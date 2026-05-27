@@ -1,7 +1,8 @@
-import { createFileRoute, Link, Navigate } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useAuth } from "@/lib/auth-context";
 import { Button } from "@/components/ui/button";
 import { Users, MessageCircle, Heart, Shield } from "lucide-react";
+import { useEffect } from "react";
 
 export const Route = createFileRoute("/")({
   component: Landing,
@@ -9,8 +10,12 @@ export const Route = createFileRoute("/")({
 
 function Landing() {
   const { user, profile, loading } = useAuth();
-  if (!loading && user && profile?.status === "approved") return <Navigate to="/feed" />;
-  if (!loading && user && profile && profile.status !== "approved") return <Navigate to="/pending" />;
+  const nav = useNavigate();
+
+  useEffect(() => {
+    if (loading || !user || !profile) return;
+    nav({ to: profile.status === "approved" ? "/feed" : "/pending", replace: true });
+  }, [loading, nav, profile, user]);
 
   return (
     <div className="min-h-screen bg-background">
