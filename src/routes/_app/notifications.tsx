@@ -77,7 +77,7 @@ function NotifPage() {
           const Icon = iconFor(n.type);
           const isMsg = !!n.conversation_id;
           return (
-            <Link key={n.id} to={link} className={`flex items-center gap-3 rounded-xl border bg-card p-4 shadow-sm transition hover:bg-muted ${!n.read ? "border-l-4 border-l-accent" : ""}`}>
+            <Link key={n.id} {...(isMsg ? { to: "/messages", search: { c: n.conversation_id! } } : { to: "/feed" })} className={`flex items-center gap-3 rounded-xl border bg-card p-4 shadow-sm transition hover:bg-muted ${!n.read ? "border-l-4 border-l-accent" : ""}`}>
               <div className="relative">
                 <Avatar className="h-10 w-10">
                   <AvatarImage src={n.actor?.avatar_url ?? undefined} />
