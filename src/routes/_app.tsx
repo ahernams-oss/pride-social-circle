@@ -5,7 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Home, MessageCircle, Bell, Shield, LogOut, User as UserIcon, Users, Users2 } from "lucide-react";
+import { Home, MessageCircle, Bell, Shield, LogOut, User as UserIcon, Users, Users2, Building2 } from "lucide-react";
 import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
@@ -175,6 +175,18 @@ function AppLayout() {
               </Avatar>
               <span className="truncate text-sm font-semibold">{profile?.full_name}</span>
             </Link>
+            <div className="my-1 border-t" />
+            {profile?.club_name && (
+              <div className="flex items-center gap-3 rounded-lg px-2 py-2 text-sm font-medium text-foreground">
+                <span className="flex h-10 w-10 items-center justify-center rounded-full bg-accent/30 text-primary">
+                  <Building2 className="h-5 w-5" />
+                </span>
+                <div className="min-w-0">
+                  <div className="text-[10px] uppercase tracking-wide text-muted-foreground">Meu Clube</div>
+                  <div className="truncate">{profile.club_name}</div>
+                </div>
+              </div>
+            )}
             <Link
               to="/friends"
               className={`flex items-center gap-3 rounded-lg px-2 py-2 text-sm font-medium transition-colors ${
