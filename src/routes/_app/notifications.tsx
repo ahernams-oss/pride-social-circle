@@ -75,7 +75,7 @@ function NotifPage() {
       ) : (
         items.map((n) => {
           const Icon = iconFor(n.type);
-          const link = n.post_id ? `/feed` : n.conversation_id ? `/messages?c=${n.conversation_id}` : "/feed";
+          const isMsg = !!n.conversation_id;
           return (
             <Link key={n.id} to={link} className={`flex items-center gap-3 rounded-xl border bg-card p-4 shadow-sm transition hover:bg-muted ${!n.read ? "border-l-4 border-l-accent" : ""}`}>
               <div className="relative">
