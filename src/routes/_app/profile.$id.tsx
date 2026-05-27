@@ -26,6 +26,7 @@ function ProfilePage() {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [posts, setPosts] = useState<FeedPost[]>([]);
   const [editing, setEditing] = useState(false);
+  const [uploading, setUploading] = useState(false);
   const [form, setForm] = useState({ full_name: "", bio: "", club_name: "", city: "", role_in_club: "", avatar_url: "" });
   const isMe = user?.id === id;
 
