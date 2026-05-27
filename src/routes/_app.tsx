@@ -1,0 +1,145 @@
+import { createFileRoute, Link, Outlet, useNavigate, useLocation, Navigate } from "@tanstack/react-router";
+import { useAuth } from "@/lib/auth-context";
+import { useEffect, useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Home, MessageCircle, Bell, Shield, LogOut, User as UserIcon } from "lucide-react";
+import {
+  DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+
+export const Route = createFileRoute("/_app")({ component: AppLayout });
+
+function initials(name: string) {
+  return name.split(" ").filter(Boolean).slice(0, 2).map((p) => p[0]?.toUpperCase()).join("") || "L";
+}
+
+function AppLayout() {
+  const { user, profile, isAdmin, loading, signOut } = useAuth();
+  const nav = useNavigate();
+  const loc = useLocation();
+  const [unread, setUnread] = useState(0);
+
+  useEffect(() => {
+    if (!user) return;
+    const load = async () => {
+      const { count } = await supabase
+        .from("notifications")
+        .select("*", { count: "exact", head: true })
+        .eq("user_id", user.id)
+        .eq("read", false);
+      setUnread(count ?? 0);
+    };
+    load();
+    const channel = supabase
+      .channel("notif-count")
+      .on("postgres_changes", { event: "*", schema: "public", table: "notifications", filter: `user_id=eq.${user.id}` }, load)
+      .subscribe();
+    return () => { supabase.removeChannel(channel); };
+  }, [user]);
+
+  if (loading) return null;
+  if (!user) return <Navigate to="/login" />;
+  if (profile && profile.status !== "approved") return <Navigate to="/pending" />;
+
+  const navItems = [
+    { to: "/feed", label: "Feed", icon: Home },
+    { to: "/messages", label: "Mensagens", icon: MessageCircle },
+    { to: "/notifications", label: "Notificações", icon: Bell, badge: unread },
+  ];
+
+  return (
+    <div className="min-h-screen bg-background">
+      <header className="sticky top-0 z-40 border-b bg-card/95 backdrop-blur">
+        <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4">
+          <Link to="/feed" className="flex items-center gap-2">
+            <div className="flex h-9 w-9 items-center justify-center rounded-full bg-primary text-primary-foreground font-bold">
+              <span className="text-gold">L</span>
+            </div>
+            <span className="text-lg font-bold tracking-tight">Lions Connect</span>
+          </Link>
+
+          <nav className="hidden items-center gap-1 md:flex">
+            {navItems.map(({ to, label, icon: Icon, badge }) => {
+              const active = loc.pathname.startsWith(to);
+              return (
+                <Link
+                  key={to}
+                  to={to}
+                  className={`relative flex items-center gap-2 rounded-md px-4 py-2 text-sm font-medium transition-colors ${
+                    active ? "bg-primary/10 text-primary" : "text-muted-foreground hover:bg-muted hover:text-foreground"
+                  }`}
+                >
+                  <Icon className="h-4 w-4" />
+                  {label}
+                  {badge ? (
+                    <Badge className="ml-1 h-5 min-w-5 bg-accent px-1.5 text-accent-foreground">{badge}</Badge>
+                  ) : null}
+                </Link>
+              );
+            })}
+            {isAdmin && (
+              <Link to="/admin" className={`flex items-center gap-2 rounded-md px-4 py-2 text-sm font-medium ${
+                loc.pathname.startsWith("/admin") ? "bg-primary/10 text-primary" : "text-muted-foreground hover:bg-muted hover:text-foreground"
+              }`}>
+                <Shield className="h-4 w-4" /> Admin
+              </Link>
+            )}
+          </nav>
+
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" className="h-10 gap-2 px-2">
+                <Avatar className="h-8 w-8 ring-2 ring-gold/40">
+                  <AvatarImage src={profile?.avatar_url ?? undefined} />
+                  <AvatarFallback className="bg-primary text-primary-foreground text-xs">
+                    {initials(profile?.full_name ?? "L")}
+                  </AvatarFallback>
+                </Avatar>
+                <span className="hidden text-sm font-medium md:inline">{profile?.full_name}</span>
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-56">
+              <DropdownMenuLabel>
+                <div className="font-semibold">{profile?.full_name}</div>
+                <div className="text-xs font-normal text-muted-foreground">{profile?.club_name || "Lions Clube"}</div>
+              </DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem onClick={() => nav({ to: "/profile/$id", params: { id: user.id } })}>
+                <UserIcon className="mr-2 h-4 w-4" /> Meu perfil
+              </DropdownMenuItem>
+              {isAdmin && (
+                <DropdownMenuItem onClick={() => nav({ to: "/admin" })}>
+                  <Shield className="mr-2 h-4 w-4" /> Painel admin
+                </DropdownMenuItem>
+              )}
+              <DropdownMenuSeparator />
+              <DropdownMenuItem onClick={async () => { await signOut(); nav({ to: "/" }); }}>
+                <LogOut className="mr-2 h-4 w-4" /> Sair
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
+
+        {/* Mobile nav */}
+        <nav className="flex items-center justify-around border-t md:hidden">
+          {navItems.map(({ to, icon: Icon, badge }) => {
+            const active = loc.pathname.startsWith(to);
+            return (
+              <Link key={to} to={to} className={`relative flex flex-1 items-center justify-center py-3 ${active ? "text-primary" : "text-muted-foreground"}`}>
+                <Icon className="h-5 w-5" />
+                {badge ? <Badge className="absolute right-6 top-1 h-4 min-w-4 bg-accent px-1 text-[10px] text-accent-foreground">{badge}</Badge> : null}
+              </Link>
+            );
+          })}
+        </nav>
+      </header>
+
+      <main className="mx-auto max-w-3xl px-4 py-6">
+        <Outlet />
+      </main>
+    </div>
+  );
+}
