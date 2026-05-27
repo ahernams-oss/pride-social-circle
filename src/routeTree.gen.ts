@@ -14,11 +14,13 @@ import { Route as PendingRouteImport } from './routes/pending'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as AppRouteImport } from './routes/_app'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AppRankingRouteImport } from './routes/_app/ranking'
 import { Route as AppNotificationsRouteImport } from './routes/_app/notifications'
 import { Route as AppMessagesRouteImport } from './routes/_app/messages'
 import { Route as AppGroupsRouteImport } from './routes/_app/groups'
 import { Route as AppFriendsRouteImport } from './routes/_app/friends'
 import { Route as AppFeedRouteImport } from './routes/_app/feed'
+import { Route as AppEventsRouteImport } from './routes/_app/events'
 import { Route as AppAdminRouteImport } from './routes/_app/admin'
 import { Route as AppProfileIdRouteImport } from './routes/_app/profile.$id'
 
@@ -46,6 +48,11 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AppRankingRoute = AppRankingRouteImport.update({
+  id: '/ranking',
+  path: '/ranking',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppNotificationsRoute = AppNotificationsRouteImport.update({
   id: '/notifications',
   path: '/notifications',
@@ -71,6 +78,11 @@ const AppFeedRoute = AppFeedRouteImport.update({
   path: '/feed',
   getParentRoute: () => AppRoute,
 } as any)
+const AppEventsRoute = AppEventsRouteImport.update({
+  id: '/events',
+  path: '/events',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppAdminRoute = AppAdminRouteImport.update({
   id: '/admin',
   path: '/admin',
@@ -88,11 +100,13 @@ export interface FileRoutesByFullPath {
   '/pending': typeof PendingRoute
   '/signup': typeof SignupRoute
   '/admin': typeof AppAdminRoute
+  '/events': typeof AppEventsRoute
   '/feed': typeof AppFeedRoute
   '/friends': typeof AppFriendsRoute
   '/groups': typeof AppGroupsRoute
   '/messages': typeof AppMessagesRoute
   '/notifications': typeof AppNotificationsRoute
+  '/ranking': typeof AppRankingRoute
   '/profile/$id': typeof AppProfileIdRoute
 }
 export interface FileRoutesByTo {
@@ -101,11 +115,13 @@ export interface FileRoutesByTo {
   '/pending': typeof PendingRoute
   '/signup': typeof SignupRoute
   '/admin': typeof AppAdminRoute
+  '/events': typeof AppEventsRoute
   '/feed': typeof AppFeedRoute
   '/friends': typeof AppFriendsRoute
   '/groups': typeof AppGroupsRoute
   '/messages': typeof AppMessagesRoute
   '/notifications': typeof AppNotificationsRoute
+  '/ranking': typeof AppRankingRoute
   '/profile/$id': typeof AppProfileIdRoute
 }
 export interface FileRoutesById {
@@ -116,11 +132,13 @@ export interface FileRoutesById {
   '/pending': typeof PendingRoute
   '/signup': typeof SignupRoute
   '/_app/admin': typeof AppAdminRoute
+  '/_app/events': typeof AppEventsRoute
   '/_app/feed': typeof AppFeedRoute
   '/_app/friends': typeof AppFriendsRoute
   '/_app/groups': typeof AppGroupsRoute
   '/_app/messages': typeof AppMessagesRoute
   '/_app/notifications': typeof AppNotificationsRoute
+  '/_app/ranking': typeof AppRankingRoute
   '/_app/profile/$id': typeof AppProfileIdRoute
 }
 export interface FileRouteTypes {
@@ -131,11 +149,13 @@ export interface FileRouteTypes {
     | '/pending'
     | '/signup'
     | '/admin'
+    | '/events'
     | '/feed'
     | '/friends'
     | '/groups'
     | '/messages'
     | '/notifications'
+    | '/ranking'
     | '/profile/$id'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -144,11 +164,13 @@ export interface FileRouteTypes {
     | '/pending'
     | '/signup'
     | '/admin'
+    | '/events'
     | '/feed'
     | '/friends'
     | '/groups'
     | '/messages'
     | '/notifications'
+    | '/ranking'
     | '/profile/$id'
   id:
     | '__root__'
@@ -158,11 +180,13 @@ export interface FileRouteTypes {
     | '/pending'
     | '/signup'
     | '/_app/admin'
+    | '/_app/events'
     | '/_app/feed'
     | '/_app/friends'
     | '/_app/groups'
     | '/_app/messages'
     | '/_app/notifications'
+    | '/_app/ranking'
     | '/_app/profile/$id'
   fileRoutesById: FileRoutesById
 }
@@ -211,6 +235,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_app/ranking': {
+      id: '/_app/ranking'
+      path: '/ranking'
+      fullPath: '/ranking'
+      preLoaderRoute: typeof AppRankingRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/_app/notifications': {
       id: '/_app/notifications'
       path: '/notifications'
@@ -246,6 +277,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppFeedRouteImport
       parentRoute: typeof AppRoute
     }
+    '/_app/events': {
+      id: '/_app/events'
+      path: '/events'
+      fullPath: '/events'
+      preLoaderRoute: typeof AppEventsRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/_app/admin': {
       id: '/_app/admin'
       path: '/admin'
@@ -265,21 +303,25 @@ declare module '@tanstack/react-router' {
 
 interface AppRouteChildren {
   AppAdminRoute: typeof AppAdminRoute
+  AppEventsRoute: typeof AppEventsRoute
   AppFeedRoute: typeof AppFeedRoute
   AppFriendsRoute: typeof AppFriendsRoute
   AppGroupsRoute: typeof AppGroupsRoute
   AppMessagesRoute: typeof AppMessagesRoute
   AppNotificationsRoute: typeof AppNotificationsRoute
+  AppRankingRoute: typeof AppRankingRoute
   AppProfileIdRoute: typeof AppProfileIdRoute
 }
 
 const AppRouteChildren: AppRouteChildren = {
   AppAdminRoute: AppAdminRoute,
+  AppEventsRoute: AppEventsRoute,
   AppFeedRoute: AppFeedRoute,
   AppFriendsRoute: AppFriendsRoute,
   AppGroupsRoute: AppGroupsRoute,
   AppMessagesRoute: AppMessagesRoute,
   AppNotificationsRoute: AppNotificationsRoute,
+  AppRankingRoute: AppRankingRoute,
   AppProfileIdRoute: AppProfileIdRoute,
 }
 
