@@ -55,6 +55,36 @@ export type Database = {
         }
         Relationships: []
       }
+      events: {
+        Row: {
+          created_at: string
+          created_by: string
+          description: string
+          id: string
+          location: string
+          starts_at: string
+          title: string
+        }
+        Insert: {
+          created_at?: string
+          created_by: string
+          description?: string
+          id?: string
+          location?: string
+          starts_at: string
+          title: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          description?: string
+          id?: string
+          location?: string
+          starts_at?: string
+          title?: string
+        }
+        Relationships: []
+      }
       messages: {
         Row: {
           content: string
