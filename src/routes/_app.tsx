@@ -5,7 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Home, MessageCircle, Bell, Shield, LogOut, User as UserIcon } from "lucide-react";
+import { Home, MessageCircle, Bell, Shield, LogOut, User as UserIcon, Users, Users2 } from "lucide-react";
 import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
@@ -159,9 +159,50 @@ function AppLayout() {
         </nav>
       </header>
 
-      <main className="mx-auto max-w-3xl px-4 py-6">
-        <Outlet />
-      </main>
+      <div className="mx-auto grid max-w-6xl gap-6 px-4 py-6 md:grid-cols-[260px_minmax(0,1fr)]">
+        <aside className="hidden md:block">
+          <div className="sticky top-24 space-y-1 rounded-xl border bg-card p-3 shadow-sm">
+            <Link
+              to="/profile/$id"
+              params={{ id: user.id }}
+              className="flex items-center gap-3 rounded-lg px-2 py-2 transition-colors hover:bg-muted"
+            >
+              <Avatar className="h-10 w-10 ring-2 ring-gold/40">
+                <AvatarImage src={profile?.avatar_url ?? undefined} />
+                <AvatarFallback className="bg-primary text-primary-foreground text-xs">
+                  {initials(profile?.full_name ?? "L")}
+                </AvatarFallback>
+              </Avatar>
+              <span className="truncate text-sm font-semibold">{profile?.full_name}</span>
+            </Link>
+            <Link
+              to="/friends"
+              className={`flex items-center gap-3 rounded-lg px-2 py-2 text-sm font-medium transition-colors ${
+                loc.pathname.startsWith("/friends") ? "bg-primary/10 text-primary" : "text-foreground hover:bg-muted"
+              }`}
+            >
+              <span className="flex h-10 w-10 items-center justify-center rounded-full bg-muted">
+                <Users className="h-5 w-5" />
+              </span>
+              Amigos
+            </Link>
+            <Link
+              to="/groups"
+              className={`flex items-center gap-3 rounded-lg px-2 py-2 text-sm font-medium transition-colors ${
+                loc.pathname.startsWith("/groups") ? "bg-primary/10 text-primary" : "text-foreground hover:bg-muted"
+              }`}
+            >
+              <span className="flex h-10 w-10 items-center justify-center rounded-full bg-muted">
+                <Users2 className="h-5 w-5" />
+              </span>
+              Grupos
+            </Link>
+          </div>
+        </aside>
+        <main className="min-w-0">
+          <Outlet />
+        </main>
+      </div>
     </div>
   );
 }
