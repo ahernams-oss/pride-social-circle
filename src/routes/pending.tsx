@@ -1,4 +1,4 @@
-import { createFileRoute, Navigate, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Navigate, useNavigate, useHydrated } from "@tanstack/react-router";
 import { useAuth } from "@/lib/auth-context";
 import { Button } from "@/components/ui/button";
 import { Clock } from "lucide-react";
@@ -6,9 +6,10 @@ import { Clock } from "lucide-react";
 export const Route = createFileRoute("/pending")({ component: Pending });
 
 function Pending() {
+  const hydrated = useHydrated();
   const { user, profile, signOut, loading, refresh } = useAuth();
   const nav = useNavigate();
-  if (loading) return null;
+  if (!hydrated || loading) return null;
   if (!user) return <Navigate to="/login" />;
   if (profile?.status === "approved") return <Navigate to="/feed" />;
 
