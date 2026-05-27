@@ -9,9 +9,8 @@ export const Route = createFileRoute("/")({
 
 function Landing() {
   const { user, profile, loading } = useAuth();
-  if (loading) return null;
-  if (user && profile?.status === "approved") return <Navigate to="/feed" />;
-  if (user && profile?.status !== "approved") return <Navigate to="/pending" />;
+  if (!loading && user && profile?.status === "approved") return <Navigate to="/feed" />;
+  if (!loading && user && profile && profile.status !== "approved") return <Navigate to="/pending" />;
 
   return (
     <div className="min-h-screen bg-background">
