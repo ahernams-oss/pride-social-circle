@@ -1,4 +1,4 @@
-import { createFileRoute, Link, Outlet, useNavigate, useLocation, Navigate } from "@tanstack/react-router";
+import { createFileRoute, Link, Outlet, useNavigate, useLocation, Navigate, useHydrated } from "@tanstack/react-router";
 import { useAuth } from "@/lib/auth-context";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
@@ -17,6 +17,7 @@ function initials(name: string) {
 }
 
 function AppLayout() {
+  const hydrated = useHydrated();
   const { user, profile, isAdmin, loading, signOut } = useAuth();
   const nav = useNavigate();
   const loc = useLocation();
@@ -40,7 +41,13 @@ function AppLayout() {
     return () => { supabase.removeChannel(channel); };
   }, [user]);
 
-  if (loading) return null;
+  if (!hydrated || loading) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-background px-4">
+        <p className="text-sm text-muted-foreground">Carregando...</p>
+      </div>
+    );
+  }
   if (!user) return <Navigate to="/login" />;
   if (profile && profile.status !== "approved") return <Navigate to="/pending" />;
 
