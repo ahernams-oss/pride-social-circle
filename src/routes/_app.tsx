@@ -9,6 +9,7 @@ import { Home, MessageCircle, Bell, Shield, LogOut, User as UserIcon } from "luc
 import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import lionsLogo from "@/assets/lions-logo.jpg";
 
 export const Route = createFileRoute("/_app")({ component: AppLayout });
 
@@ -78,9 +79,7 @@ function AppLayout() {
       <header className="sticky top-0 z-40 border-b bg-card/95 backdrop-blur">
         <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4">
           <Link to="/feed" className="flex items-center gap-2">
-            <div className="flex h-9 w-9 items-center justify-center rounded-full bg-primary text-primary-foreground font-bold">
-              <span className="text-gold">L</span>
-            </div>
+            <img src={lionsLogo} alt="Lions International" className="h-9 w-9 object-contain" />
             <span className="text-lg font-bold tracking-tight">Lions Connect</span>
           </Link>
 
