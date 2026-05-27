@@ -16,6 +16,8 @@ import { Route as AppRouteImport } from './routes/_app'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AppNotificationsRouteImport } from './routes/_app/notifications'
 import { Route as AppMessagesRouteImport } from './routes/_app/messages'
+import { Route as AppGroupsRouteImport } from './routes/_app/groups'
+import { Route as AppFriendsRouteImport } from './routes/_app/friends'
 import { Route as AppFeedRouteImport } from './routes/_app/feed'
 import { Route as AppAdminRouteImport } from './routes/_app/admin'
 import { Route as AppProfileIdRouteImport } from './routes/_app/profile.$id'
@@ -54,6 +56,16 @@ const AppMessagesRoute = AppMessagesRouteImport.update({
   path: '/messages',
   getParentRoute: () => AppRoute,
 } as any)
+const AppGroupsRoute = AppGroupsRouteImport.update({
+  id: '/groups',
+  path: '/groups',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppFriendsRoute = AppFriendsRouteImport.update({
+  id: '/friends',
+  path: '/friends',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppFeedRoute = AppFeedRouteImport.update({
   id: '/feed',
   path: '/feed',
@@ -77,6 +89,8 @@ export interface FileRoutesByFullPath {
   '/signup': typeof SignupRoute
   '/admin': typeof AppAdminRoute
   '/feed': typeof AppFeedRoute
+  '/friends': typeof AppFriendsRoute
+  '/groups': typeof AppGroupsRoute
   '/messages': typeof AppMessagesRoute
   '/notifications': typeof AppNotificationsRoute
   '/profile/$id': typeof AppProfileIdRoute
@@ -88,6 +102,8 @@ export interface FileRoutesByTo {
   '/signup': typeof SignupRoute
   '/admin': typeof AppAdminRoute
   '/feed': typeof AppFeedRoute
+  '/friends': typeof AppFriendsRoute
+  '/groups': typeof AppGroupsRoute
   '/messages': typeof AppMessagesRoute
   '/notifications': typeof AppNotificationsRoute
   '/profile/$id': typeof AppProfileIdRoute
@@ -101,6 +117,8 @@ export interface FileRoutesById {
   '/signup': typeof SignupRoute
   '/_app/admin': typeof AppAdminRoute
   '/_app/feed': typeof AppFeedRoute
+  '/_app/friends': typeof AppFriendsRoute
+  '/_app/groups': typeof AppGroupsRoute
   '/_app/messages': typeof AppMessagesRoute
   '/_app/notifications': typeof AppNotificationsRoute
   '/_app/profile/$id': typeof AppProfileIdRoute
@@ -114,6 +132,8 @@ export interface FileRouteTypes {
     | '/signup'
     | '/admin'
     | '/feed'
+    | '/friends'
+    | '/groups'
     | '/messages'
     | '/notifications'
     | '/profile/$id'
@@ -125,6 +145,8 @@ export interface FileRouteTypes {
     | '/signup'
     | '/admin'
     | '/feed'
+    | '/friends'
+    | '/groups'
     | '/messages'
     | '/notifications'
     | '/profile/$id'
@@ -137,6 +159,8 @@ export interface FileRouteTypes {
     | '/signup'
     | '/_app/admin'
     | '/_app/feed'
+    | '/_app/friends'
+    | '/_app/groups'
     | '/_app/messages'
     | '/_app/notifications'
     | '/_app/profile/$id'
@@ -201,6 +225,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppMessagesRouteImport
       parentRoute: typeof AppRoute
     }
+    '/_app/groups': {
+      id: '/_app/groups'
+      path: '/groups'
+      fullPath: '/groups'
+      preLoaderRoute: typeof AppGroupsRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/friends': {
+      id: '/_app/friends'
+      path: '/friends'
+      fullPath: '/friends'
+      preLoaderRoute: typeof AppFriendsRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/_app/feed': {
       id: '/_app/feed'
       path: '/feed'
@@ -228,6 +266,8 @@ declare module '@tanstack/react-router' {
 interface AppRouteChildren {
   AppAdminRoute: typeof AppAdminRoute
   AppFeedRoute: typeof AppFeedRoute
+  AppFriendsRoute: typeof AppFriendsRoute
+  AppGroupsRoute: typeof AppGroupsRoute
   AppMessagesRoute: typeof AppMessagesRoute
   AppNotificationsRoute: typeof AppNotificationsRoute
   AppProfileIdRoute: typeof AppProfileIdRoute
@@ -236,6 +276,8 @@ interface AppRouteChildren {
 const AppRouteChildren: AppRouteChildren = {
   AppAdminRoute: AppAdminRoute,
   AppFeedRoute: AppFeedRoute,
+  AppFriendsRoute: AppFriendsRoute,
+  AppGroupsRoute: AppGroupsRoute,
   AppMessagesRoute: AppMessagesRoute,
   AppNotificationsRoute: AppNotificationsRoute,
   AppProfileIdRoute: AppProfileIdRoute,
@@ -253,3 +295,13 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
