@@ -9,6 +9,7 @@ import { Home, MessageCircle, Bell, Shield, LogOut, User as UserIcon } from "luc
 import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import lionsLogo from "@/assets/lions-logo.jpg";
 
 export const Route = createFileRoute("/_app")({ component: AppLayout });
 
