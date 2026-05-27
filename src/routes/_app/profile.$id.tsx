@@ -26,6 +26,7 @@ function ProfilePage() {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [posts, setPosts] = useState<FeedPost[]>([]);
   const [editing, setEditing] = useState(false);
+  const [uploading, setUploading] = useState(false);
   const [form, setForm] = useState({ full_name: "", bio: "", club_name: "", city: "", role_in_club: "", avatar_url: "" });
   const isMe = user?.id === id;
 
@@ -129,15 +130,41 @@ function ProfilePage() {
           </div>
           {editing ? (
             <form onSubmit={save} className="mt-4 space-y-3">
+              <div>
+                <Label>Foto de perfil</Label>
+                <div className="mt-1 flex items-center gap-3">
+                  <Avatar className="h-16 w-16">
+                    <AvatarImage src={form.avatar_url || undefined} />
+                    <AvatarFallback className="bg-primary text-primary-foreground">{initials(form.full_name)}</AvatarFallback>
+                  </Avatar>
+                  <Input
+                    type="file"
+                    accept="image/*"
+                    disabled={uploading}
+                    onChange={async (e) => {
+                      const file = e.target.files?.[0];
+                      if (!file || !user) return;
+                      setUploading(true);
+                      const ext = file.name.split(".").pop() ?? "jpg";
+                      const path = `${user.id}/avatar-${Date.now()}.${ext}`;
+                      const { error: upErr } = await supabase.storage.from("avatars").upload(path, file, { upsert: true });
+                      if (upErr) { toast.error(upErr.message); setUploading(false); return; }
+                      const { data } = supabase.storage.from("avatars").getPublicUrl(path);
+                      setForm((f) => ({ ...f, avatar_url: data.publicUrl }));
+                      setUploading(false);
+                      toast.success("Foto enviada");
+                    }}
+                  />
+                </div>
+              </div>
               <div><Label>Nome</Label><Input value={form.full_name} onChange={(e) => setForm({ ...form, full_name: e.target.value })} /></div>
               <div className="grid grid-cols-2 gap-3">
                 <div><Label>Clube</Label><Input value={form.club_name} onChange={(e) => setForm({ ...form, club_name: e.target.value })} /></div>
                 <div><Label>Cidade</Label><Input value={form.city} onChange={(e) => setForm({ ...form, city: e.target.value })} /></div>
               </div>
               <div><Label>Cargo no clube</Label><Input value={form.role_in_club} onChange={(e) => setForm({ ...form, role_in_club: e.target.value })} placeholder="Presidente, Secretário..." /></div>
-              <div><Label>URL da foto</Label><Input value={form.avatar_url} onChange={(e) => setForm({ ...form, avatar_url: e.target.value })} placeholder="https://..." /></div>
               <div><Label>Bio</Label><Textarea value={form.bio} onChange={(e) => setForm({ ...form, bio: e.target.value })} rows={3} /></div>
-              <Button type="submit">Salvar</Button>
+              <Button type="submit" disabled={uploading}>{uploading ? "Enviando..." : "Salvar"}</Button>
             </form>
           ) : (
             <>
