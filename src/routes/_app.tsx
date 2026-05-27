@@ -1,4 +1,4 @@
-import { createFileRoute, Link, Outlet, useNavigate, useLocation, Navigate } from "@tanstack/react-router";
+import { createFileRoute, Link, Outlet, useNavigate, useLocation, useHydrated } from "@tanstack/react-router";
 import { useAuth } from "@/lib/auth-context";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
@@ -17,10 +17,22 @@ function initials(name: string) {
 }
 
 function AppLayout() {
+  const hydrated = useHydrated();
   const { user, profile, isAdmin, loading, signOut } = useAuth();
   const nav = useNavigate();
   const loc = useLocation();
   const [unread, setUnread] = useState(0);
+
+  useEffect(() => {
+    if (!hydrated || loading) return;
+    if (!user) {
+      nav({ to: "/login", replace: true });
+      return;
+    }
+    if (profile && profile.status !== "approved") {
+      nav({ to: "/pending", replace: true });
+    }
+  }, [hydrated, loading, nav, profile, user]);
 
   useEffect(() => {
     if (!user) return;
@@ -40,9 +52,20 @@ function AppLayout() {
     return () => { supabase.removeChannel(channel); };
   }, [user]);
 
-  if (loading) return null;
-  if (!user) return <Navigate to="/login" />;
-  if (profile && profile.status !== "approved") return <Navigate to="/pending" />;
+  if (!hydrated || loading) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-background px-4">
+        <p className="text-sm text-muted-foreground">Carregando...</p>
+      </div>
+    );
+  }
+  if (!user || (profile && profile.status !== "approved")) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-background px-4">
+        <p className="text-sm text-muted-foreground">Redirecionando...</p>
+      </div>
+    );
+  }
 
   const navItems = [
     { to: "/feed", label: "Feed", icon: Home },

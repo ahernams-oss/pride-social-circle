@@ -1,16 +1,28 @@
-import { createFileRoute, Navigate, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, useNavigate, useHydrated } from "@tanstack/react-router";
 import { useAuth } from "@/lib/auth-context";
 import { Button } from "@/components/ui/button";
 import { Clock } from "lucide-react";
+import { useEffect } from "react";
 
 export const Route = createFileRoute("/pending")({ component: Pending });
 
 function Pending() {
+  const hydrated = useHydrated();
   const { user, profile, signOut, loading, refresh } = useAuth();
   const nav = useNavigate();
-  if (loading) return null;
-  if (!user) return <Navigate to="/login" />;
-  if (profile?.status === "approved") return <Navigate to="/feed" />;
+
+  useEffect(() => {
+    if (!hydrated || loading) return;
+    if (!user) {
+      nav({ to: "/login", replace: true });
+      return;
+    }
+    if (profile?.status === "approved") {
+      nav({ to: "/feed", replace: true });
+    }
+  }, [hydrated, loading, nav, profile?.status, user]);
+
+  if (!hydrated || loading || !user || profile?.status === "approved") return null;
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-lions-gradient p-4">

@@ -1,4 +1,4 @@
-import { createFileRoute, Navigate } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useCallback, useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth-context";
@@ -21,6 +21,7 @@ function initials(n?: string | null) {
 
 function AdminPage() {
   const { isAdmin, loading } = useAuth();
+  const nav = useNavigate();
   const [rows, setRows] = useState<Row[]>([]);
   const [tab, setTab] = useState<"pending" | "approved" | "rejected">("pending");
 
@@ -33,8 +34,12 @@ function AdminPage() {
 
   useEffect(() => { load(); }, [load]);
 
+  useEffect(() => {
+    if (!loading && !isAdmin) nav({ to: "/feed", replace: true });
+  }, [isAdmin, loading, nav]);
+
   if (loading) return null;
-  if (!isAdmin) return <Navigate to="/feed" />;
+  if (!isAdmin) return null;
 
   const setStatus = async (id: string, status: Row["status"]) => {
     const { error } = await supabase.from("profiles").update({ status }).eq("id", id);
