@@ -117,6 +117,62 @@ export type Database = {
           },
         ]
       }
+      mission_completions: {
+        Row: {
+          created_at: string
+          id: string
+          mission_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          mission_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          mission_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "mission_completions_mission_id_fkey"
+            columns: ["mission_id"]
+            isOneToOne: false
+            referencedRelation: "missions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      missions: {
+        Row: {
+          created_at: string
+          created_by: string
+          description: string | null
+          id: string
+          points: number
+          title: string
+        }
+        Insert: {
+          created_at?: string
+          created_by: string
+          description?: string | null
+          id?: string
+          points?: number
+          title: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          description?: string | null
+          id?: string
+          points?: number
+          title?: string
+        }
+        Relationships: []
+      }
       notifications: {
         Row: {
           actor_id: string | null
