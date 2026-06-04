@@ -78,13 +78,15 @@ function MissionsPage() {
           <Target className="h-5 w-5 text-primary" />
           <h1 className="text-xl font-bold">Missões</h1>
         </div>
-        <Button size="sm" onClick={() => setShowForm((v) => !v)}>
-          <Plus className="h-4 w-4" /> Nova missão
-        </Button>
+        {isAdmin && (
+          <Button size="sm" onClick={() => setShowForm((v) => !v)}>
+            <Plus className="h-4 w-4" /> Nova missão
+          </Button>
+        )}
       </div>
       <p className="text-sm text-muted-foreground">Conclua missões para somar pontos no ranking.</p>
 
-      {showForm && (
+      {showForm && isAdmin && (
         <Card>
           <CardHeader><CardTitle className="text-base">Nova missão</CardTitle></CardHeader>
           <CardContent className="space-y-3">
@@ -105,7 +107,6 @@ function MissionsPage() {
       <div className="space-y-2">
         {missions.map((m) => {
           const done = completed.has(m.id);
-          const canDelete = isAdmin || m.created_by === user?.id;
           return (
             <div key={m.id} className="flex items-start gap-3 rounded-xl border bg-card p-4">
               <button
@@ -126,7 +127,7 @@ function MissionsPage() {
                 </div>
                 {m.description && <p className="mt-1 text-sm text-muted-foreground">{m.description}</p>}
               </div>
-              {canDelete && (
+              {isAdmin && (
                 <Button variant="ghost" size="icon" onClick={() => remove(m.id)}>
                   <Trash2 className="h-4 w-4" />
                 </Button>
