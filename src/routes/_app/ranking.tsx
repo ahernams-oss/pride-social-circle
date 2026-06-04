@@ -17,12 +17,15 @@ function RankingPage() {
 
   useEffect(() => {
     (async () => {
-      const [{ data: profiles }, { data: posts }] = await Promise.all([
+      const [{ data: profiles }, { data: completions }] = await Promise.all([
         supabase.from("profiles").select("id, full_name, avatar_url, club_name").eq("status", "approved"),
-        supabase.from("posts").select("author_id"),
+        supabase.from("mission_completions").select("user_id, missions(points)"),
       ]);
       const counts = new Map<string, number>();
-      (posts ?? []).forEach((p: any) => counts.set(p.author_id, (counts.get(p.author_id) ?? 0) + 1));
+      (completions ?? []).forEach((c: any) => {
+        const pts = c.missions?.points ?? 1;
+        counts.set(c.user_id, (counts.get(c.user_id) ?? 0) + pts);
+      });
       const list: Row[] = ((profiles ?? []) as any[])
         .map((p) => ({ ...p, posts: counts.get(p.id) ?? 0 }))
         .sort((a, b) => b.posts - a.posts);
