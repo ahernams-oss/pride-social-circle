@@ -16,6 +16,7 @@ import { Route as AppRouteImport } from './routes/_app'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AppRankingRouteImport } from './routes/_app/ranking'
 import { Route as AppNotificationsRouteImport } from './routes/_app/notifications'
+import { Route as AppMissionsRouteImport } from './routes/_app/missions'
 import { Route as AppMessagesRouteImport } from './routes/_app/messages'
 import { Route as AppGroupsRouteImport } from './routes/_app/groups'
 import { Route as AppFriendsRouteImport } from './routes/_app/friends'
@@ -56,6 +57,11 @@ const AppRankingRoute = AppRankingRouteImport.update({
 const AppNotificationsRoute = AppNotificationsRouteImport.update({
   id: '/notifications',
   path: '/notifications',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppMissionsRoute = AppMissionsRouteImport.update({
+  id: '/missions',
+  path: '/missions',
   getParentRoute: () => AppRoute,
 } as any)
 const AppMessagesRoute = AppMessagesRouteImport.update({
@@ -105,6 +111,7 @@ export interface FileRoutesByFullPath {
   '/friends': typeof AppFriendsRoute
   '/groups': typeof AppGroupsRoute
   '/messages': typeof AppMessagesRoute
+  '/missions': typeof AppMissionsRoute
   '/notifications': typeof AppNotificationsRoute
   '/ranking': typeof AppRankingRoute
   '/profile/$id': typeof AppProfileIdRoute
@@ -120,6 +127,7 @@ export interface FileRoutesByTo {
   '/friends': typeof AppFriendsRoute
   '/groups': typeof AppGroupsRoute
   '/messages': typeof AppMessagesRoute
+  '/missions': typeof AppMissionsRoute
   '/notifications': typeof AppNotificationsRoute
   '/ranking': typeof AppRankingRoute
   '/profile/$id': typeof AppProfileIdRoute
@@ -137,6 +145,7 @@ export interface FileRoutesById {
   '/_app/friends': typeof AppFriendsRoute
   '/_app/groups': typeof AppGroupsRoute
   '/_app/messages': typeof AppMessagesRoute
+  '/_app/missions': typeof AppMissionsRoute
   '/_app/notifications': typeof AppNotificationsRoute
   '/_app/ranking': typeof AppRankingRoute
   '/_app/profile/$id': typeof AppProfileIdRoute
@@ -154,6 +163,7 @@ export interface FileRouteTypes {
     | '/friends'
     | '/groups'
     | '/messages'
+    | '/missions'
     | '/notifications'
     | '/ranking'
     | '/profile/$id'
@@ -169,6 +179,7 @@ export interface FileRouteTypes {
     | '/friends'
     | '/groups'
     | '/messages'
+    | '/missions'
     | '/notifications'
     | '/ranking'
     | '/profile/$id'
@@ -185,6 +196,7 @@ export interface FileRouteTypes {
     | '/_app/friends'
     | '/_app/groups'
     | '/_app/messages'
+    | '/_app/missions'
     | '/_app/notifications'
     | '/_app/ranking'
     | '/_app/profile/$id'
@@ -249,6 +261,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppNotificationsRouteImport
       parentRoute: typeof AppRoute
     }
+    '/_app/missions': {
+      id: '/_app/missions'
+      path: '/missions'
+      fullPath: '/missions'
+      preLoaderRoute: typeof AppMissionsRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/_app/messages': {
       id: '/_app/messages'
       path: '/messages'
@@ -308,6 +327,7 @@ interface AppRouteChildren {
   AppFriendsRoute: typeof AppFriendsRoute
   AppGroupsRoute: typeof AppGroupsRoute
   AppMessagesRoute: typeof AppMessagesRoute
+  AppMissionsRoute: typeof AppMissionsRoute
   AppNotificationsRoute: typeof AppNotificationsRoute
   AppRankingRoute: typeof AppRankingRoute
   AppProfileIdRoute: typeof AppProfileIdRoute
@@ -320,6 +340,7 @@ const AppRouteChildren: AppRouteChildren = {
   AppFriendsRoute: AppFriendsRoute,
   AppGroupsRoute: AppGroupsRoute,
   AppMessagesRoute: AppMessagesRoute,
+  AppMissionsRoute: AppMissionsRoute,
   AppNotificationsRoute: AppNotificationsRoute,
   AppRankingRoute: AppRankingRoute,
   AppProfileIdRoute: AppProfileIdRoute,
