@@ -29,6 +29,7 @@ function ProfilePage() {
   const [uploading, setUploading] = useState(false);
   const [form, setForm] = useState({ full_name: "", bio: "", club_name: "", city: "", role_in_club: "", role_in_district: "", avatar_url: "" });
   const [districtRoles, setDistrictRoles] = useState<{ id: string; name: string }[]>([]);
+  const [clubRoles, setClubRoles] = useState<{ id: string; name: string }[]>([]);
   const isMe = user?.id === id;
 
   const load = useCallback(async () => {
