@@ -117,7 +117,7 @@ function ClubsPage() {
               </div>
               <div className="space-y-1">
                 <Label>Distrito</Label>
-                <Input value={form.district} onChange={(e) => setForm({ ...form, district: e.target.value })} />
+                <Input value="LC-11" disabled className="bg-muted" />
               </div>
               <div className="space-y-1">
                 <Label>Ano de fundação</Label>
