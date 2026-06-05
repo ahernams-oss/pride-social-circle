@@ -264,6 +264,17 @@ function AppLayout() {
               </span>
               Cargos no Distrito
             </Link>
+            <Link
+              to="/club-roles"
+              className={`flex items-center gap-3 rounded-lg px-2 py-2 text-sm font-medium transition-colors ${
+                loc.pathname.startsWith("/club-roles") ? "bg-primary/10 text-primary" : "text-foreground hover:bg-muted"
+              }`}
+            >
+              <span className="flex h-10 w-10 items-center justify-center rounded-full bg-muted">
+                <BadgeCheck className="h-5 w-5" />
+              </span>
+              Cargos no Clube
+            </Link>
           </div>
         </aside>
         <main className="min-w-0">
