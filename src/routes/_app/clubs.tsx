@@ -27,7 +27,7 @@ function ClubsPage() {
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [editing, setEditing] = useState<Club | null>(null);
-  const [form, setForm] = useState({ name: "", city: "", district: "", founded_year: "", description: "" });
+  const [form, setForm] = useState({ name: "", city: "", district: "LC-11", founded_year: "", description: "" });
 
   const load = async () => {
     setLoading(true);
