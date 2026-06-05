@@ -40,7 +40,7 @@ function ClubsPage() {
   useEffect(() => { load(); }, []);
 
   const resetForm = () => {
-    setForm({ name: "", city: "", district: "", founded_year: "", description: "" });
+    setForm({ name: "", city: "", district: "LC-11", founded_year: "", description: "" });
     setEditing(null);
     setShowForm(false);
   };
