@@ -24,6 +24,7 @@ import { Route as AppFeedRouteImport } from './routes/_app/feed'
 import { Route as AppEventsRouteImport } from './routes/_app/events'
 import { Route as AppDistrictRolesRouteImport } from './routes/_app/district-roles'
 import { Route as AppClubsRouteImport } from './routes/_app/clubs'
+import { Route as AppClubRolesRouteImport } from './routes/_app/club-roles'
 import { Route as AppAdminRouteImport } from './routes/_app/admin'
 import { Route as AppProfileIdRouteImport } from './routes/_app/profile.$id'
 
@@ -101,6 +102,11 @@ const AppClubsRoute = AppClubsRouteImport.update({
   path: '/clubs',
   getParentRoute: () => AppRoute,
 } as any)
+const AppClubRolesRoute = AppClubRolesRouteImport.update({
+  id: '/club-roles',
+  path: '/club-roles',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppAdminRoute = AppAdminRouteImport.update({
   id: '/admin',
   path: '/admin',
@@ -118,6 +124,7 @@ export interface FileRoutesByFullPath {
   '/pending': typeof PendingRoute
   '/signup': typeof SignupRoute
   '/admin': typeof AppAdminRoute
+  '/club-roles': typeof AppClubRolesRoute
   '/clubs': typeof AppClubsRoute
   '/district-roles': typeof AppDistrictRolesRoute
   '/events': typeof AppEventsRoute
@@ -136,6 +143,7 @@ export interface FileRoutesByTo {
   '/pending': typeof PendingRoute
   '/signup': typeof SignupRoute
   '/admin': typeof AppAdminRoute
+  '/club-roles': typeof AppClubRolesRoute
   '/clubs': typeof AppClubsRoute
   '/district-roles': typeof AppDistrictRolesRoute
   '/events': typeof AppEventsRoute
@@ -156,6 +164,7 @@ export interface FileRoutesById {
   '/pending': typeof PendingRoute
   '/signup': typeof SignupRoute
   '/_app/admin': typeof AppAdminRoute
+  '/_app/club-roles': typeof AppClubRolesRoute
   '/_app/clubs': typeof AppClubsRoute
   '/_app/district-roles': typeof AppDistrictRolesRoute
   '/_app/events': typeof AppEventsRoute
@@ -176,6 +185,7 @@ export interface FileRouteTypes {
     | '/pending'
     | '/signup'
     | '/admin'
+    | '/club-roles'
     | '/clubs'
     | '/district-roles'
     | '/events'
@@ -194,6 +204,7 @@ export interface FileRouteTypes {
     | '/pending'
     | '/signup'
     | '/admin'
+    | '/club-roles'
     | '/clubs'
     | '/district-roles'
     | '/events'
@@ -213,6 +224,7 @@ export interface FileRouteTypes {
     | '/pending'
     | '/signup'
     | '/_app/admin'
+    | '/_app/club-roles'
     | '/_app/clubs'
     | '/_app/district-roles'
     | '/_app/events'
@@ -341,6 +353,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppClubsRouteImport
       parentRoute: typeof AppRoute
     }
+    '/_app/club-roles': {
+      id: '/_app/club-roles'
+      path: '/club-roles'
+      fullPath: '/club-roles'
+      preLoaderRoute: typeof AppClubRolesRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/_app/admin': {
       id: '/_app/admin'
       path: '/admin'
@@ -360,6 +379,7 @@ declare module '@tanstack/react-router' {
 
 interface AppRouteChildren {
   AppAdminRoute: typeof AppAdminRoute
+  AppClubRolesRoute: typeof AppClubRolesRoute
   AppClubsRoute: typeof AppClubsRoute
   AppDistrictRolesRoute: typeof AppDistrictRolesRoute
   AppEventsRoute: typeof AppEventsRoute
@@ -375,6 +395,7 @@ interface AppRouteChildren {
 
 const AppRouteChildren: AppRouteChildren = {
   AppAdminRoute: AppAdminRoute,
+  AppClubRolesRoute: AppClubRolesRoute,
   AppClubsRoute: AppClubsRoute,
   AppDistrictRolesRoute: AppDistrictRolesRoute,
   AppEventsRoute: AppEventsRoute,
@@ -400,3 +421,13 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
