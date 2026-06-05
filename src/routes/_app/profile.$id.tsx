@@ -93,6 +93,26 @@ function ProfilePage() {
     if (isMe) await refresh();
   };
 
+  const addHistory = async () => {
+    if (!user) return;
+    const sy = parseInt(newHist.start_year, 10);
+    const ey = newHist.end_year ? parseInt(newHist.end_year, 10) : null;
+    if (!newHist.role_name || !sy) return toast.error("Preencha cargo e ano inicial");
+    if (ey && ey < sy) return toast.error("Ano final deve ser maior ou igual ao inicial");
+    const { error } = await supabase.from("user_role_history").insert({
+      user_id: id, scope: newHist.scope, role_name: newHist.role_name, start_year: sy, end_year: ey,
+    });
+    if (error) return toast.error(error.message);
+    toast.success("Período adicionado");
+    setNewHist({ scope: "club", role_name: "", start_year: String(new Date().getFullYear()), end_year: "" });
+    await load();
+  };
+
+  const removeHistory = async (hid: string) => {
+    const { error } = await supabase.from("user_role_history").delete().eq("id", hid);
+    if (error) return toast.error(error.message);
+    await load();
+
   const startDM = async () => {
     if (!user || isMe) return;
     // find existing 1:1
