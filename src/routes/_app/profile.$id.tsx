@@ -46,7 +46,7 @@ function ProfilePage() {
     const [{ data: dr }, { data: cr }, { data: hist }] = await Promise.all([
       supabase.from("district_roles").select("id, name").order("name"),
       supabase.from("club_roles").select("id, name").order("name"),
-      supabase.from("user_role_history").select("id, scope, role_name, start_year, end_year").eq("user_id", id).order("start_year", { ascending: false }),
+      supabase.from("user_role_history").select("id, scope, role_name, start_date, end_date").eq("user_id", id).order("start_date", { ascending: false }),
     ]);
     setDistrictRoles(dr ?? []);
     setClubRoles(cr ?? []);
