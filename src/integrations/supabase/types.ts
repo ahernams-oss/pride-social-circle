@@ -91,6 +91,33 @@ export type Database = {
         }
         Relationships: []
       }
+      district_roles: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          description: string
+          id: string
+          name: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          description?: string
+          id?: string
+          name: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          description?: string
+          id?: string
+          name?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       events: {
         Row: {
           created_at: string
@@ -353,6 +380,7 @@ export type Database = {
           full_name: string
           id: string
           role_in_club: string
+          role_in_district: string
           status: Database["public"]["Enums"]["profile_status"]
           updated_at: string
         }
@@ -366,6 +394,7 @@ export type Database = {
           full_name?: string
           id: string
           role_in_club?: string
+          role_in_district?: string
           status?: Database["public"]["Enums"]["profile_status"]
           updated_at?: string
         }
@@ -379,6 +408,7 @@ export type Database = {
           full_name?: string
           id?: string
           role_in_club?: string
+          role_in_district?: string
           status?: Database["public"]["Enums"]["profile_status"]
           updated_at?: string
         }

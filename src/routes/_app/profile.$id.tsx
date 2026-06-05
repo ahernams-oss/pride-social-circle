@@ -27,7 +27,8 @@ function ProfilePage() {
   const [posts, setPosts] = useState<FeedPost[]>([]);
   const [editing, setEditing] = useState(false);
   const [uploading, setUploading] = useState(false);
-  const [form, setForm] = useState({ full_name: "", bio: "", club_name: "", city: "", role_in_club: "", avatar_url: "" });
+  const [form, setForm] = useState({ full_name: "", bio: "", club_name: "", city: "", role_in_club: "", role_in_district: "", avatar_url: "" });
+  const [districtRoles, setDistrictRoles] = useState<{ id: string; name: string }[]>([]);
   const isMe = user?.id === id;
 
   const load = useCallback(async () => {
@@ -35,8 +36,12 @@ function ProfilePage() {
     setProfile(p as Profile | null);
     if (p) setForm({
       full_name: p.full_name, bio: p.bio, club_name: p.club_name, city: p.city,
-      role_in_club: p.role_in_club, avatar_url: p.avatar_url ?? "",
+      role_in_club: p.role_in_club, role_in_district: p.role_in_district ?? "",
+      avatar_url: p.avatar_url ?? "",
     });
+
+    const { data: dr } = await supabase.from("district_roles").select("id, name").order("name");
+    setDistrictRoles(dr ?? []);
 
     const { data: rows } = await supabase
       .from("posts").select("id, author_id, content, image_url, created_at")
@@ -69,7 +74,7 @@ function ProfilePage() {
     e.preventDefault();
     const { error } = await supabase.from("profiles").update({
       full_name: form.full_name, bio: form.bio, club_name: form.club_name,
-      city: form.city, role_in_club: form.role_in_club,
+      city: form.city, role_in_club: form.role_in_club, role_in_district: form.role_in_district,
       avatar_url: form.avatar_url || null,
     }).eq("id", id);
     if (error) return toast.error(error.message);
@@ -163,6 +168,19 @@ function ProfilePage() {
                 <div><Label>Cidade</Label><Input value={form.city} onChange={(e) => setForm({ ...form, city: e.target.value })} /></div>
               </div>
               <div><Label>Cargo no clube</Label><Input value={form.role_in_club} onChange={(e) => setForm({ ...form, role_in_club: e.target.value })} placeholder="Presidente, Secretário..." /></div>
+              <div>
+                <Label>Cargo no Distrito</Label>
+                <select
+                  className="mt-1 flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+                  value={form.role_in_district}
+                  onChange={(e) => setForm({ ...form, role_in_district: e.target.value })}
+                >
+                  <option value="">Nenhum</option>
+                  {districtRoles.map((r) => (
+                    <option key={r.id} value={r.name}>{r.name}</option>
+                  ))}
+                </select>
+              </div>
               <div><Label>Bio</Label><Textarea value={form.bio} onChange={(e) => setForm({ ...form, bio: e.target.value })} rows={3} /></div>
               <Button type="submit" disabled={uploading}>{uploading ? "Enviando..." : "Salvar"}</Button>
             </form>
@@ -170,6 +188,7 @@ function ProfilePage() {
             <>
               <h1 className="mt-3 text-2xl font-bold">{profile.full_name}</h1>
               {profile.role_in_club && <div className="text-sm text-accent-foreground"><span className="rounded-md bg-accent px-2 py-0.5 text-xs font-medium">{profile.role_in_club}</span></div>}
+              {profile.role_in_district && <div className="mt-1 text-sm"><span className="rounded-md bg-primary/10 px-2 py-0.5 text-xs font-medium text-primary">Distrito: {profile.role_in_district}</span></div>}
               <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-sm text-muted-foreground">
                 {profile.club_name && <span className="flex items-center gap-1"><Building2 className="h-3.5 w-3.5" />{profile.club_name}</span>}
                 {profile.city && <span className="flex items-center gap-1"><MapPin className="h-3.5 w-3.5" />{profile.city}</span>}

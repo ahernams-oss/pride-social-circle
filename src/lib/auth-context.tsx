@@ -11,6 +11,7 @@ export type Profile = {
   club_name: string;
   city: string;
   role_in_club: string;
+  role_in_district: string;
   status: "pending" | "approved" | "rejected";
 };
 
