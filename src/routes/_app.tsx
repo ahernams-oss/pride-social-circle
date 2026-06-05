@@ -5,7 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Home, MessageCircle, Bell, Shield, LogOut, User as UserIcon, Users, Users2, Building2, Trophy, Calendar, Target, Landmark, Award, BadgeCheck, Globe } from "lucide-react";
+import { Home, MessageCircle, Bell, Shield, LogOut, User as UserIcon, Users, Users2, Building2, Trophy, Calendar, Target, Landmark, Award, BadgeCheck, Globe, FileText } from "lucide-react";
 import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
@@ -286,6 +286,17 @@ function AppLayout() {
                 <Globe className="h-5 w-5" />
               </span>
               Distrito LC-11
+            </Link>
+            <Link
+              to="/documents"
+              className={`flex items-center gap-3 rounded-lg px-2 py-2 text-sm font-medium transition-colors ${
+                loc.pathname.startsWith("/documents") ? "bg-primary/10 text-primary" : "text-foreground hover:bg-muted"
+              }`}
+            >
+              <span className="flex h-10 w-10 items-center justify-center rounded-full bg-muted">
+                <FileText className="h-5 w-5" />
+              </span>
+              Documentos
             </Link>
           </div>
         </aside>

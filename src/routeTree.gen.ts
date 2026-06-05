@@ -22,6 +22,7 @@ import { Route as AppGroupsRouteImport } from './routes/_app/groups'
 import { Route as AppFriendsRouteImport } from './routes/_app/friends'
 import { Route as AppFeedRouteImport } from './routes/_app/feed'
 import { Route as AppEventsRouteImport } from './routes/_app/events'
+import { Route as AppDocumentsRouteImport } from './routes/_app/documents'
 import { Route as AppDistritoRouteImport } from './routes/_app/distrito'
 import { Route as AppDistrictRolesRouteImport } from './routes/_app/district-roles'
 import { Route as AppClubsRouteImport } from './routes/_app/clubs'
@@ -93,6 +94,11 @@ const AppEventsRoute = AppEventsRouteImport.update({
   path: '/events',
   getParentRoute: () => AppRoute,
 } as any)
+const AppDocumentsRoute = AppDocumentsRouteImport.update({
+  id: '/documents',
+  path: '/documents',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppDistritoRoute = AppDistritoRouteImport.update({
   id: '/distrito',
   path: '/distrito',
@@ -134,6 +140,7 @@ export interface FileRoutesByFullPath {
   '/clubs': typeof AppClubsRoute
   '/district-roles': typeof AppDistrictRolesRoute
   '/distrito': typeof AppDistritoRoute
+  '/documents': typeof AppDocumentsRoute
   '/events': typeof AppEventsRoute
   '/feed': typeof AppFeedRoute
   '/friends': typeof AppFriendsRoute
@@ -154,6 +161,7 @@ export interface FileRoutesByTo {
   '/clubs': typeof AppClubsRoute
   '/district-roles': typeof AppDistrictRolesRoute
   '/distrito': typeof AppDistritoRoute
+  '/documents': typeof AppDocumentsRoute
   '/events': typeof AppEventsRoute
   '/feed': typeof AppFeedRoute
   '/friends': typeof AppFriendsRoute
@@ -176,6 +184,7 @@ export interface FileRoutesById {
   '/_app/clubs': typeof AppClubsRoute
   '/_app/district-roles': typeof AppDistrictRolesRoute
   '/_app/distrito': typeof AppDistritoRoute
+  '/_app/documents': typeof AppDocumentsRoute
   '/_app/events': typeof AppEventsRoute
   '/_app/feed': typeof AppFeedRoute
   '/_app/friends': typeof AppFriendsRoute
@@ -198,6 +207,7 @@ export interface FileRouteTypes {
     | '/clubs'
     | '/district-roles'
     | '/distrito'
+    | '/documents'
     | '/events'
     | '/feed'
     | '/friends'
@@ -218,6 +228,7 @@ export interface FileRouteTypes {
     | '/clubs'
     | '/district-roles'
     | '/distrito'
+    | '/documents'
     | '/events'
     | '/feed'
     | '/friends'
@@ -239,6 +250,7 @@ export interface FileRouteTypes {
     | '/_app/clubs'
     | '/_app/district-roles'
     | '/_app/distrito'
+    | '/_app/documents'
     | '/_app/events'
     | '/_app/feed'
     | '/_app/friends'
@@ -351,6 +363,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppEventsRouteImport
       parentRoute: typeof AppRoute
     }
+    '/_app/documents': {
+      id: '/_app/documents'
+      path: '/documents'
+      fullPath: '/documents'
+      preLoaderRoute: typeof AppDocumentsRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/_app/distrito': {
       id: '/_app/distrito'
       path: '/distrito'
@@ -402,6 +421,7 @@ interface AppRouteChildren {
   AppClubsRoute: typeof AppClubsRoute
   AppDistrictRolesRoute: typeof AppDistrictRolesRoute
   AppDistritoRoute: typeof AppDistritoRoute
+  AppDocumentsRoute: typeof AppDocumentsRoute
   AppEventsRoute: typeof AppEventsRoute
   AppFeedRoute: typeof AppFeedRoute
   AppFriendsRoute: typeof AppFriendsRoute
@@ -419,6 +439,7 @@ const AppRouteChildren: AppRouteChildren = {
   AppClubsRoute: AppClubsRoute,
   AppDistrictRolesRoute: AppDistrictRolesRoute,
   AppDistritoRoute: AppDistritoRoute,
+  AppDocumentsRoute: AppDocumentsRoute,
   AppEventsRoute: AppEventsRoute,
   AppFeedRoute: AppFeedRoute,
   AppFriendsRoute: AppFriendsRoute,
@@ -442,3 +463,13 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
