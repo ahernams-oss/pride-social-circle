@@ -444,31 +444,37 @@ export type Database = {
       user_role_history: {
         Row: {
           created_at: string
+          end_date: string | null
           end_year: number | null
           id: string
           role_name: string
           scope: string
-          start_year: number
+          start_date: string
+          start_year: number | null
           updated_at: string
           user_id: string
         }
         Insert: {
           created_at?: string
+          end_date?: string | null
           end_year?: number | null
           id?: string
           role_name: string
           scope: string
-          start_year: number
+          start_date: string
+          start_year?: number | null
           updated_at?: string
           user_id: string
         }
         Update: {
           created_at?: string
+          end_date?: string | null
           end_year?: number | null
           id?: string
           role_name?: string
           scope?: string
-          start_year?: number
+          start_date?: string
+          start_year?: number | null
           updated_at?: string
           user_id?: string
         }
