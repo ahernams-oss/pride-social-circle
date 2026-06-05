@@ -36,8 +36,12 @@ function ProfilePage() {
     setProfile(p as Profile | null);
     if (p) setForm({
       full_name: p.full_name, bio: p.bio, club_name: p.club_name, city: p.city,
-      role_in_club: p.role_in_club, avatar_url: p.avatar_url ?? "",
+      role_in_club: p.role_in_club, role_in_district: p.role_in_district ?? "",
+      avatar_url: p.avatar_url ?? "",
     });
+
+    const { data: dr } = await supabase.from("district_roles").select("id, name").order("name");
+    setDistrictRoles(dr ?? []);
 
     const { data: rows } = await supabase
       .from("posts").select("id, author_id, content, image_url, created_at")
