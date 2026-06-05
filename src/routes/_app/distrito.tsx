@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -91,7 +92,7 @@ function LcifTab() {
   );
 }
 
-function renderValue(value: unknown): React.ReactNode {
+function renderValue(value: unknown): ReactNode {
   if (value == null) return <span className="italic">—</span>;
   if (typeof value === "string" || typeof value === "number" || typeof value === "boolean") {
     return <p className="whitespace-pre-wrap">{String(value)}</p>;
