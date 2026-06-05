@@ -41,8 +41,12 @@ function ProfilePage() {
       avatar_url: p.avatar_url ?? "",
     });
 
-    const { data: dr } = await supabase.from("district_roles").select("id, name").order("name");
+    const [{ data: dr }, { data: cr }] = await Promise.all([
+      supabase.from("district_roles").select("id, name").order("name"),
+      supabase.from("club_roles").select("id, name").order("name"),
+    ]);
     setDistrictRoles(dr ?? []);
+    setClubRoles(cr ?? []);
 
     const { data: rows } = await supabase
       .from("posts").select("id, author_id, content, image_url, created_at")
