@@ -14,6 +14,42 @@ export type Database = {
   }
   public: {
     Tables: {
+      clubs: {
+        Row: {
+          city: string
+          created_at: string
+          created_by: string | null
+          description: string
+          district: string
+          founded_year: number | null
+          id: string
+          name: string
+          updated_at: string
+        }
+        Insert: {
+          city?: string
+          created_at?: string
+          created_by?: string | null
+          description?: string
+          district?: string
+          founded_year?: number | null
+          id?: string
+          name: string
+          updated_at?: string
+        }
+        Update: {
+          city?: string
+          created_at?: string
+          created_by?: string | null
+          description?: string
+          district?: string
+          founded_year?: number | null
+          id?: string
+          name?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       conversation_participants: {
         Row: {
           conversation_id: string
