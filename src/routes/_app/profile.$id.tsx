@@ -243,6 +243,57 @@ function ProfilePage() {
         </div>
       </div>
 
+      <div className="rounded-xl border bg-card p-4 shadow-sm">
+        <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-muted-foreground">Histórico de cargos</h2>
+        {history.length === 0 ? (
+          <p className="text-sm text-muted-foreground">Nenhum cargo registrado.</p>
+        ) : (
+          <ul className="space-y-2">
+            {history.map((h) => (
+              <li key={h.id} className="flex items-center justify-between gap-3 rounded-md border bg-background px-3 py-2 text-sm">
+                <div className="flex flex-wrap items-center gap-2">
+                  <span className={`rounded-md px-2 py-0.5 text-xs font-medium ${h.scope === "district" ? "bg-primary/10 text-primary" : "bg-accent text-accent-foreground"}`}>
+                    {h.scope === "district" ? "Distrito" : "Clube"}
+                  </span>
+                  <span className="font-medium">{h.role_name}</span>
+                  <span className="text-muted-foreground">
+                    {h.start_year}{h.end_year ? ` – ${h.end_year}` : " – atual"}
+                  </span>
+                </div>
+                {isMe && (
+                  <Button variant="ghost" size="sm" onClick={() => removeHistory(h.id)}>Remover</Button>
+                )}
+              </li>
+            ))}
+          </ul>
+        )}
+        {isMe && (
+          <div className="mt-4 grid grid-cols-1 gap-2 border-t pt-4 sm:grid-cols-[120px_1fr_100px_100px_auto]">
+            <select
+              className="h-10 rounded-md border border-input bg-background px-3 text-sm"
+              value={newHist.scope}
+              onChange={(e) => setNewHist({ ...newHist, scope: e.target.value as "club" | "district", role_name: "" })}
+            >
+              <option value="club">Clube</option>
+              <option value="district">Distrito</option>
+            </select>
+            <select
+              className="h-10 rounded-md border border-input bg-background px-3 text-sm"
+              value={newHist.role_name}
+              onChange={(e) => setNewHist({ ...newHist, role_name: e.target.value })}
+            >
+              <option value="">Selecione o cargo</option>
+              {(newHist.scope === "club" ? clubRoles : districtRoles).map((r) => (
+                <option key={r.id} value={r.name}>{r.name}</option>
+              ))}
+            </select>
+            <Input type="number" placeholder="Início" value={newHist.start_year} onChange={(e) => setNewHist({ ...newHist, start_year: e.target.value })} />
+            <Input type="number" placeholder="Fim" value={newHist.end_year} onChange={(e) => setNewHist({ ...newHist, end_year: e.target.value })} />
+            <Button onClick={addHistory}>Adicionar</Button>
+          </div>
+        )}
+      </div>
+
       <h2 className="px-1 text-sm font-semibold uppercase tracking-wide text-muted-foreground">Publicações</h2>
       {posts.length === 0 ? (
         <p className="rounded-xl border bg-card p-8 text-center text-muted-foreground">Nenhuma publicação ainda.</p>
