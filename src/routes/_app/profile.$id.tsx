@@ -172,7 +172,19 @@ function ProfilePage() {
                 <div><Label>Clube</Label><Input value={form.club_name} onChange={(e) => setForm({ ...form, club_name: e.target.value })} /></div>
                 <div><Label>Cidade</Label><Input value={form.city} onChange={(e) => setForm({ ...form, city: e.target.value })} /></div>
               </div>
-              <div><Label>Cargo no clube</Label><Input value={form.role_in_club} onChange={(e) => setForm({ ...form, role_in_club: e.target.value })} placeholder="Presidente, Secretário..." /></div>
+              <div>
+                <Label>Cargo no clube</Label>
+                <select
+                  className="mt-1 flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+                  value={form.role_in_club}
+                  onChange={(e) => setForm({ ...form, role_in_club: e.target.value })}
+                >
+                  <option value="">Nenhum</option>
+                  {clubRoles.map((r) => (
+                    <option key={r.id} value={r.name}>{r.name}</option>
+                  ))}
+                </select>
+              </div>
               <div>
                 <Label>Cargo no Distrito</Label>
                 <select
