@@ -27,7 +27,7 @@ function ClubsPage() {
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [editing, setEditing] = useState<Club | null>(null);
-  const [form, setForm] = useState({ name: "", city: "", district: "", founded_year: "", description: "" });
+  const [form, setForm] = useState({ name: "", city: "", district: "LC-11", founded_year: "", description: "" });
 
   const load = async () => {
     setLoading(true);
@@ -40,7 +40,7 @@ function ClubsPage() {
   useEffect(() => { load(); }, []);
 
   const resetForm = () => {
-    setForm({ name: "", city: "", district: "", founded_year: "", description: "" });
+    setForm({ name: "", city: "", district: "LC-11", founded_year: "", description: "" });
     setEditing(null);
     setShowForm(false);
   };
@@ -50,7 +50,7 @@ function ClubsPage() {
     setForm({
       name: c.name,
       city: c.city,
-      district: c.district,
+      district: "LC-11",
       founded_year: c.founded_year?.toString() ?? "",
       description: c.description,
     });
@@ -63,7 +63,7 @@ function ClubsPage() {
     const payload = {
       name: form.name.trim(),
       city: form.city.trim(),
-      district: form.district.trim(),
+      district: "LC-11",
       founded_year: form.founded_year ? Number(form.founded_year) : null,
       description: form.description.trim(),
     };
@@ -117,7 +117,7 @@ function ClubsPage() {
               </div>
               <div className="space-y-1">
                 <Label>Distrito</Label>
-                <Input value={form.district} onChange={(e) => setForm({ ...form, district: e.target.value })} />
+                <Input value="LC-11" disabled className="bg-muted" />
               </div>
               <div className="space-y-1">
                 <Label>Ano de fundação</Label>
