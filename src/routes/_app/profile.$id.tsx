@@ -112,6 +112,9 @@ function ProfilePage() {
     const { error } = await supabase.from("user_role_history").delete().eq("id", hid);
     if (error) return toast.error(error.message);
     await load();
+  };
+
+
 
   const startDM = async () => {
     if (!user || isMe) return;
