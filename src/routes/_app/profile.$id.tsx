@@ -188,6 +188,7 @@ function ProfilePage() {
             <>
               <h1 className="mt-3 text-2xl font-bold">{profile.full_name}</h1>
               {profile.role_in_club && <div className="text-sm text-accent-foreground"><span className="rounded-md bg-accent px-2 py-0.5 text-xs font-medium">{profile.role_in_club}</span></div>}
+              {profile.role_in_district && <div className="mt-1 text-sm"><span className="rounded-md bg-primary/10 px-2 py-0.5 text-xs font-medium text-primary">Distrito: {profile.role_in_district}</span></div>}
               <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-sm text-muted-foreground">
                 {profile.club_name && <span className="flex items-center gap-1"><Building2 className="h-3.5 w-3.5" />{profile.club_name}</span>}
                 {profile.city && <span className="flex items-center gap-1"><MapPin className="h-3.5 w-3.5" />{profile.city}</span>}
