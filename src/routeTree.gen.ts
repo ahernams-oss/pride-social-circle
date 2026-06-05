@@ -22,6 +22,7 @@ import { Route as AppGroupsRouteImport } from './routes/_app/groups'
 import { Route as AppFriendsRouteImport } from './routes/_app/friends'
 import { Route as AppFeedRouteImport } from './routes/_app/feed'
 import { Route as AppEventsRouteImport } from './routes/_app/events'
+import { Route as AppDistritoRouteImport } from './routes/_app/distrito'
 import { Route as AppDistrictRolesRouteImport } from './routes/_app/district-roles'
 import { Route as AppClubsRouteImport } from './routes/_app/clubs'
 import { Route as AppClubRolesRouteImport } from './routes/_app/club-roles'
@@ -92,6 +93,11 @@ const AppEventsRoute = AppEventsRouteImport.update({
   path: '/events',
   getParentRoute: () => AppRoute,
 } as any)
+const AppDistritoRoute = AppDistritoRouteImport.update({
+  id: '/distrito',
+  path: '/distrito',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppDistrictRolesRoute = AppDistrictRolesRouteImport.update({
   id: '/district-roles',
   path: '/district-roles',
@@ -127,6 +133,7 @@ export interface FileRoutesByFullPath {
   '/club-roles': typeof AppClubRolesRoute
   '/clubs': typeof AppClubsRoute
   '/district-roles': typeof AppDistrictRolesRoute
+  '/distrito': typeof AppDistritoRoute
   '/events': typeof AppEventsRoute
   '/feed': typeof AppFeedRoute
   '/friends': typeof AppFriendsRoute
@@ -146,6 +153,7 @@ export interface FileRoutesByTo {
   '/club-roles': typeof AppClubRolesRoute
   '/clubs': typeof AppClubsRoute
   '/district-roles': typeof AppDistrictRolesRoute
+  '/distrito': typeof AppDistritoRoute
   '/events': typeof AppEventsRoute
   '/feed': typeof AppFeedRoute
   '/friends': typeof AppFriendsRoute
@@ -167,6 +175,7 @@ export interface FileRoutesById {
   '/_app/club-roles': typeof AppClubRolesRoute
   '/_app/clubs': typeof AppClubsRoute
   '/_app/district-roles': typeof AppDistrictRolesRoute
+  '/_app/distrito': typeof AppDistritoRoute
   '/_app/events': typeof AppEventsRoute
   '/_app/feed': typeof AppFeedRoute
   '/_app/friends': typeof AppFriendsRoute
@@ -188,6 +197,7 @@ export interface FileRouteTypes {
     | '/club-roles'
     | '/clubs'
     | '/district-roles'
+    | '/distrito'
     | '/events'
     | '/feed'
     | '/friends'
@@ -207,6 +217,7 @@ export interface FileRouteTypes {
     | '/club-roles'
     | '/clubs'
     | '/district-roles'
+    | '/distrito'
     | '/events'
     | '/feed'
     | '/friends'
@@ -227,6 +238,7 @@ export interface FileRouteTypes {
     | '/_app/club-roles'
     | '/_app/clubs'
     | '/_app/district-roles'
+    | '/_app/distrito'
     | '/_app/events'
     | '/_app/feed'
     | '/_app/friends'
@@ -339,6 +351,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppEventsRouteImport
       parentRoute: typeof AppRoute
     }
+    '/_app/distrito': {
+      id: '/_app/distrito'
+      path: '/distrito'
+      fullPath: '/distrito'
+      preLoaderRoute: typeof AppDistritoRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/_app/district-roles': {
       id: '/_app/district-roles'
       path: '/district-roles'
@@ -382,6 +401,7 @@ interface AppRouteChildren {
   AppClubRolesRoute: typeof AppClubRolesRoute
   AppClubsRoute: typeof AppClubsRoute
   AppDistrictRolesRoute: typeof AppDistrictRolesRoute
+  AppDistritoRoute: typeof AppDistritoRoute
   AppEventsRoute: typeof AppEventsRoute
   AppFeedRoute: typeof AppFeedRoute
   AppFriendsRoute: typeof AppFriendsRoute
@@ -398,6 +418,7 @@ const AppRouteChildren: AppRouteChildren = {
   AppClubRolesRoute: AppClubRolesRoute,
   AppClubsRoute: AppClubsRoute,
   AppDistrictRolesRoute: AppDistrictRolesRoute,
+  AppDistritoRoute: AppDistritoRoute,
   AppEventsRoute: AppEventsRoute,
   AppFeedRoute: AppFeedRoute,
   AppFriendsRoute: AppFriendsRoute,
