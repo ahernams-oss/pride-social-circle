@@ -74,7 +74,7 @@ function ProfilePage() {
     e.preventDefault();
     const { error } = await supabase.from("profiles").update({
       full_name: form.full_name, bio: form.bio, club_name: form.club_name,
-      city: form.city, role_in_club: form.role_in_club,
+      city: form.city, role_in_club: form.role_in_club, role_in_district: form.role_in_district,
       avatar_url: form.avatar_url || null,
     }).eq("id", id);
     if (error) return toast.error(error.message);
