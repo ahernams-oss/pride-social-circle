@@ -168,6 +168,19 @@ function ProfilePage() {
                 <div><Label>Cidade</Label><Input value={form.city} onChange={(e) => setForm({ ...form, city: e.target.value })} /></div>
               </div>
               <div><Label>Cargo no clube</Label><Input value={form.role_in_club} onChange={(e) => setForm({ ...form, role_in_club: e.target.value })} placeholder="Presidente, Secretário..." /></div>
+              <div>
+                <Label>Cargo no Distrito</Label>
+                <select
+                  className="mt-1 flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+                  value={form.role_in_district}
+                  onChange={(e) => setForm({ ...form, role_in_district: e.target.value })}
+                >
+                  <option value="">Nenhum</option>
+                  {districtRoles.map((r) => (
+                    <option key={r.id} value={r.name}>{r.name}</option>
+                  ))}
+                </select>
+              </div>
               <div><Label>Bio</Label><Textarea value={form.bio} onChange={(e) => setForm({ ...form, bio: e.target.value })} rows={3} /></div>
               <Button type="submit" disabled={uploading}>{uploading ? "Enviando..." : "Salvar"}</Button>
             </form>
