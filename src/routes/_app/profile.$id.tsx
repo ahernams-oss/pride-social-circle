@@ -286,8 +286,8 @@ function ProfilePage() {
                 <option key={r.id} value={r.name}>{r.name}</option>
               ))}
             </select>
-            <Input type="number" placeholder="Início" value={newHist.start_year} onChange={(e) => setNewHist({ ...newHist, start_year: e.target.value })} />
-            <Input type="number" placeholder="Fim" value={newHist.end_year} onChange={(e) => setNewHist({ ...newHist, end_year: e.target.value })} />
+            <Input type="date" placeholder="Data inicial" value={newHist.start_date} onChange={(e) => setNewHist({ ...newHist, start_date: e.target.value })} />
+            <Input type="date" placeholder="Data final" value={newHist.end_date} onChange={(e) => setNewHist({ ...newHist, end_date: e.target.value })} />
             <Button onClick={addHistory}>Adicionar</Button>
           </div>
         )}
