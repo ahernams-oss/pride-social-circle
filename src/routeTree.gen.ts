@@ -22,6 +22,7 @@ import { Route as AppGroupsRouteImport } from './routes/_app/groups'
 import { Route as AppFriendsRouteImport } from './routes/_app/friends'
 import { Route as AppFeedRouteImport } from './routes/_app/feed'
 import { Route as AppEventsRouteImport } from './routes/_app/events'
+import { Route as AppClubsRouteImport } from './routes/_app/clubs'
 import { Route as AppAdminRouteImport } from './routes/_app/admin'
 import { Route as AppProfileIdRouteImport } from './routes/_app/profile.$id'
 
@@ -89,6 +90,11 @@ const AppEventsRoute = AppEventsRouteImport.update({
   path: '/events',
   getParentRoute: () => AppRoute,
 } as any)
+const AppClubsRoute = AppClubsRouteImport.update({
+  id: '/clubs',
+  path: '/clubs',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppAdminRoute = AppAdminRouteImport.update({
   id: '/admin',
   path: '/admin',
@@ -106,6 +112,7 @@ export interface FileRoutesByFullPath {
   '/pending': typeof PendingRoute
   '/signup': typeof SignupRoute
   '/admin': typeof AppAdminRoute
+  '/clubs': typeof AppClubsRoute
   '/events': typeof AppEventsRoute
   '/feed': typeof AppFeedRoute
   '/friends': typeof AppFriendsRoute
@@ -122,6 +129,7 @@ export interface FileRoutesByTo {
   '/pending': typeof PendingRoute
   '/signup': typeof SignupRoute
   '/admin': typeof AppAdminRoute
+  '/clubs': typeof AppClubsRoute
   '/events': typeof AppEventsRoute
   '/feed': typeof AppFeedRoute
   '/friends': typeof AppFriendsRoute
@@ -140,6 +148,7 @@ export interface FileRoutesById {
   '/pending': typeof PendingRoute
   '/signup': typeof SignupRoute
   '/_app/admin': typeof AppAdminRoute
+  '/_app/clubs': typeof AppClubsRoute
   '/_app/events': typeof AppEventsRoute
   '/_app/feed': typeof AppFeedRoute
   '/_app/friends': typeof AppFriendsRoute
@@ -158,6 +167,7 @@ export interface FileRouteTypes {
     | '/pending'
     | '/signup'
     | '/admin'
+    | '/clubs'
     | '/events'
     | '/feed'
     | '/friends'
@@ -174,6 +184,7 @@ export interface FileRouteTypes {
     | '/pending'
     | '/signup'
     | '/admin'
+    | '/clubs'
     | '/events'
     | '/feed'
     | '/friends'
@@ -191,6 +202,7 @@ export interface FileRouteTypes {
     | '/pending'
     | '/signup'
     | '/_app/admin'
+    | '/_app/clubs'
     | '/_app/events'
     | '/_app/feed'
     | '/_app/friends'
@@ -303,6 +315,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppEventsRouteImport
       parentRoute: typeof AppRoute
     }
+    '/_app/clubs': {
+      id: '/_app/clubs'
+      path: '/clubs'
+      fullPath: '/clubs'
+      preLoaderRoute: typeof AppClubsRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/_app/admin': {
       id: '/_app/admin'
       path: '/admin'
@@ -322,6 +341,7 @@ declare module '@tanstack/react-router' {
 
 interface AppRouteChildren {
   AppAdminRoute: typeof AppAdminRoute
+  AppClubsRoute: typeof AppClubsRoute
   AppEventsRoute: typeof AppEventsRoute
   AppFeedRoute: typeof AppFeedRoute
   AppFriendsRoute: typeof AppFriendsRoute
@@ -335,6 +355,7 @@ interface AppRouteChildren {
 
 const AppRouteChildren: AppRouteChildren = {
   AppAdminRoute: AppAdminRoute,
+  AppClubsRoute: AppClubsRoute,
   AppEventsRoute: AppEventsRoute,
   AppFeedRoute: AppFeedRoute,
   AppFriendsRoute: AppFriendsRoute,
