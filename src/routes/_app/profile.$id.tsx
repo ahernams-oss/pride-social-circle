@@ -43,12 +43,14 @@ function ProfilePage() {
       avatar_url: p.avatar_url ?? "",
     });
 
-    const [{ data: dr }, { data: cr }] = await Promise.all([
+    const [{ data: dr }, { data: cr }, { data: hist }] = await Promise.all([
       supabase.from("district_roles").select("id, name").order("name"),
       supabase.from("club_roles").select("id, name").order("name"),
+      supabase.from("user_role_history").select("id, scope, role_name, start_year, end_year").eq("user_id", id).order("start_year", { ascending: false }),
     ]);
     setDistrictRoles(dr ?? []);
     setClubRoles(cr ?? []);
+    setHistory((hist ?? []) as any);
 
     const { data: rows } = await supabase
       .from("posts").select("id, author_id, content, image_url, created_at")
