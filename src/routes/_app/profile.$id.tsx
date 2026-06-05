@@ -267,7 +267,7 @@ function ProfilePage() {
           </ul>
         )}
         {isMe && (
-          <div className="mt-4 grid grid-cols-1 gap-2 border-t pt-4 sm:grid-cols-[120px_1fr_100px_100px_auto]">
+          <div className="mt-4 grid grid-cols-1 gap-2 border-t pt-4 sm:grid-cols-[120px_1fr_160px_160px_auto]">
             <select
               className="h-10 rounded-md border border-input bg-background px-3 text-sm"
               value={newHist.scope}
