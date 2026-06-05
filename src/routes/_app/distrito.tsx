@@ -32,26 +32,37 @@ function GovernadoresTab() {
   if (isLoading) return <LoadingGrid />;
   if (!data?.length) return <Empty msg="Nenhum governador encontrado." />;
   return (
-    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+    <div className="space-y-3">
       {data.map((g) => (
-        <Card key={g.id}>
-          <CardHeader className="items-center text-center">
-            <Avatar className="h-24 w-24 ring-2 ring-primary/30">
-              <AvatarImage src={g.photo_url} alt={g.name} />
-              <AvatarFallback>{g.name?.[0] ?? "G"}</AvatarFallback>
-            </Avatar>
-            <CardTitle className="mt-2">{g.name}</CardTitle>
-            <CardDescription>{g.year_label} · {g.role}</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-2 text-sm">
+        <div
+          key={g.id}
+          className="flex items-start gap-4 rounded-xl border bg-card p-4 shadow-sm transition-colors hover:bg-muted/40"
+        >
+          {g.photo_url ? (
+            <img
+              src={g.photo_url}
+              alt={g.name}
+              className="h-24 w-20 shrink-0 rounded-lg object-cover ring-1 ring-border"
+            />
+          ) : (
+            <div className="flex h-24 w-20 shrink-0 items-center justify-center rounded-lg bg-muted text-lg font-semibold text-muted-foreground ring-1 ring-border">
+              {g.name?.[0] ?? "G"}
+            </div>
+          )}
+          <div className="min-w-0 flex-1 space-y-1">
+            <div className="flex flex-wrap items-baseline justify-between gap-2">
+              <h3 className="text-base font-semibold leading-tight">{g.name}</h3>
+              <span className="text-xs font-medium text-muted-foreground">{g.year_label}</span>
+            </div>
+            {g.role && <p className="text-xs uppercase tracking-wide text-muted-foreground">{g.role}</p>}
             {g.motto && (
-              <p className="rounded-md bg-accent/30 p-2 text-center italic text-primary">
+              <p className="rounded-md bg-accent/30 px-2 py-1 text-sm italic text-primary">
                 "{g.motto}"
               </p>
             )}
-            {g.bio && <p className="text-muted-foreground">{g.bio}</p>}
-          </CardContent>
-        </Card>
+            {g.bio && <p className="text-sm text-muted-foreground">{g.bio}</p>}
+          </div>
+        </div>
       ))}
     </div>
   );
