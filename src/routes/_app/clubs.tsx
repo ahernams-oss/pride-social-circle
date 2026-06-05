@@ -50,7 +50,7 @@ function ClubsPage() {
     setForm({
       name: c.name,
       city: c.city,
-      district: c.district,
+      district: "LC-11",
       founded_year: c.founded_year?.toString() ?? "",
       description: c.description,
     });
