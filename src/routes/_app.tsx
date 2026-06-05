@@ -10,6 +10,7 @@ import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import lionsLogo from "@/assets/lions-logo.jpg";
+import { GovernadoresSidebar } from "@/components/GovernadoresSidebar";
 
 export const Route = createFileRoute("/_app")({ component: AppLayout });
 
@@ -159,7 +160,7 @@ function AppLayout() {
         </nav>
       </header>
 
-      <div className="mx-auto grid max-w-6xl gap-6 px-4 py-6 md:grid-cols-[260px_minmax(0,1fr)]">
+      <div className={`mx-auto grid max-w-7xl gap-6 px-4 py-6 md:grid-cols-[260px_minmax(0,1fr)] ${loc.pathname.startsWith("/feed") ? "lg:grid-cols-[260px_minmax(0,1fr)_280px]" : ""}`}>
         <aside className="hidden md:block">
           <div className="sticky top-24 space-y-1 rounded-xl border bg-card p-3 shadow-sm">
             <Link
@@ -291,6 +292,7 @@ function AppLayout() {
         <main className="min-w-0">
           <Outlet />
         </main>
+        {loc.pathname.startsWith("/feed") && <GovernadoresSidebar />}
       </div>
     </div>
   );
