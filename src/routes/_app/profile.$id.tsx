@@ -256,7 +256,7 @@ function ProfilePage() {
                   </span>
                   <span className="font-medium">{h.role_name}</span>
                   <span className="text-muted-foreground">
-                    {h.start_year}{h.end_year ? ` – ${h.end_year}` : " – atual"}
+                    {new Date(h.start_date).toLocaleDateString("pt-BR")}{h.end_date ? ` – ${new Date(h.end_date).toLocaleDateString("pt-BR")}` : " – atual"}
                   </span>
                 </div>
                 {isMe && (
