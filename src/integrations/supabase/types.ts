@@ -441,6 +441,39 @@ export type Database = {
         }
         Relationships: []
       }
+      user_role_history: {
+        Row: {
+          created_at: string
+          end_year: number | null
+          id: string
+          role_name: string
+          scope: string
+          start_year: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          end_year?: number | null
+          id?: string
+          role_name: string
+          scope: string
+          start_year: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          end_year?: number | null
+          id?: string
+          role_name?: string
+          scope?: string
+          start_year?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           created_at: string

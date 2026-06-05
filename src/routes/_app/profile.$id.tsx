@@ -30,6 +30,8 @@ function ProfilePage() {
   const [form, setForm] = useState({ full_name: "", bio: "", club_name: "", city: "", role_in_club: "", role_in_district: "", avatar_url: "" });
   const [districtRoles, setDistrictRoles] = useState<{ id: string; name: string }[]>([]);
   const [clubRoles, setClubRoles] = useState<{ id: string; name: string }[]>([]);
+  const [history, setHistory] = useState<Array<{ id: string; scope: string; role_name: string; start_year: number; end_year: number | null }>>([]);
+  const [newHist, setNewHist] = useState<{ scope: "club" | "district"; role_name: string; start_year: string; end_year: string }>({ scope: "club", role_name: "", start_year: String(new Date().getFullYear()), end_year: "" });
   const isMe = user?.id === id;
 
   const load = useCallback(async () => {
@@ -41,12 +43,14 @@ function ProfilePage() {
       avatar_url: p.avatar_url ?? "",
     });
 
-    const [{ data: dr }, { data: cr }] = await Promise.all([
+    const [{ data: dr }, { data: cr }, { data: hist }] = await Promise.all([
       supabase.from("district_roles").select("id, name").order("name"),
       supabase.from("club_roles").select("id, name").order("name"),
+      supabase.from("user_role_history").select("id, scope, role_name, start_year, end_year").eq("user_id", id).order("start_year", { ascending: false }),
     ]);
     setDistrictRoles(dr ?? []);
     setClubRoles(cr ?? []);
+    setHistory((hist ?? []) as any);
 
     const { data: rows } = await supabase
       .from("posts").select("id, author_id, content, image_url, created_at")
@@ -88,6 +92,29 @@ function ProfilePage() {
     await load();
     if (isMe) await refresh();
   };
+
+  const addHistory = async () => {
+    if (!user) return;
+    const sy = parseInt(newHist.start_year, 10);
+    const ey = newHist.end_year ? parseInt(newHist.end_year, 10) : null;
+    if (!newHist.role_name || !sy) return toast.error("Preencha cargo e ano inicial");
+    if (ey && ey < sy) return toast.error("Ano final deve ser maior ou igual ao inicial");
+    const { error } = await supabase.from("user_role_history").insert({
+      user_id: id, scope: newHist.scope, role_name: newHist.role_name, start_year: sy, end_year: ey,
+    });
+    if (error) return toast.error(error.message);
+    toast.success("Período adicionado");
+    setNewHist({ scope: "club", role_name: "", start_year: String(new Date().getFullYear()), end_year: "" });
+    await load();
+  };
+
+  const removeHistory = async (hid: string) => {
+    const { error } = await supabase.from("user_role_history").delete().eq("id", hid);
+    if (error) return toast.error(error.message);
+    await load();
+  };
+
+
 
   const startDM = async () => {
     if (!user || isMe) return;
@@ -214,6 +241,57 @@ function ProfilePage() {
             </>
           )}
         </div>
+      </div>
+
+      <div className="rounded-xl border bg-card p-4 shadow-sm">
+        <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-muted-foreground">Histórico de cargos</h2>
+        {history.length === 0 ? (
+          <p className="text-sm text-muted-foreground">Nenhum cargo registrado.</p>
+        ) : (
+          <ul className="space-y-2">
+            {history.map((h) => (
+              <li key={h.id} className="flex items-center justify-between gap-3 rounded-md border bg-background px-3 py-2 text-sm">
+                <div className="flex flex-wrap items-center gap-2">
+                  <span className={`rounded-md px-2 py-0.5 text-xs font-medium ${h.scope === "district" ? "bg-primary/10 text-primary" : "bg-accent text-accent-foreground"}`}>
+                    {h.scope === "district" ? "Distrito" : "Clube"}
+                  </span>
+                  <span className="font-medium">{h.role_name}</span>
+                  <span className="text-muted-foreground">
+                    {h.start_year}{h.end_year ? ` – ${h.end_year}` : " – atual"}
+                  </span>
+                </div>
+                {isMe && (
+                  <Button variant="ghost" size="sm" onClick={() => removeHistory(h.id)}>Remover</Button>
+                )}
+              </li>
+            ))}
+          </ul>
+        )}
+        {isMe && (
+          <div className="mt-4 grid grid-cols-1 gap-2 border-t pt-4 sm:grid-cols-[120px_1fr_100px_100px_auto]">
+            <select
+              className="h-10 rounded-md border border-input bg-background px-3 text-sm"
+              value={newHist.scope}
+              onChange={(e) => setNewHist({ ...newHist, scope: e.target.value as "club" | "district", role_name: "" })}
+            >
+              <option value="club">Clube</option>
+              <option value="district">Distrito</option>
+            </select>
+            <select
+              className="h-10 rounded-md border border-input bg-background px-3 text-sm"
+              value={newHist.role_name}
+              onChange={(e) => setNewHist({ ...newHist, role_name: e.target.value })}
+            >
+              <option value="">Selecione o cargo</option>
+              {(newHist.scope === "club" ? clubRoles : districtRoles).map((r) => (
+                <option key={r.id} value={r.name}>{r.name}</option>
+              ))}
+            </select>
+            <Input type="number" placeholder="Início" value={newHist.start_year} onChange={(e) => setNewHist({ ...newHist, start_year: e.target.value })} />
+            <Input type="number" placeholder="Fim" value={newHist.end_year} onChange={(e) => setNewHist({ ...newHist, end_year: e.target.value })} />
+            <Button onClick={addHistory}>Adicionar</Button>
+          </div>
+        )}
       </div>
 
       <h2 className="px-1 text-sm font-semibold uppercase tracking-wide text-muted-foreground">Publicações</h2>
