@@ -63,7 +63,7 @@ function ClubsPage() {
     const payload = {
       name: form.name.trim(),
       city: form.city.trim(),
-      district: form.district.trim(),
+      district: "LC-11",
       founded_year: form.founded_year ? Number(form.founded_year) : null,
       description: form.description.trim(),
     };
