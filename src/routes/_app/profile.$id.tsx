@@ -30,8 +30,8 @@ function ProfilePage() {
   const [form, setForm] = useState({ full_name: "", bio: "", club_name: "", city: "", role_in_club: "", role_in_district: "", avatar_url: "" });
   const [districtRoles, setDistrictRoles] = useState<{ id: string; name: string }[]>([]);
   const [clubRoles, setClubRoles] = useState<{ id: string; name: string }[]>([]);
-  const [history, setHistory] = useState<Array<{ id: string; scope: string; role_name: string; start_year: number; end_year: number | null }>>([]);
-  const [newHist, setNewHist] = useState<{ scope: "club" | "district"; role_name: string; start_year: string; end_year: string }>({ scope: "club", role_name: "", start_year: String(new Date().getFullYear()), end_year: "" });
+  const [history, setHistory] = useState<Array<{ id: string; scope: string; role_name: string; start_date: string; end_date: string | null }>>([]);
+  const [newHist, setNewHist] = useState<{ scope: "club" | "district"; role_name: string; start_date: string; end_date: string }>({ scope: "club", role_name: "", start_date: "", end_date: "" });
   const isMe = user?.id === id;
 
   const load = useCallback(async () => {
@@ -46,7 +46,7 @@ function ProfilePage() {
     const [{ data: dr }, { data: cr }, { data: hist }] = await Promise.all([
       supabase.from("district_roles").select("id, name").order("name"),
       supabase.from("club_roles").select("id, name").order("name"),
-      supabase.from("user_role_history").select("id, scope, role_name, start_year, end_year").eq("user_id", id).order("start_year", { ascending: false }),
+      supabase.from("user_role_history").select("id, scope, role_name, start_date, end_date").eq("user_id", id).order("start_date", { ascending: false }),
     ]);
     setDistrictRoles(dr ?? []);
     setClubRoles(cr ?? []);
@@ -95,16 +95,15 @@ function ProfilePage() {
 
   const addHistory = async () => {
     if (!user) return;
-    const sy = parseInt(newHist.start_year, 10);
-    const ey = newHist.end_year ? parseInt(newHist.end_year, 10) : null;
-    if (!newHist.role_name || !sy) return toast.error("Preencha cargo e ano inicial");
-    if (ey && ey < sy) return toast.error("Ano final deve ser maior ou igual ao inicial");
+    if (!newHist.role_name || !newHist.start_date) return toast.error("Preencha cargo e data inicial");
+    if (newHist.end_date && newHist.end_date < newHist.start_date) return toast.error("Data final deve ser maior ou igual à inicial");
     const { error } = await supabase.from("user_role_history").insert({
-      user_id: id, scope: newHist.scope, role_name: newHist.role_name, start_year: sy, end_year: ey,
+      user_id: id, scope: newHist.scope, role_name: newHist.role_name,
+      start_date: newHist.start_date, end_date: newHist.end_date || null,
     });
     if (error) return toast.error(error.message);
     toast.success("Período adicionado");
-    setNewHist({ scope: "club", role_name: "", start_year: String(new Date().getFullYear()), end_year: "" });
+    setNewHist({ scope: "club", role_name: "", start_date: "", end_date: "" });
     await load();
   };
 
@@ -257,7 +256,7 @@ function ProfilePage() {
                   </span>
                   <span className="font-medium">{h.role_name}</span>
                   <span className="text-muted-foreground">
-                    {h.start_year}{h.end_year ? ` – ${h.end_year}` : " – atual"}
+                    {new Date(h.start_date).toLocaleDateString("pt-BR")}{h.end_date ? ` – ${new Date(h.end_date).toLocaleDateString("pt-BR")}` : " – atual"}
                   </span>
                 </div>
                 {isMe && (
@@ -268,7 +267,7 @@ function ProfilePage() {
           </ul>
         )}
         {isMe && (
-          <div className="mt-4 grid grid-cols-1 gap-2 border-t pt-4 sm:grid-cols-[120px_1fr_100px_100px_auto]">
+          <div className="mt-4 grid grid-cols-1 gap-2 border-t pt-4 sm:grid-cols-[120px_1fr_160px_160px_auto]">
             <select
               className="h-10 rounded-md border border-input bg-background px-3 text-sm"
               value={newHist.scope}
@@ -287,8 +286,8 @@ function ProfilePage() {
                 <option key={r.id} value={r.name}>{r.name}</option>
               ))}
             </select>
-            <Input type="number" placeholder="Início" value={newHist.start_year} onChange={(e) => setNewHist({ ...newHist, start_year: e.target.value })} />
-            <Input type="number" placeholder="Fim" value={newHist.end_year} onChange={(e) => setNewHist({ ...newHist, end_year: e.target.value })} />
+            <Input type="date" placeholder="Data inicial" value={newHist.start_date} onChange={(e) => setNewHist({ ...newHist, start_date: e.target.value })} />
+            <Input type="date" placeholder="Data final" value={newHist.end_date} onChange={(e) => setNewHist({ ...newHist, end_date: e.target.value })} />
             <Button onClick={addHistory}>Adicionar</Button>
           </div>
         )}
