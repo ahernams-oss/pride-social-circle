@@ -29,6 +29,7 @@ function ProfilePage() {
   const [uploading, setUploading] = useState(false);
   const [form, setForm] = useState({ full_name: "", bio: "", club_name: "", city: "", role_in_club: "", role_in_district: "", avatar_url: "" });
   const [districtRoles, setDistrictRoles] = useState<{ id: string; name: string }[]>([]);
+  const [clubRoles, setClubRoles] = useState<{ id: string; name: string }[]>([]);
   const isMe = user?.id === id;
 
   const load = useCallback(async () => {
@@ -40,8 +41,12 @@ function ProfilePage() {
       avatar_url: p.avatar_url ?? "",
     });
 
-    const { data: dr } = await supabase.from("district_roles").select("id, name").order("name");
+    const [{ data: dr }, { data: cr }] = await Promise.all([
+      supabase.from("district_roles").select("id, name").order("name"),
+      supabase.from("club_roles").select("id, name").order("name"),
+    ]);
     setDistrictRoles(dr ?? []);
+    setClubRoles(cr ?? []);
 
     const { data: rows } = await supabase
       .from("posts").select("id, author_id, content, image_url, created_at")
@@ -167,7 +172,19 @@ function ProfilePage() {
                 <div><Label>Clube</Label><Input value={form.club_name} onChange={(e) => setForm({ ...form, club_name: e.target.value })} /></div>
                 <div><Label>Cidade</Label><Input value={form.city} onChange={(e) => setForm({ ...form, city: e.target.value })} /></div>
               </div>
-              <div><Label>Cargo no clube</Label><Input value={form.role_in_club} onChange={(e) => setForm({ ...form, role_in_club: e.target.value })} placeholder="Presidente, Secretário..." /></div>
+              <div>
+                <Label>Cargo no clube</Label>
+                <select
+                  className="mt-1 flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+                  value={form.role_in_club}
+                  onChange={(e) => setForm({ ...form, role_in_club: e.target.value })}
+                >
+                  <option value="">Nenhum</option>
+                  {clubRoles.map((r) => (
+                    <option key={r.id} value={r.name}>{r.name}</option>
+                  ))}
+                </select>
+              </div>
               <div>
                 <Label>Cargo no Distrito</Label>
                 <select
