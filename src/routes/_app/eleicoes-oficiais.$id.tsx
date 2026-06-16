@@ -1,0 +1,389 @@
+import { createFileRoute, useParams, Link } from "@tanstack/react-router";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/lib/auth-context";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Badge } from "@/components/ui/badge";
+import { Card, CardContent } from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Progress } from "@/components/ui/progress";
+import { Plus, Play, Square, CheckCircle2, Copy, ShieldAlert, Trash2, Gavel } from "lucide-react";
+import { toast } from "sonner";
+
+export const Route = createFileRoute("/_app/eleicoes-oficiais/$id")({ component: Page });
+
+type Status = "configurando" | "credenciamento" | "votacao_aberta" | "votacao_encerrada" | "apurada";
+type Eleicao = { id: string; titulo: string; descricao: string | null; distrito: string | null; data_eleicao: string; status: Status };
+type Candidatura = { id: string; nome: string; cargo: string; numero: string | null; proposta: string | null; status: string };
+type Delegado = {
+  id: string; nome: string; clube: string | null; tipo: "titular" | "suplente" | "nato";
+  codigo_acesso: string; credenciado: boolean; presente: boolean; habilitado_votar: boolean; ja_votou: boolean;
+};
+type Comissao = { id: string; nome: string; funcao: "presidente" | "vice_presidente" | "membro" | "vogal" };
+type Apuracao = { cargo: string; candidatura_id: string | null; candidato: string; tipo: string; votos: number };
+
+const STATUS_LABEL: Record<Status, string> = {
+  configurando: "Configurando", credenciamento: "Credenciamento",
+  votacao_aberta: "Votação aberta", votacao_encerrada: "Encerrada", apurada: "Apurada",
+};
+
+function genCodigo() {
+  return Math.random().toString(36).slice(2, 8).toUpperCase() + "-" + Math.random().toString(36).slice(2, 6).toUpperCase();
+}
+
+function Page() {
+  const { id } = useParams({ from: "/_app/eleicoes-oficiais/$id" });
+  const { isAdmin } = useAuth();
+  const [eleicao, setEleicao] = useState<Eleicao | null>(null);
+  const [cands, setCands] = useState<Candidatura[]>([]);
+  const [dels, setDels] = useState<Delegado[]>([]);
+  const [com, setCom] = useState<Comissao[]>([]);
+  const [apur, setApur] = useState<Apuracao[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  const load = useCallback(async () => {
+    setLoading(true);
+    const [{ data: el }, { data: c }, { data: d }, { data: m }] = await Promise.all([
+      supabase.from("vf_eleicoes").select("*").eq("id", id).maybeSingle(),
+      supabase.from("vf_candidaturas").select("*").eq("eleicao_id", id).order("cargo"),
+      supabase.from("vf_delegados").select("*").eq("eleicao_id", id).order("nome"),
+      supabase.from("vf_comissao").select("*").eq("eleicao_id", id).order("funcao"),
+    ]);
+    setEleicao(el as Eleicao | null);
+    setCands((c ?? []) as Candidatura[]);
+    setDels((d ?? []) as Delegado[]);
+    setCom((m ?? []) as Comissao[]);
+    const { data: ap } = await supabase.rpc("vf_apuracao", { _eleicao_id: id });
+    setApur((ap ?? []) as any);
+    setLoading(false);
+  }, [id]);
+  useEffect(() => { load(); }, [load]);
+
+  useEffect(() => {
+    const ch = supabase.channel(`vf-${id}`)
+      .on("postgres_changes", { event: "*", schema: "public", table: "vf_votos", filter: `eleicao_id=eq.${id}` }, load)
+      .subscribe();
+    return () => { supabase.removeChannel(ch); };
+  }, [id, load]);
+
+  const setStatus = async (s: Status) => {
+    const { error } = await supabase.from("vf_eleicoes").update({ status: s }).eq("id", id);
+    if (error) return toast.error(error.message);
+    toast.success("Status atualizado");
+    load();
+  };
+
+  if (loading) return <p className="text-sm text-muted-foreground">Carregando...</p>;
+  if (!eleicao) return <Card><CardContent className="py-10 text-center text-sm">Eleição não encontrada.</CardContent></Card>;
+
+  return (
+    <div className="space-y-4">
+      <Link to="/eleicoes-oficiais" className="text-xs text-muted-foreground hover:underline">← Voltar</Link>
+      <div className="flex flex-wrap items-start justify-between gap-3">
+        <div>
+          <h1 className="flex items-center gap-2 text-2xl font-bold"><Gavel className="h-6 w-6 text-primary" /> {eleicao.titulo}</h1>
+          <p className="text-sm text-muted-foreground">
+            {eleicao.distrito ? `${eleicao.distrito} · ` : ""}{new Date(eleicao.data_eleicao).toLocaleDateString("pt-BR")}
+          </p>
+          {eleicao.descricao && <p className="mt-2 max-w-2xl text-sm">{eleicao.descricao}</p>}
+        </div>
+        <Badge className="text-sm">{STATUS_LABEL[eleicao.status]}</Badge>
+      </div>
+
+      {isAdmin && (
+        <div className="flex flex-wrap gap-2">
+          {eleicao.status === "configurando" && (
+            <Button size="sm" variant="outline" onClick={() => setStatus("credenciamento")}>Abrir credenciamento</Button>
+          )}
+          {eleicao.status === "credenciamento" && (
+            <Button size="sm" onClick={() => setStatus("votacao_aberta")}><Play className="mr-2 h-4 w-4" /> Abrir votação</Button>
+          )}
+          {eleicao.status === "votacao_aberta" && (
+            <Button size="sm" variant="secondary" onClick={() => setStatus("votacao_encerrada")}><Square className="mr-2 h-4 w-4" /> Encerrar votação</Button>
+          )}
+          {eleicao.status === "votacao_encerrada" && (
+            <Button size="sm" onClick={() => setStatus("apurada")}><CheckCircle2 className="mr-2 h-4 w-4" /> Marcar como apurada</Button>
+          )}
+        </div>
+      )}
+
+      <Tabs defaultValue="candidaturas">
+        <TabsList>
+          <TabsTrigger value="candidaturas">Candidaturas</TabsTrigger>
+          <TabsTrigger value="delegados">Delegados</TabsTrigger>
+          <TabsTrigger value="comissao">Comissão</TabsTrigger>
+          <TabsTrigger value="apuracao">Apuração</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="candidaturas" className="space-y-3 pt-4">
+          {isAdmin && <NewCandidatura eleicaoId={id} onCreated={load} />}
+          <CandidaturasList items={cands} isAdmin={isAdmin} onChanged={load} />
+        </TabsContent>
+
+        <TabsContent value="delegados" className="space-y-3 pt-4">
+          {isAdmin && <NewDelegado eleicaoId={id} onCreated={load} />}
+          <DelegadosList items={dels} isAdmin={isAdmin} onChanged={load} />
+        </TabsContent>
+
+        <TabsContent value="comissao" className="space-y-3 pt-4">
+          {isAdmin && <NewComissao eleicaoId={id} onCreated={load} />}
+          <ComissaoList items={com} isAdmin={isAdmin} onChanged={load} />
+        </TabsContent>
+
+        <TabsContent value="apuracao" className="pt-4">
+          <ApuracaoView items={apur} status={eleicao.status} />
+        </TabsContent>
+      </Tabs>
+    </div>
+  );
+}
+
+function NewCandidatura({ eleicaoId, onCreated }: { eleicaoId: string; onCreated: () => void }) {
+  const [open, setOpen] = useState(false);
+  const [f, setF] = useState({ nome: "", cargo: "", numero: "", proposta: "" });
+  const save = async () => {
+    if (!f.nome || !f.cargo) return toast.error("Nome e cargo são obrigatórios");
+    const { error } = await supabase.from("vf_candidaturas").insert({
+      eleicao_id: eleicaoId, nome: f.nome, cargo: f.cargo, numero: f.numero || null, proposta: f.proposta || null,
+    } as any);
+    if (error) return toast.error(error.message);
+    toast.success("Candidatura cadastrada");
+    setF({ nome: "", cargo: "", numero: "", proposta: "" });
+    setOpen(false);
+    onCreated();
+  };
+  return (
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild><Button size="sm"><Plus className="mr-2 h-4 w-4" /> Nova candidatura</Button></DialogTrigger>
+      <DialogContent>
+        <DialogHeader><DialogTitle>Nova candidatura</DialogTitle></DialogHeader>
+        <div className="space-y-3">
+          <div><Label>Nome</Label><Input value={f.nome} onChange={(e) => setF({ ...f, nome: e.target.value })} /></div>
+          <div><Label>Cargo</Label><Input placeholder="Ex: Governador" value={f.cargo} onChange={(e) => setF({ ...f, cargo: e.target.value })} /></div>
+          <div><Label>Número (opcional)</Label><Input value={f.numero} onChange={(e) => setF({ ...f, numero: e.target.value })} /></div>
+          <div><Label>Proposta</Label><Textarea value={f.proposta} onChange={(e) => setF({ ...f, proposta: e.target.value })} /></div>
+        </div>
+        <DialogFooter><Button onClick={save}>Salvar</Button></DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+function CandidaturasList({ items, isAdmin, onChanged }: { items: Candidatura[]; isAdmin: boolean; onChanged: () => void }) {
+  const remove = async (id: string) => {
+    if (!confirm("Excluir candidatura?")) return;
+    const { error } = await supabase.from("vf_candidaturas").delete().eq("id", id);
+    if (error) return toast.error(error.message);
+    onChanged();
+  };
+  const grouped = useMemo(() => {
+    const m = new Map<string, Candidatura[]>();
+    items.forEach((c) => { const arr = m.get(c.cargo) ?? []; arr.push(c); m.set(c.cargo, arr); });
+    return Array.from(m.entries());
+  }, [items]);
+  if (items.length === 0) return <p className="text-sm text-muted-foreground">Nenhuma candidatura.</p>;
+  return (
+    <div className="space-y-4">
+      {grouped.map(([cargo, list]) => (
+        <div key={cargo} className="space-y-2">
+          <h3 className="text-sm font-semibold text-muted-foreground">{cargo}</h3>
+          <div className="grid gap-2 sm:grid-cols-2">
+            {list.map((c) => (
+              <Card key={c.id}><CardContent className="flex items-start justify-between gap-2 py-3">
+                <div>
+                  <div className="font-medium">{c.numero ? `${c.numero} — ` : ""}{c.nome}</div>
+                  {c.proposta && <p className="mt-1 line-clamp-2 text-xs text-muted-foreground">{c.proposta}</p>}
+                </div>
+                {isAdmin && <Button size="icon" variant="ghost" onClick={() => remove(c.id)}><Trash2 className="h-4 w-4" /></Button>}
+              </CardContent></Card>
+            ))}
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function NewDelegado({ eleicaoId, onCreated }: { eleicaoId: string; onCreated: () => void }) {
+  const [open, setOpen] = useState(false);
+  const [f, setF] = useState({ nome: "", clube: "", tipo: "titular" as "titular" | "suplente" | "nato" });
+  const save = async () => {
+    if (!f.nome) return toast.error("Nome é obrigatório");
+    const { error } = await supabase.from("vf_delegados").insert({
+      eleicao_id: eleicaoId, nome: f.nome, clube: f.clube || null, tipo: f.tipo, codigo_acesso: genCodigo(),
+    } as any);
+    if (error) return toast.error(error.message);
+    toast.success("Delegado cadastrado");
+    setF({ nome: "", clube: "", tipo: "titular" });
+    setOpen(false); onCreated();
+  };
+  return (
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild><Button size="sm"><Plus className="mr-2 h-4 w-4" /> Novo delegado</Button></DialogTrigger>
+      <DialogContent>
+        <DialogHeader><DialogTitle>Novo delegado</DialogTitle></DialogHeader>
+        <div className="space-y-3">
+          <div><Label>Nome</Label><Input value={f.nome} onChange={(e) => setF({ ...f, nome: e.target.value })} /></div>
+          <div><Label>Clube</Label><Input value={f.clube} onChange={(e) => setF({ ...f, clube: e.target.value })} /></div>
+          <div><Label>Tipo</Label>
+            <Select value={f.tipo} onValueChange={(v: any) => setF({ ...f, tipo: v })}>
+              <SelectTrigger><SelectValue /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="titular">Titular</SelectItem>
+                <SelectItem value="suplente">Suplente</SelectItem>
+                <SelectItem value="nato">Nato</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
+        <DialogFooter><Button onClick={save}>Salvar</Button></DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+function DelegadosList({ items, isAdmin, onChanged }: { items: Delegado[]; isAdmin: boolean; onChanged: () => void }) {
+  const toggle = async (id: string, field: "credenciado" | "presente" | "habilitado_votar", val: boolean) => {
+    const { error } = await supabase.from("vf_delegados").update({ [field]: val } as any).eq("id", id);
+    if (error) return toast.error(error.message);
+    onChanged();
+  };
+  const remove = async (id: string) => {
+    if (!confirm("Remover delegado?")) return;
+    const { error } = await supabase.from("vf_delegados").delete().eq("id", id);
+    if (error) return toast.error(error.message);
+    onChanged();
+  };
+  if (items.length === 0) return <p className="text-sm text-muted-foreground">Nenhum delegado.</p>;
+  return (
+    <div className="space-y-2">
+      {items.map((d) => (
+        <Card key={d.id}><CardContent className="flex flex-wrap items-center justify-between gap-3 py-3">
+          <div className="min-w-0 flex-1">
+            <div className="font-medium">{d.nome} <Badge variant="outline" className="ml-2 text-[10px]">{d.tipo}</Badge></div>
+            <div className="text-xs text-muted-foreground">{d.clube ?? "—"}</div>
+            <div className="mt-1 flex items-center gap-2">
+              <code className="rounded bg-muted px-2 py-0.5 text-xs font-mono">{d.codigo_acesso}</code>
+              <Button size="icon" variant="ghost" className="h-6 w-6"
+                onClick={() => { navigator.clipboard.writeText(d.codigo_acesso); toast.success("Código copiado"); }}>
+                <Copy className="h-3 w-3" />
+              </Button>
+            </div>
+          </div>
+          <div className="flex flex-wrap items-center gap-2">
+            {d.ja_votou && <Badge variant="secondary">Já votou</Badge>}
+            {isAdmin && (
+              <>
+                <Button size="sm" variant={d.credenciado ? "default" : "outline"} onClick={() => toggle(d.id, "credenciado", !d.credenciado)}>Credenciado</Button>
+                <Button size="sm" variant={d.presente ? "default" : "outline"} onClick={() => toggle(d.id, "presente", !d.presente)}>Presente</Button>
+                <Button size="sm" variant={d.habilitado_votar ? "default" : "outline"} onClick={() => toggle(d.id, "habilitado_votar", !d.habilitado_votar)}>Habilitado</Button>
+                <Button size="icon" variant="ghost" onClick={() => remove(d.id)}><Trash2 className="h-4 w-4" /></Button>
+              </>
+            )}
+          </div>
+        </CardContent></Card>
+      ))}
+    </div>
+  );
+}
+
+function NewComissao({ eleicaoId, onCreated }: { eleicaoId: string; onCreated: () => void }) {
+  const [open, setOpen] = useState(false);
+  const [f, setF] = useState({ nome: "", funcao: "membro" as Comissao["funcao"] });
+  const save = async () => {
+    if (!f.nome) return toast.error("Nome é obrigatório");
+    const { error } = await supabase.from("vf_comissao").insert({
+      eleicao_id: eleicaoId, nome: f.nome, funcao: f.funcao,
+    } as any);
+    if (error) return toast.error(error.message);
+    toast.success("Membro adicionado");
+    setF({ nome: "", funcao: "membro" });
+    setOpen(false); onCreated();
+  };
+  return (
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild><Button size="sm"><Plus className="mr-2 h-4 w-4" /> Membro</Button></DialogTrigger>
+      <DialogContent>
+        <DialogHeader><DialogTitle>Membro da comissão</DialogTitle></DialogHeader>
+        <div className="space-y-3">
+          <div><Label>Nome</Label><Input value={f.nome} onChange={(e) => setF({ ...f, nome: e.target.value })} /></div>
+          <div><Label>Função</Label>
+            <Select value={f.funcao} onValueChange={(v: any) => setF({ ...f, funcao: v })}>
+              <SelectTrigger><SelectValue /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="presidente">Presidente</SelectItem>
+                <SelectItem value="vice_presidente">Vice-presidente</SelectItem>
+                <SelectItem value="membro">Membro</SelectItem>
+                <SelectItem value="vogal">Vogal</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
+        <DialogFooter><Button onClick={save}>Salvar</Button></DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+function ComissaoList({ items, isAdmin, onChanged }: { items: Comissao[]; isAdmin: boolean; onChanged: () => void }) {
+  const remove = async (id: string) => {
+    if (!confirm("Remover?")) return;
+    const { error } = await supabase.from("vf_comissao").delete().eq("id", id);
+    if (error) return toast.error(error.message);
+    onChanged();
+  };
+  if (items.length === 0) return <p className="text-sm text-muted-foreground">Nenhum membro.</p>;
+  return (
+    <div className="grid gap-2 sm:grid-cols-2">
+      {items.map((m) => (
+        <Card key={m.id}><CardContent className="flex items-center justify-between py-3">
+          <div><div className="font-medium">{m.nome}</div><div className="text-xs text-muted-foreground capitalize">{m.funcao.replace("_", " ")}</div></div>
+          {isAdmin && <Button size="icon" variant="ghost" onClick={() => remove(m.id)}><Trash2 className="h-4 w-4" /></Button>}
+        </CardContent></Card>
+      ))}
+    </div>
+  );
+}
+
+function ApuracaoView({ items, status }: { items: Apuracao[]; status: Status }) {
+  if (status !== "votacao_encerrada" && status !== "apurada") {
+    return (
+      <Card><CardContent className="flex items-center gap-3 py-6">
+        <ShieldAlert className="h-5 w-5 text-muted-foreground" />
+        <p className="text-sm text-muted-foreground">Apuração disponível apenas para administradores enquanto a eleição não estiver encerrada.</p>
+      </CardContent></Card>
+    );
+  }
+  if (items.length === 0) return <p className="text-sm text-muted-foreground">Nenhum voto registrado.</p>;
+  const grouped = new Map<string, Apuracao[]>();
+  items.forEach((i) => { const a = grouped.get(i.cargo) ?? []; a.push(i); grouped.set(i.cargo, a); });
+  return (
+    <div className="space-y-4">
+      {Array.from(grouped.entries()).map(([cargo, list]) => {
+        const total = list.reduce((s, x) => s + Number(x.votos), 0);
+        return (
+          <Card key={cargo}><CardContent className="space-y-3 py-4">
+            <h3 className="font-semibold">{cargo} <span className="text-xs font-normal text-muted-foreground">({total} votos)</span></h3>
+            {list.map((x, idx) => {
+              const pct = total ? (Number(x.votos) / total) * 100 : 0;
+              return (
+                <div key={idx} className="space-y-1">
+                  <div className="flex items-center justify-between text-sm">
+                    <span>{x.candidato}</span>
+                    <span className="text-muted-foreground">{x.votos} · {pct.toFixed(1)}%</span>
+                  </div>
+                  <Progress value={pct} />
+                </div>
+              );
+            })}
+          </CardContent></Card>
+        );
+      })}
+    </div>
+  );
+}

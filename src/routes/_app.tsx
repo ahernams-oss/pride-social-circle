@@ -5,7 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Home, MessageCircle, Bell, Shield, LogOut, User as UserIcon, Users, Users2, Building2, Trophy, Calendar, Target, Landmark, Award, BadgeCheck, Globe, FileText, Vote, Monitor } from "lucide-react";
+import { Home, MessageCircle, Bell, Shield, LogOut, User as UserIcon, Users, Users2, Building2, Trophy, Calendar, Target, Landmark, Award, BadgeCheck, Globe, FileText, Vote, Monitor, Gavel } from "lucide-react";
 import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
@@ -322,6 +322,28 @@ function AppLayout() {
                 Kiosk de Votação
               </Link>
             )}
+            <Link
+              to="/eleicoes-oficiais"
+              className={`flex items-center gap-3 rounded-lg px-2 py-2 text-sm font-medium transition-colors ${
+                loc.pathname.startsWith("/eleicoes-oficiais") ? "bg-primary/10 text-primary" : "text-foreground hover:bg-muted"
+              }`}
+            >
+              <span className="flex h-10 w-10 items-center justify-center rounded-full bg-muted">
+                <Gavel className="h-5 w-5" />
+              </span>
+              Eleições Oficiais
+            </Link>
+            <Link
+              to="/votar-eleicao"
+              className={`flex items-center gap-3 rounded-lg px-2 py-2 text-sm font-medium transition-colors ${
+                loc.pathname.startsWith("/votar-eleicao") ? "bg-primary/10 text-primary" : "text-foreground hover:bg-muted"
+              }`}
+            >
+              <span className="flex h-10 w-10 items-center justify-center rounded-full bg-muted">
+                <Vote className="h-5 w-5" />
+              </span>
+              Votar (delegado)
+            </Link>
           </div>
         </aside>
         <main className="min-w-0">

@@ -14,6 +14,7 @@ import { Route as PendingRouteImport } from './routes/pending'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as AppRouteImport } from './routes/_app'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AppVotarEleicaoRouteImport } from './routes/_app/votar-eleicao'
 import { Route as AppRankingRouteImport } from './routes/_app/ranking'
 import { Route as AppNotificationsRouteImport } from './routes/_app/notifications'
 import { Route as AppMissionsRouteImport } from './routes/_app/missions'
@@ -23,6 +24,7 @@ import { Route as AppGroupsRouteImport } from './routes/_app/groups'
 import { Route as AppFriendsRouteImport } from './routes/_app/friends'
 import { Route as AppFeedRouteImport } from './routes/_app/feed'
 import { Route as AppEventsRouteImport } from './routes/_app/events'
+import { Route as AppEleicoesOficiaisRouteImport } from './routes/_app/eleicoes-oficiais'
 import { Route as AppElectionsRouteImport } from './routes/_app/elections'
 import { Route as AppDocumentsRouteImport } from './routes/_app/documents'
 import { Route as AppDistritoRouteImport } from './routes/_app/distrito'
@@ -32,6 +34,7 @@ import { Route as AppClubRolesRouteImport } from './routes/_app/club-roles'
 import { Route as AppAdminRouteImport } from './routes/_app/admin'
 import { Route as ApiPublicElectionsRouteImport } from './routes/api/public/elections'
 import { Route as AppProfileIdRouteImport } from './routes/_app/profile.$id'
+import { Route as AppEleicoesOficiaisIdRouteImport } from './routes/_app/eleicoes-oficiais.$id'
 import { Route as AppElectionsIdRouteImport } from './routes/_app/elections.$id'
 
 const SignupRoute = SignupRouteImport.update({
@@ -57,6 +60,11 @@ const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
+} as any)
+const AppVotarEleicaoRoute = AppVotarEleicaoRouteImport.update({
+  id: '/votar-eleicao',
+  path: '/votar-eleicao',
+  getParentRoute: () => AppRoute,
 } as any)
 const AppRankingRoute = AppRankingRouteImport.update({
   id: '/ranking',
@@ -101,6 +109,11 @@ const AppFeedRoute = AppFeedRouteImport.update({
 const AppEventsRoute = AppEventsRouteImport.update({
   id: '/events',
   path: '/events',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppEleicoesOficiaisRoute = AppEleicoesOficiaisRouteImport.update({
+  id: '/eleicoes-oficiais',
+  path: '/eleicoes-oficiais',
   getParentRoute: () => AppRoute,
 } as any)
 const AppElectionsRoute = AppElectionsRouteImport.update({
@@ -148,6 +161,11 @@ const AppProfileIdRoute = AppProfileIdRouteImport.update({
   path: '/profile/$id',
   getParentRoute: () => AppRoute,
 } as any)
+const AppEleicoesOficiaisIdRoute = AppEleicoesOficiaisIdRouteImport.update({
+  id: '/$id',
+  path: '/$id',
+  getParentRoute: () => AppEleicoesOficiaisRoute,
+} as any)
 const AppElectionsIdRoute = AppElectionsIdRouteImport.update({
   id: '/$id',
   path: '/$id',
@@ -166,6 +184,7 @@ export interface FileRoutesByFullPath {
   '/distrito': typeof AppDistritoRoute
   '/documents': typeof AppDocumentsRoute
   '/elections': typeof AppElectionsRouteWithChildren
+  '/eleicoes-oficiais': typeof AppEleicoesOficiaisRouteWithChildren
   '/events': typeof AppEventsRoute
   '/feed': typeof AppFeedRoute
   '/friends': typeof AppFriendsRoute
@@ -175,7 +194,9 @@ export interface FileRoutesByFullPath {
   '/missions': typeof AppMissionsRoute
   '/notifications': typeof AppNotificationsRoute
   '/ranking': typeof AppRankingRoute
+  '/votar-eleicao': typeof AppVotarEleicaoRoute
   '/elections/$id': typeof AppElectionsIdRoute
+  '/eleicoes-oficiais/$id': typeof AppEleicoesOficiaisIdRoute
   '/profile/$id': typeof AppProfileIdRoute
   '/api/public/elections': typeof ApiPublicElectionsRoute
 }
@@ -191,6 +212,7 @@ export interface FileRoutesByTo {
   '/distrito': typeof AppDistritoRoute
   '/documents': typeof AppDocumentsRoute
   '/elections': typeof AppElectionsRouteWithChildren
+  '/eleicoes-oficiais': typeof AppEleicoesOficiaisRouteWithChildren
   '/events': typeof AppEventsRoute
   '/feed': typeof AppFeedRoute
   '/friends': typeof AppFriendsRoute
@@ -200,7 +222,9 @@ export interface FileRoutesByTo {
   '/missions': typeof AppMissionsRoute
   '/notifications': typeof AppNotificationsRoute
   '/ranking': typeof AppRankingRoute
+  '/votar-eleicao': typeof AppVotarEleicaoRoute
   '/elections/$id': typeof AppElectionsIdRoute
+  '/eleicoes-oficiais/$id': typeof AppEleicoesOficiaisIdRoute
   '/profile/$id': typeof AppProfileIdRoute
   '/api/public/elections': typeof ApiPublicElectionsRoute
 }
@@ -218,6 +242,7 @@ export interface FileRoutesById {
   '/_app/distrito': typeof AppDistritoRoute
   '/_app/documents': typeof AppDocumentsRoute
   '/_app/elections': typeof AppElectionsRouteWithChildren
+  '/_app/eleicoes-oficiais': typeof AppEleicoesOficiaisRouteWithChildren
   '/_app/events': typeof AppEventsRoute
   '/_app/feed': typeof AppFeedRoute
   '/_app/friends': typeof AppFriendsRoute
@@ -227,7 +252,9 @@ export interface FileRoutesById {
   '/_app/missions': typeof AppMissionsRoute
   '/_app/notifications': typeof AppNotificationsRoute
   '/_app/ranking': typeof AppRankingRoute
+  '/_app/votar-eleicao': typeof AppVotarEleicaoRoute
   '/_app/elections/$id': typeof AppElectionsIdRoute
+  '/_app/eleicoes-oficiais/$id': typeof AppEleicoesOficiaisIdRoute
   '/_app/profile/$id': typeof AppProfileIdRoute
   '/api/public/elections': typeof ApiPublicElectionsRoute
 }
@@ -245,6 +272,7 @@ export interface FileRouteTypes {
     | '/distrito'
     | '/documents'
     | '/elections'
+    | '/eleicoes-oficiais'
     | '/events'
     | '/feed'
     | '/friends'
@@ -254,7 +282,9 @@ export interface FileRouteTypes {
     | '/missions'
     | '/notifications'
     | '/ranking'
+    | '/votar-eleicao'
     | '/elections/$id'
+    | '/eleicoes-oficiais/$id'
     | '/profile/$id'
     | '/api/public/elections'
   fileRoutesByTo: FileRoutesByTo
@@ -270,6 +300,7 @@ export interface FileRouteTypes {
     | '/distrito'
     | '/documents'
     | '/elections'
+    | '/eleicoes-oficiais'
     | '/events'
     | '/feed'
     | '/friends'
@@ -279,7 +310,9 @@ export interface FileRouteTypes {
     | '/missions'
     | '/notifications'
     | '/ranking'
+    | '/votar-eleicao'
     | '/elections/$id'
+    | '/eleicoes-oficiais/$id'
     | '/profile/$id'
     | '/api/public/elections'
   id:
@@ -296,6 +329,7 @@ export interface FileRouteTypes {
     | '/_app/distrito'
     | '/_app/documents'
     | '/_app/elections'
+    | '/_app/eleicoes-oficiais'
     | '/_app/events'
     | '/_app/feed'
     | '/_app/friends'
@@ -305,7 +339,9 @@ export interface FileRouteTypes {
     | '/_app/missions'
     | '/_app/notifications'
     | '/_app/ranking'
+    | '/_app/votar-eleicao'
     | '/_app/elections/$id'
+    | '/_app/eleicoes-oficiais/$id'
     | '/_app/profile/$id'
     | '/api/public/elections'
   fileRoutesById: FileRoutesById
@@ -355,6 +391,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/_app/votar-eleicao': {
+      id: '/_app/votar-eleicao'
+      path: '/votar-eleicao'
+      fullPath: '/votar-eleicao'
+      preLoaderRoute: typeof AppVotarEleicaoRouteImport
+      parentRoute: typeof AppRoute
     }
     '/_app/ranking': {
       id: '/_app/ranking'
@@ -417,6 +460,13 @@ declare module '@tanstack/react-router' {
       path: '/events'
       fullPath: '/events'
       preLoaderRoute: typeof AppEventsRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/eleicoes-oficiais': {
+      id: '/_app/eleicoes-oficiais'
+      path: '/eleicoes-oficiais'
+      fullPath: '/eleicoes-oficiais'
+      preLoaderRoute: typeof AppEleicoesOficiaisRouteImport
       parentRoute: typeof AppRoute
     }
     '/_app/elections': {
@@ -482,6 +532,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppProfileIdRouteImport
       parentRoute: typeof AppRoute
     }
+    '/_app/eleicoes-oficiais/$id': {
+      id: '/_app/eleicoes-oficiais/$id'
+      path: '/$id'
+      fullPath: '/eleicoes-oficiais/$id'
+      preLoaderRoute: typeof AppEleicoesOficiaisIdRouteImport
+      parentRoute: typeof AppEleicoesOficiaisRoute
+    }
     '/_app/elections/$id': {
       id: '/_app/elections/$id'
       path: '/$id'
@@ -504,6 +561,17 @@ const AppElectionsRouteWithChildren = AppElectionsRoute._addFileChildren(
   AppElectionsRouteChildren,
 )
 
+interface AppEleicoesOficiaisRouteChildren {
+  AppEleicoesOficiaisIdRoute: typeof AppEleicoesOficiaisIdRoute
+}
+
+const AppEleicoesOficiaisRouteChildren: AppEleicoesOficiaisRouteChildren = {
+  AppEleicoesOficiaisIdRoute: AppEleicoesOficiaisIdRoute,
+}
+
+const AppEleicoesOficiaisRouteWithChildren =
+  AppEleicoesOficiaisRoute._addFileChildren(AppEleicoesOficiaisRouteChildren)
+
 interface AppRouteChildren {
   AppAdminRoute: typeof AppAdminRoute
   AppClubRolesRoute: typeof AppClubRolesRoute
@@ -512,6 +580,7 @@ interface AppRouteChildren {
   AppDistritoRoute: typeof AppDistritoRoute
   AppDocumentsRoute: typeof AppDocumentsRoute
   AppElectionsRoute: typeof AppElectionsRouteWithChildren
+  AppEleicoesOficiaisRoute: typeof AppEleicoesOficiaisRouteWithChildren
   AppEventsRoute: typeof AppEventsRoute
   AppFeedRoute: typeof AppFeedRoute
   AppFriendsRoute: typeof AppFriendsRoute
@@ -521,6 +590,7 @@ interface AppRouteChildren {
   AppMissionsRoute: typeof AppMissionsRoute
   AppNotificationsRoute: typeof AppNotificationsRoute
   AppRankingRoute: typeof AppRankingRoute
+  AppVotarEleicaoRoute: typeof AppVotarEleicaoRoute
   AppProfileIdRoute: typeof AppProfileIdRoute
 }
 
@@ -532,6 +602,7 @@ const AppRouteChildren: AppRouteChildren = {
   AppDistritoRoute: AppDistritoRoute,
   AppDocumentsRoute: AppDocumentsRoute,
   AppElectionsRoute: AppElectionsRouteWithChildren,
+  AppEleicoesOficiaisRoute: AppEleicoesOficiaisRouteWithChildren,
   AppEventsRoute: AppEventsRoute,
   AppFeedRoute: AppFeedRoute,
   AppFriendsRoute: AppFriendsRoute,
@@ -541,6 +612,7 @@ const AppRouteChildren: AppRouteChildren = {
   AppMissionsRoute: AppMissionsRoute,
   AppNotificationsRoute: AppNotificationsRoute,
   AppRankingRoute: AppRankingRoute,
+  AppVotarEleicaoRoute: AppVotarEleicaoRoute,
   AppProfileIdRoute: AppProfileIdRoute,
 }
 
