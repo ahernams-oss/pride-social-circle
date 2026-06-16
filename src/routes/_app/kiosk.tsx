@@ -140,7 +140,7 @@ function KioskPage() {
           <CardContent className="space-y-3 py-5">
             <div className="flex items-center gap-2"><Badge>Sessão ativa</Badge><span className="text-sm text-muted-foreground">Aguardando próximo delegado</span></div>
             <Label><LogIn className="mr-1 inline h-4 w-4" /> Código de acesso do delegado</Label>
-            <Input value={codigo} onChange={(e) => setCodigo(e.target.value)} placeholder="XXXXXX-XXXX" autoComplete="off" />
+            <Input value={codigo} onChange={(e) => setCodigo(e.target.value)} placeholder="0000" autoComplete="off" />
             <Button onClick={entrar} disabled={busy || !codigo} className="w-full">{busy ? "Validando..." : "Entrar e votar"}</Button>
           </CardContent>
         </Card>

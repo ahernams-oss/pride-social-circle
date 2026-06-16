@@ -35,7 +35,7 @@ const STATUS_LABEL: Record<Status, string> = {
 };
 
 function genCodigo() {
-  return Math.random().toString(36).slice(2, 8).toUpperCase() + "-" + Math.random().toString(36).slice(2, 6).toUpperCase();
+  return Math.floor(1000 + Math.random() * 9000).toString();
 }
 
 function Page() {
