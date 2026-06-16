@@ -23,9 +23,11 @@ type Candidatura = { id: string; nome: string; cargo: string; numero: string | n
 type Delegado = {
   id: string; nome: string; clube: string | null; tipo: "titular" | "suplente" | "nato";
   codigo_acesso: string; credenciado: boolean; presente: boolean; habilitado_votar: boolean; ja_votou: boolean;
+  associado_id: string | null;
 };
 type Comissao = { id: string; nome: string; funcao: "presidente" | "vice_presidente" | "membro" | "vogal" };
 type Apuracao = { cargo: string; candidatura_id: string | null; candidato: string; tipo: string; votos: number };
+type Associado = { id: string; full_name: string; club_name: string | null };
 
 const STATUS_LABEL: Record<Status, string> = {
   configurando: "Configurando", credenciamento: "Credenciamento",
@@ -145,15 +147,21 @@ function Page() {
 
 function NewCandidatura({ eleicaoId, onCreated }: { eleicaoId: string; onCreated: () => void }) {
   const [open, setOpen] = useState(false);
-  const [f, setF] = useState({ nome: "", cargo: "", numero: "", proposta: "" });
+  const associados = useAssociados();
+  const [f, setF] = useState({ associado_id: "", nome: "", cargo: "", numero: "", proposta: "" });
+  const pick = (aid: string) => {
+    const a = associados.find((x) => x.id === aid);
+    setF({ ...f, associado_id: aid, nome: a?.full_name ?? f.nome });
+  };
   const save = async () => {
     if (!f.nome || !f.cargo) return toast.error("Nome e cargo são obrigatórios");
     const { error } = await supabase.from("vf_candidaturas").insert({
-      eleicao_id: eleicaoId, nome: f.nome, cargo: f.cargo, numero: f.numero || null, proposta: f.proposta || null,
+      eleicao_id: eleicaoId, associado_id: f.associado_id || null,
+      nome: f.nome, cargo: f.cargo, numero: f.numero || null, proposta: f.proposta || null,
     } as any);
     if (error) return toast.error(error.message);
     toast.success("Candidatura cadastrada");
-    setF({ nome: "", cargo: "", numero: "", proposta: "" });
+    setF({ associado_id: "", nome: "", cargo: "", numero: "", proposta: "" });
     setOpen(false);
     onCreated();
   };
@@ -163,6 +171,16 @@ function NewCandidatura({ eleicaoId, onCreated }: { eleicaoId: string; onCreated
       <DialogContent>
         <DialogHeader><DialogTitle>Nova candidatura</DialogTitle></DialogHeader>
         <div className="space-y-3">
+          <div><Label>Associado (opcional)</Label>
+            <Select value={f.associado_id} onValueChange={pick}>
+              <SelectTrigger><SelectValue placeholder="Selecionar associado..." /></SelectTrigger>
+              <SelectContent>
+                {associados.map((a) => (
+                  <SelectItem key={a.id} value={a.id}>{a.full_name}{a.club_name ? ` — ${a.club_name}` : ""}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
           <div><Label>Nome</Label><Input value={f.nome} onChange={(e) => setF({ ...f, nome: e.target.value })} /></div>
           <div><Label>Cargo</Label><Input placeholder="Ex: Governador" value={f.cargo} onChange={(e) => setF({ ...f, cargo: e.target.value })} /></div>
           <div><Label>Número (opcional)</Label><Input value={f.numero} onChange={(e) => setF({ ...f, numero: e.target.value })} /></div>
@@ -209,17 +227,32 @@ function CandidaturasList({ items, isAdmin, onChanged }: { items: Candidatura[];
   );
 }
 
+function useAssociados() {
+  const [list, setList] = useState<Associado[]>([]);
+  useEffect(() => {
+    supabase.from("profiles").select("id, full_name, club_name").eq("status", "approved").order("full_name")
+      .then(({ data }) => setList((data ?? []) as Associado[]));
+  }, []);
+  return list;
+}
+
 function NewDelegado({ eleicaoId, onCreated }: { eleicaoId: string; onCreated: () => void }) {
   const [open, setOpen] = useState(false);
-  const [f, setF] = useState({ nome: "", clube: "", tipo: "titular" as "titular" | "suplente" | "nato" });
+  const associados = useAssociados();
+  const [f, setF] = useState({ associado_id: "", nome: "", clube: "", tipo: "titular" as "titular" | "suplente" | "nato" });
+  const pick = (aid: string) => {
+    const a = associados.find((x) => x.id === aid);
+    setF({ ...f, associado_id: aid, nome: a?.full_name ?? "", clube: a?.club_name ?? "" });
+  };
   const save = async () => {
-    if (!f.nome) return toast.error("Nome é obrigatório");
+    if (!f.nome) return toast.error("Selecione um associado ou informe o nome");
     const { error } = await supabase.from("vf_delegados").insert({
-      eleicao_id: eleicaoId, nome: f.nome, clube: f.clube || null, tipo: f.tipo, codigo_acesso: genCodigo(),
+      eleicao_id: eleicaoId, associado_id: f.associado_id || null,
+      nome: f.nome, clube: f.clube || null, tipo: f.tipo, codigo_acesso: genCodigo(),
     } as any);
     if (error) return toast.error(error.message);
     toast.success("Delegado cadastrado");
-    setF({ nome: "", clube: "", tipo: "titular" });
+    setF({ associado_id: "", nome: "", clube: "", tipo: "titular" });
     setOpen(false); onCreated();
   };
   return (
@@ -228,6 +261,17 @@ function NewDelegado({ eleicaoId, onCreated }: { eleicaoId: string; onCreated: (
       <DialogContent>
         <DialogHeader><DialogTitle>Novo delegado</DialogTitle></DialogHeader>
         <div className="space-y-3">
+          <div><Label>Associado do sistema (recomendado)</Label>
+            <Select value={f.associado_id} onValueChange={pick}>
+              <SelectTrigger><SelectValue placeholder="Selecionar associado..." /></SelectTrigger>
+              <SelectContent>
+                {associados.map((a) => (
+                  <SelectItem key={a.id} value={a.id}>{a.full_name}{a.club_name ? ` — ${a.club_name}` : ""}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <p className="mt-1 text-xs text-muted-foreground">Vincular ao login permite votação remota com a conta do associado.</p>
+          </div>
           <div><Label>Nome</Label><Input value={f.nome} onChange={(e) => setF({ ...f, nome: e.target.value })} /></div>
           <div><Label>Clube</Label><Input value={f.clube} onChange={(e) => setF({ ...f, clube: e.target.value })} /></div>
           <div><Label>Tipo</Label>
