@@ -11,7 +11,7 @@ import { PostCard, type FeedPost } from "@/components/PostCard";
 import { MapPin, Building2, MessageCircle, Pencil } from "lucide-react";
 import { useNavigate } from "@tanstack/react-router";
 import { toast } from "sonner";
-import type { Profile } from "@/lib/auth-context";
+
 
 export const Route = createFileRoute("/_app/profile/$id")({ component: ProfilePage });
 
