@@ -18,17 +18,21 @@ import { Route as AppRankingRouteImport } from './routes/_app/ranking'
 import { Route as AppNotificationsRouteImport } from './routes/_app/notifications'
 import { Route as AppMissionsRouteImport } from './routes/_app/missions'
 import { Route as AppMessagesRouteImport } from './routes/_app/messages'
+import { Route as AppKioskRouteImport } from './routes/_app/kiosk'
 import { Route as AppGroupsRouteImport } from './routes/_app/groups'
 import { Route as AppFriendsRouteImport } from './routes/_app/friends'
 import { Route as AppFeedRouteImport } from './routes/_app/feed'
 import { Route as AppEventsRouteImport } from './routes/_app/events'
+import { Route as AppElectionsRouteImport } from './routes/_app/elections'
 import { Route as AppDocumentsRouteImport } from './routes/_app/documents'
 import { Route as AppDistritoRouteImport } from './routes/_app/distrito'
 import { Route as AppDistrictRolesRouteImport } from './routes/_app/district-roles'
 import { Route as AppClubsRouteImport } from './routes/_app/clubs'
 import { Route as AppClubRolesRouteImport } from './routes/_app/club-roles'
 import { Route as AppAdminRouteImport } from './routes/_app/admin'
+import { Route as ApiPublicElectionsRouteImport } from './routes/api/public/elections'
 import { Route as AppProfileIdRouteImport } from './routes/_app/profile.$id'
+import { Route as AppElectionsIdRouteImport } from './routes/_app/elections.$id'
 
 const SignupRoute = SignupRouteImport.update({
   id: '/signup',
@@ -74,6 +78,11 @@ const AppMessagesRoute = AppMessagesRouteImport.update({
   path: '/messages',
   getParentRoute: () => AppRoute,
 } as any)
+const AppKioskRoute = AppKioskRouteImport.update({
+  id: '/kiosk',
+  path: '/kiosk',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppGroupsRoute = AppGroupsRouteImport.update({
   id: '/groups',
   path: '/groups',
@@ -92,6 +101,11 @@ const AppFeedRoute = AppFeedRouteImport.update({
 const AppEventsRoute = AppEventsRouteImport.update({
   id: '/events',
   path: '/events',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppElectionsRoute = AppElectionsRouteImport.update({
+  id: '/elections',
+  path: '/elections',
   getParentRoute: () => AppRoute,
 } as any)
 const AppDocumentsRoute = AppDocumentsRouteImport.update({
@@ -124,10 +138,20 @@ const AppAdminRoute = AppAdminRouteImport.update({
   path: '/admin',
   getParentRoute: () => AppRoute,
 } as any)
+const ApiPublicElectionsRoute = ApiPublicElectionsRouteImport.update({
+  id: '/api/public/elections',
+  path: '/api/public/elections',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AppProfileIdRoute = AppProfileIdRouteImport.update({
   id: '/profile/$id',
   path: '/profile/$id',
   getParentRoute: () => AppRoute,
+} as any)
+const AppElectionsIdRoute = AppElectionsIdRouteImport.update({
+  id: '/$id',
+  path: '/$id',
+  getParentRoute: () => AppElectionsRoute,
 } as any)
 
 export interface FileRoutesByFullPath {
@@ -141,15 +165,19 @@ export interface FileRoutesByFullPath {
   '/district-roles': typeof AppDistrictRolesRoute
   '/distrito': typeof AppDistritoRoute
   '/documents': typeof AppDocumentsRoute
+  '/elections': typeof AppElectionsRouteWithChildren
   '/events': typeof AppEventsRoute
   '/feed': typeof AppFeedRoute
   '/friends': typeof AppFriendsRoute
   '/groups': typeof AppGroupsRoute
+  '/kiosk': typeof AppKioskRoute
   '/messages': typeof AppMessagesRoute
   '/missions': typeof AppMissionsRoute
   '/notifications': typeof AppNotificationsRoute
   '/ranking': typeof AppRankingRoute
+  '/elections/$id': typeof AppElectionsIdRoute
   '/profile/$id': typeof AppProfileIdRoute
+  '/api/public/elections': typeof ApiPublicElectionsRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -162,15 +190,19 @@ export interface FileRoutesByTo {
   '/district-roles': typeof AppDistrictRolesRoute
   '/distrito': typeof AppDistritoRoute
   '/documents': typeof AppDocumentsRoute
+  '/elections': typeof AppElectionsRouteWithChildren
   '/events': typeof AppEventsRoute
   '/feed': typeof AppFeedRoute
   '/friends': typeof AppFriendsRoute
   '/groups': typeof AppGroupsRoute
+  '/kiosk': typeof AppKioskRoute
   '/messages': typeof AppMessagesRoute
   '/missions': typeof AppMissionsRoute
   '/notifications': typeof AppNotificationsRoute
   '/ranking': typeof AppRankingRoute
+  '/elections/$id': typeof AppElectionsIdRoute
   '/profile/$id': typeof AppProfileIdRoute
+  '/api/public/elections': typeof ApiPublicElectionsRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -185,15 +217,19 @@ export interface FileRoutesById {
   '/_app/district-roles': typeof AppDistrictRolesRoute
   '/_app/distrito': typeof AppDistritoRoute
   '/_app/documents': typeof AppDocumentsRoute
+  '/_app/elections': typeof AppElectionsRouteWithChildren
   '/_app/events': typeof AppEventsRoute
   '/_app/feed': typeof AppFeedRoute
   '/_app/friends': typeof AppFriendsRoute
   '/_app/groups': typeof AppGroupsRoute
+  '/_app/kiosk': typeof AppKioskRoute
   '/_app/messages': typeof AppMessagesRoute
   '/_app/missions': typeof AppMissionsRoute
   '/_app/notifications': typeof AppNotificationsRoute
   '/_app/ranking': typeof AppRankingRoute
+  '/_app/elections/$id': typeof AppElectionsIdRoute
   '/_app/profile/$id': typeof AppProfileIdRoute
+  '/api/public/elections': typeof ApiPublicElectionsRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -208,15 +244,19 @@ export interface FileRouteTypes {
     | '/district-roles'
     | '/distrito'
     | '/documents'
+    | '/elections'
     | '/events'
     | '/feed'
     | '/friends'
     | '/groups'
+    | '/kiosk'
     | '/messages'
     | '/missions'
     | '/notifications'
     | '/ranking'
+    | '/elections/$id'
     | '/profile/$id'
+    | '/api/public/elections'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -229,15 +269,19 @@ export interface FileRouteTypes {
     | '/district-roles'
     | '/distrito'
     | '/documents'
+    | '/elections'
     | '/events'
     | '/feed'
     | '/friends'
     | '/groups'
+    | '/kiosk'
     | '/messages'
     | '/missions'
     | '/notifications'
     | '/ranking'
+    | '/elections/$id'
     | '/profile/$id'
+    | '/api/public/elections'
   id:
     | '__root__'
     | '/'
@@ -251,15 +295,19 @@ export interface FileRouteTypes {
     | '/_app/district-roles'
     | '/_app/distrito'
     | '/_app/documents'
+    | '/_app/elections'
     | '/_app/events'
     | '/_app/feed'
     | '/_app/friends'
     | '/_app/groups'
+    | '/_app/kiosk'
     | '/_app/messages'
     | '/_app/missions'
     | '/_app/notifications'
     | '/_app/ranking'
+    | '/_app/elections/$id'
     | '/_app/profile/$id'
+    | '/api/public/elections'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -268,6 +316,7 @@ export interface RootRouteChildren {
   LoginRoute: typeof LoginRoute
   PendingRoute: typeof PendingRoute
   SignupRoute: typeof SignupRoute
+  ApiPublicElectionsRoute: typeof ApiPublicElectionsRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -335,6 +384,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppMessagesRouteImport
       parentRoute: typeof AppRoute
     }
+    '/_app/kiosk': {
+      id: '/_app/kiosk'
+      path: '/kiosk'
+      fullPath: '/kiosk'
+      preLoaderRoute: typeof AppKioskRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/_app/groups': {
       id: '/_app/groups'
       path: '/groups'
@@ -361,6 +417,13 @@ declare module '@tanstack/react-router' {
       path: '/events'
       fullPath: '/events'
       preLoaderRoute: typeof AppEventsRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/elections': {
+      id: '/_app/elections'
+      path: '/elections'
+      fullPath: '/elections'
+      preLoaderRoute: typeof AppElectionsRouteImport
       parentRoute: typeof AppRoute
     }
     '/_app/documents': {
@@ -405,6 +468,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppAdminRouteImport
       parentRoute: typeof AppRoute
     }
+    '/api/public/elections': {
+      id: '/api/public/elections'
+      path: '/api/public/elections'
+      fullPath: '/api/public/elections'
+      preLoaderRoute: typeof ApiPublicElectionsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/_app/profile/$id': {
       id: '/_app/profile/$id'
       path: '/profile/$id'
@@ -412,8 +482,27 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppProfileIdRouteImport
       parentRoute: typeof AppRoute
     }
+    '/_app/elections/$id': {
+      id: '/_app/elections/$id'
+      path: '/$id'
+      fullPath: '/elections/$id'
+      preLoaderRoute: typeof AppElectionsIdRouteImport
+      parentRoute: typeof AppElectionsRoute
+    }
   }
 }
+
+interface AppElectionsRouteChildren {
+  AppElectionsIdRoute: typeof AppElectionsIdRoute
+}
+
+const AppElectionsRouteChildren: AppElectionsRouteChildren = {
+  AppElectionsIdRoute: AppElectionsIdRoute,
+}
+
+const AppElectionsRouteWithChildren = AppElectionsRoute._addFileChildren(
+  AppElectionsRouteChildren,
+)
 
 interface AppRouteChildren {
   AppAdminRoute: typeof AppAdminRoute
@@ -422,10 +511,12 @@ interface AppRouteChildren {
   AppDistrictRolesRoute: typeof AppDistrictRolesRoute
   AppDistritoRoute: typeof AppDistritoRoute
   AppDocumentsRoute: typeof AppDocumentsRoute
+  AppElectionsRoute: typeof AppElectionsRouteWithChildren
   AppEventsRoute: typeof AppEventsRoute
   AppFeedRoute: typeof AppFeedRoute
   AppFriendsRoute: typeof AppFriendsRoute
   AppGroupsRoute: typeof AppGroupsRoute
+  AppKioskRoute: typeof AppKioskRoute
   AppMessagesRoute: typeof AppMessagesRoute
   AppMissionsRoute: typeof AppMissionsRoute
   AppNotificationsRoute: typeof AppNotificationsRoute
@@ -440,10 +531,12 @@ const AppRouteChildren: AppRouteChildren = {
   AppDistrictRolesRoute: AppDistrictRolesRoute,
   AppDistritoRoute: AppDistritoRoute,
   AppDocumentsRoute: AppDocumentsRoute,
+  AppElectionsRoute: AppElectionsRouteWithChildren,
   AppEventsRoute: AppEventsRoute,
   AppFeedRoute: AppFeedRoute,
   AppFriendsRoute: AppFriendsRoute,
   AppGroupsRoute: AppGroupsRoute,
+  AppKioskRoute: AppKioskRoute,
   AppMessagesRoute: AppMessagesRoute,
   AppMissionsRoute: AppMissionsRoute,
   AppNotificationsRoute: AppNotificationsRoute,
@@ -459,6 +552,7 @@ const rootRouteChildren: RootRouteChildren = {
   LoginRoute: LoginRoute,
   PendingRoute: PendingRoute,
   SignupRoute: SignupRoute,
+  ApiPublicElectionsRoute: ApiPublicElectionsRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
