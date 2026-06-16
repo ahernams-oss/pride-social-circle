@@ -83,7 +83,7 @@ function Page() {
         <h1 className="flex items-center gap-2 text-2xl font-bold"><Vote className="h-6 w-6 text-primary" /> Votação Remota</h1>
         <Card><CardContent className="space-y-3 py-6">
           <Label>Código de acesso do delegado</Label>
-          <Input value={codigo} onChange={(e) => setCodigo(e.target.value)} placeholder="XXXXXX-XXXX" />
+          <Input value={codigo} onChange={(e) => setCodigo(e.target.value.replace(/\D/g, "").slice(0, 4))} placeholder="0000" inputMode="numeric" maxLength={4} />
           <Button disabled={busy || !codigo} onClick={entrar} className="w-full">Entrar</Button>
         </CardContent></Card>
       </div>
