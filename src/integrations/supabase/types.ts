@@ -438,16 +438,59 @@ export type Database = {
         }
         Relationships: []
       }
+      profile_educations: {
+        Row: {
+          course: string
+          created_at: string
+          id: string
+          institution: string
+          level: string
+          updated_at: string
+          user_id: string
+          year_end: number | null
+          year_start: number | null
+        }
+        Insert: {
+          course?: string
+          created_at?: string
+          id?: string
+          institution?: string
+          level?: string
+          updated_at?: string
+          user_id: string
+          year_end?: number | null
+          year_start?: number | null
+        }
+        Update: {
+          course?: string
+          created_at?: string
+          id?: string
+          institution?: string
+          level?: string
+          updated_at?: string
+          user_id?: string
+          year_end?: number | null
+          year_start?: number | null
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null
+          bairro: string
           bio: string
+          birth_date: string | null
+          cep: string
           city: string
           club_name: string
+          complemento: string
           cover_url: string | null
           created_at: string
+          estado: string
           full_name: string
           id: string
+          logradouro: string
+          numero: string
           role_in_club: string
           role_in_district: string
           status: Database["public"]["Enums"]["profile_status"]
@@ -455,13 +498,20 @@ export type Database = {
         }
         Insert: {
           avatar_url?: string | null
+          bairro?: string
           bio?: string
+          birth_date?: string | null
+          cep?: string
           city?: string
           club_name?: string
+          complemento?: string
           cover_url?: string | null
           created_at?: string
+          estado?: string
           full_name?: string
           id: string
+          logradouro?: string
+          numero?: string
           role_in_club?: string
           role_in_district?: string
           status?: Database["public"]["Enums"]["profile_status"]
@@ -469,13 +519,20 @@ export type Database = {
         }
         Update: {
           avatar_url?: string | null
+          bairro?: string
           bio?: string
+          birth_date?: string | null
+          cep?: string
           city?: string
           club_name?: string
+          complemento?: string
           cover_url?: string | null
           created_at?: string
+          estado?: string
           full_name?: string
           id?: string
+          logradouro?: string
+          numero?: string
           role_in_club?: string
           role_in_district?: string
           status?: Database["public"]["Enums"]["profile_status"]

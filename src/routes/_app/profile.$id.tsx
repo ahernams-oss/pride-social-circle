@@ -11,7 +11,7 @@ import { PostCard, type FeedPost } from "@/components/PostCard";
 import { MapPin, Building2, MessageCircle, Pencil } from "lucide-react";
 import { useNavigate } from "@tanstack/react-router";
 import { toast } from "sonner";
-import type { Profile } from "@/lib/auth-context";
+
 
 export const Route = createFileRoute("/_app/profile/$id")({ component: ProfilePage });
 
@@ -23,34 +23,49 @@ function ProfilePage() {
   const { id } = useParams({ from: "/_app/profile/$id" });
   const { user, refresh } = useAuth();
   const nav = useNavigate();
-  const [profile, setProfile] = useState<Profile | null>(null);
+  const [profile, setProfile] = useState<any>(null);
   const [posts, setPosts] = useState<FeedPost[]>([]);
   const [editing, setEditing] = useState(false);
   const [uploading, setUploading] = useState(false);
-  const [form, setForm] = useState({ full_name: "", bio: "", club_name: "", city: "", role_in_club: "", role_in_district: "", avatar_url: "" });
+  const [cepLoading, setCepLoading] = useState(false);
+  const [form, setForm] = useState({
+    full_name: "", bio: "", club_name: "", city: "", role_in_club: "", role_in_district: "", avatar_url: "",
+    birth_date: "", cep: "", logradouro: "", numero: "", complemento: "", bairro: "", estado: "",
+  });
   const [districtRoles, setDistrictRoles] = useState<{ id: string; name: string }[]>([]);
   const [clubRoles, setClubRoles] = useState<{ id: string; name: string }[]>([]);
   const [history, setHistory] = useState<Array<{ id: string; scope: string; role_name: string; start_date: string; end_date: string | null }>>([]);
   const [newHist, setNewHist] = useState<{ scope: "club" | "district"; role_name: string; start_date: string; end_date: string }>({ scope: "club", role_name: "", start_date: "", end_date: "" });
+  const [educations, setEducations] = useState<Array<{ id: string; institution: string; course: string; level: string; year_start: number | null; year_end: number | null }>>([]);
+  const [newEdu, setNewEdu] = useState({ institution: "", course: "", level: "", year_start: "", year_end: "" });
   const isMe = user?.id === id;
 
   const load = useCallback(async () => {
     const { data: p } = await supabase.from("profiles").select("*").eq("id", id).maybeSingle();
-    setProfile(p as Profile | null);
+    setProfile(p);
     if (p) setForm({
       full_name: p.full_name, bio: p.bio, club_name: p.club_name, city: p.city,
       role_in_club: p.role_in_club, role_in_district: p.role_in_district ?? "",
       avatar_url: p.avatar_url ?? "",
+      birth_date: (p as any).birth_date ?? "",
+      cep: (p as any).cep ?? "",
+      logradouro: (p as any).logradouro ?? "",
+      numero: (p as any).numero ?? "",
+      complemento: (p as any).complemento ?? "",
+      bairro: (p as any).bairro ?? "",
+      estado: (p as any).estado ?? "",
     });
 
-    const [{ data: dr }, { data: cr }, { data: hist }] = await Promise.all([
+    const [{ data: dr }, { data: cr }, { data: hist }, { data: edus }] = await Promise.all([
       supabase.from("district_roles").select("id, name").order("name"),
       supabase.from("club_roles").select("id, name").order("name"),
       supabase.from("user_role_history").select("id, scope, role_name, start_date, end_date").eq("user_id", id).order("start_date", { ascending: false }),
+      supabase.from("profile_educations" as any).select("id, institution, course, level, year_start, year_end").eq("user_id", id).order("year_start", { ascending: false }),
     ]);
     setDistrictRoles(dr ?? []);
     setClubRoles(cr ?? []);
     setHistory((hist ?? []) as any);
+    setEducations((edus ?? []) as any);
 
     const { data: rows } = await supabase
       .from("posts").select("id, author_id, content, image_url, created_at")
@@ -85,13 +100,62 @@ function ProfilePage() {
       full_name: form.full_name, bio: form.bio, club_name: form.club_name,
       city: form.city, role_in_club: form.role_in_club, role_in_district: form.role_in_district,
       avatar_url: form.avatar_url || null,
-    }).eq("id", id);
+      birth_date: form.birth_date || null,
+      cep: form.cep, logradouro: form.logradouro, numero: form.numero,
+      complemento: form.complemento, bairro: form.bairro, estado: form.estado,
+    } as any).eq("id", id);
     if (error) return toast.error(error.message);
     toast.success("Perfil atualizado");
     setEditing(false);
     await load();
     if (isMe) await refresh();
   };
+
+  const lookupCep = async (raw: string) => {
+    const cep = raw.replace(/\D/g, "");
+    if (cep.length !== 8) return;
+    setCepLoading(true);
+    try {
+      const res = await fetch(`https://viacep.com.br/ws/${cep}/json/`);
+      const data = await res.json();
+      if (data.erro) { toast.error("CEP não encontrado"); return; }
+      setForm((f) => ({
+        ...f,
+        logradouro: data.logradouro ?? f.logradouro,
+        bairro: data.bairro ?? f.bairro,
+        city: data.localidade ?? f.city,
+        estado: data.uf ?? f.estado,
+      }));
+    } catch {
+      toast.error("Falha ao consultar CEP");
+    } finally {
+      setCepLoading(false);
+    }
+  };
+
+  const addEducation = async () => {
+    if (!user) return;
+    if (!newEdu.institution || !newEdu.course) return toast.error("Preencha instituição e curso");
+    const { error } = await supabase.from("profile_educations" as any).insert({
+      user_id: id,
+      institution: newEdu.institution,
+      course: newEdu.course,
+      level: newEdu.level,
+      year_start: newEdu.year_start ? Number(newEdu.year_start) : null,
+      year_end: newEdu.year_end ? Number(newEdu.year_end) : null,
+    });
+    if (error) return toast.error(error.message);
+    toast.success("Formação adicionada");
+    setNewEdu({ institution: "", course: "", level: "", year_start: "", year_end: "" });
+    await load();
+  };
+
+  const removeEducation = async (eid: string) => {
+    const { error } = await supabase.from("profile_educations" as any).delete().eq("id", eid);
+    if (error) return toast.error(error.message);
+    await load();
+  };
+
 
   const addHistory = async () => {
     if (!user) return;
@@ -224,6 +288,29 @@ function ProfilePage() {
                   ))}
                 </select>
               </div>
+              <div><Label>Data de Nascimento</Label><Input type="date" value={form.birth_date} onChange={(e) => setForm({ ...form, birth_date: e.target.value })} /></div>
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-[160px_1fr]">
+                <div>
+                  <Label>CEP</Label>
+                  <Input
+                    value={form.cep}
+                    placeholder="00000-000"
+                    disabled={cepLoading}
+                    onChange={(e) => setForm({ ...form, cep: e.target.value })}
+                    onBlur={(e) => lookupCep(e.target.value)}
+                  />
+                </div>
+                <div><Label>Logradouro</Label><Input value={form.logradouro} onChange={(e) => setForm({ ...form, logradouro: e.target.value })} /></div>
+              </div>
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+                <div><Label>Número</Label><Input value={form.numero} onChange={(e) => setForm({ ...form, numero: e.target.value })} /></div>
+                <div><Label>Complemento</Label><Input value={form.complemento} onChange={(e) => setForm({ ...form, complemento: e.target.value })} /></div>
+                <div><Label>Bairro</Label><Input value={form.bairro} onChange={(e) => setForm({ ...form, bairro: e.target.value })} /></div>
+              </div>
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-[1fr_120px]">
+                <div><Label>Cidade (endereço)</Label><Input value={form.city} onChange={(e) => setForm({ ...form, city: e.target.value })} /></div>
+                <div><Label>Estado (UF)</Label><Input maxLength={2} value={form.estado} onChange={(e) => setForm({ ...form, estado: e.target.value.toUpperCase() })} /></div>
+              </div>
               <div><Label>Bio</Label><Textarea value={form.bio} onChange={(e) => setForm({ ...form, bio: e.target.value })} rows={3} /></div>
               <Button type="submit" disabled={uploading}>{uploading ? "Enviando..." : "Salvar"}</Button>
             </form>
@@ -292,6 +379,54 @@ function ProfilePage() {
           </div>
         )}
       </div>
+
+      <div className="rounded-xl border bg-card p-4 shadow-sm">
+        <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-muted-foreground">Formação</h2>
+        {educations.length === 0 ? (
+          <p className="text-sm text-muted-foreground">Nenhuma formação registrada.</p>
+        ) : (
+          <ul className="space-y-2">
+            {educations.map((e) => (
+              <li key={e.id} className="flex items-center justify-between gap-3 rounded-md border bg-background px-3 py-2 text-sm">
+                <div className="flex flex-wrap items-center gap-2">
+                  {e.level && <span className="rounded-md bg-accent px-2 py-0.5 text-xs font-medium text-accent-foreground">{e.level}</span>}
+                  <span className="font-medium">{e.course}</span>
+                  <span className="text-muted-foreground">{e.institution}</span>
+                  {(e.year_start || e.year_end) && (
+                    <span className="text-muted-foreground">{e.year_start ?? "?"}{e.year_end ? ` – ${e.year_end}` : " – atual"}</span>
+                  )}
+                </div>
+                {isMe && (
+                  <Button variant="ghost" size="sm" onClick={() => removeEducation(e.id)}>Remover</Button>
+                )}
+              </li>
+            ))}
+          </ul>
+        )}
+        {isMe && (
+          <div className="mt-4 grid grid-cols-1 gap-2 border-t pt-4 sm:grid-cols-[1fr_1fr_140px_100px_100px_auto]">
+            <Input placeholder="Instituição" value={newEdu.institution} onChange={(e) => setNewEdu({ ...newEdu, institution: e.target.value })} />
+            <Input placeholder="Curso" value={newEdu.course} onChange={(e) => setNewEdu({ ...newEdu, course: e.target.value })} />
+            <select
+              className="h-10 rounded-md border border-input bg-background px-3 text-sm"
+              value={newEdu.level}
+              onChange={(e) => setNewEdu({ ...newEdu, level: e.target.value })}
+            >
+              <option value="">Nível</option>
+              <option value="Ensino Médio">Ensino Médio</option>
+              <option value="Técnico">Técnico</option>
+              <option value="Graduação">Graduação</option>
+              <option value="Pós-graduação">Pós-graduação</option>
+              <option value="Mestrado">Mestrado</option>
+              <option value="Doutorado">Doutorado</option>
+            </select>
+            <Input type="number" placeholder="Início" value={newEdu.year_start} onChange={(e) => setNewEdu({ ...newEdu, year_start: e.target.value })} />
+            <Input type="number" placeholder="Fim" value={newEdu.year_end} onChange={(e) => setNewEdu({ ...newEdu, year_end: e.target.value })} />
+            <Button onClick={addEducation}>Adicionar</Button>
+          </div>
+        )}
+      </div>
+
 
       <h2 className="px-1 text-sm font-semibold uppercase tracking-wide text-muted-foreground">Publicações</h2>
       {posts.length === 0 ? (
