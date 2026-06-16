@@ -848,6 +848,298 @@ export type Database = {
         }
         Relationships: []
       }
+      vf_auditoria: {
+        Row: {
+          acao: string
+          created_at: string
+          detalhes: Json | null
+          dispositivo: string | null
+          entidade: string | null
+          entidade_id: string | null
+          id: string
+          modulo: string
+          user_id: string | null
+        }
+        Insert: {
+          acao: string
+          created_at?: string
+          detalhes?: Json | null
+          dispositivo?: string | null
+          entidade?: string | null
+          entidade_id?: string | null
+          id?: string
+          modulo: string
+          user_id?: string | null
+        }
+        Update: {
+          acao?: string
+          created_at?: string
+          detalhes?: Json | null
+          dispositivo?: string | null
+          entidade?: string | null
+          entidade_id?: string | null
+          id?: string
+          modulo?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      vf_candidaturas: {
+        Row: {
+          associado_id: string | null
+          cargo: string
+          created_at: string
+          eleicao_id: string
+          foto_url: string | null
+          id: string
+          nome: string
+          numero: string | null
+          proposta: string | null
+          status: Database["public"]["Enums"]["vf_status_candidatura"]
+          updated_at: string
+        }
+        Insert: {
+          associado_id?: string | null
+          cargo: string
+          created_at?: string
+          eleicao_id: string
+          foto_url?: string | null
+          id?: string
+          nome: string
+          numero?: string | null
+          proposta?: string | null
+          status?: Database["public"]["Enums"]["vf_status_candidatura"]
+          updated_at?: string
+        }
+        Update: {
+          associado_id?: string | null
+          cargo?: string
+          created_at?: string
+          eleicao_id?: string
+          foto_url?: string | null
+          id?: string
+          nome?: string
+          numero?: string | null
+          proposta?: string | null
+          status?: Database["public"]["Enums"]["vf_status_candidatura"]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "vf_candidaturas_associado_id_fkey"
+            columns: ["associado_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vf_candidaturas_eleicao_id_fkey"
+            columns: ["eleicao_id"]
+            isOneToOne: false
+            referencedRelation: "vf_eleicoes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      vf_comissao: {
+        Row: {
+          associado_id: string | null
+          created_at: string
+          eleicao_id: string
+          funcao: Database["public"]["Enums"]["vf_funcao_comissao"]
+          id: string
+          nome: string
+        }
+        Insert: {
+          associado_id?: string | null
+          created_at?: string
+          eleicao_id: string
+          funcao: Database["public"]["Enums"]["vf_funcao_comissao"]
+          id?: string
+          nome: string
+        }
+        Update: {
+          associado_id?: string | null
+          created_at?: string
+          eleicao_id?: string
+          funcao?: Database["public"]["Enums"]["vf_funcao_comissao"]
+          id?: string
+          nome?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "vf_comissao_associado_id_fkey"
+            columns: ["associado_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vf_comissao_eleicao_id_fkey"
+            columns: ["eleicao_id"]
+            isOneToOne: false
+            referencedRelation: "vf_eleicoes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      vf_delegados: {
+        Row: {
+          associado_id: string | null
+          clube: string | null
+          codigo_acesso: string
+          created_at: string
+          credenciado: boolean
+          eleicao_id: string
+          habilitado_votar: boolean
+          id: string
+          ja_votou: boolean
+          nome: string
+          presente: boolean
+          suplente_acionado: boolean
+          tipo: Database["public"]["Enums"]["vf_tipo_delegado"]
+          updated_at: string
+        }
+        Insert: {
+          associado_id?: string | null
+          clube?: string | null
+          codigo_acesso: string
+          created_at?: string
+          credenciado?: boolean
+          eleicao_id: string
+          habilitado_votar?: boolean
+          id?: string
+          ja_votou?: boolean
+          nome: string
+          presente?: boolean
+          suplente_acionado?: boolean
+          tipo?: Database["public"]["Enums"]["vf_tipo_delegado"]
+          updated_at?: string
+        }
+        Update: {
+          associado_id?: string | null
+          clube?: string | null
+          codigo_acesso?: string
+          created_at?: string
+          credenciado?: boolean
+          eleicao_id?: string
+          habilitado_votar?: boolean
+          id?: string
+          ja_votou?: boolean
+          nome?: string
+          presente?: boolean
+          suplente_acionado?: boolean
+          tipo?: Database["public"]["Enums"]["vf_tipo_delegado"]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "vf_delegados_associado_id_fkey"
+            columns: ["associado_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vf_delegados_eleicao_id_fkey"
+            columns: ["eleicao_id"]
+            isOneToOne: false
+            referencedRelation: "vf_eleicoes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      vf_eleicoes: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          data_eleicao: string
+          descricao: string | null
+          distrito: string | null
+          id: string
+          status: Database["public"]["Enums"]["vf_status_eleicao"]
+          titulo: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          data_eleicao: string
+          descricao?: string | null
+          distrito?: string | null
+          id?: string
+          status?: Database["public"]["Enums"]["vf_status_eleicao"]
+          titulo: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          data_eleicao?: string
+          descricao?: string | null
+          distrito?: string | null
+          id?: string
+          status?: Database["public"]["Enums"]["vf_status_eleicao"]
+          titulo?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      vf_votos: {
+        Row: {
+          candidatura_id: string | null
+          cargo: string
+          created_at: string
+          delegado_id: string
+          dispositivo: string | null
+          eleicao_id: string
+          id: string
+          tipo: Database["public"]["Enums"]["vf_tipo_voto"]
+        }
+        Insert: {
+          candidatura_id?: string | null
+          cargo: string
+          created_at?: string
+          delegado_id: string
+          dispositivo?: string | null
+          eleicao_id: string
+          id?: string
+          tipo: Database["public"]["Enums"]["vf_tipo_voto"]
+        }
+        Update: {
+          candidatura_id?: string | null
+          cargo?: string
+          created_at?: string
+          delegado_id?: string
+          dispositivo?: string | null
+          eleicao_id?: string
+          id?: string
+          tipo?: Database["public"]["Enums"]["vf_tipo_voto"]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "vf_votos_candidatura_id_fkey"
+            columns: ["candidatura_id"]
+            isOneToOne: false
+            referencedRelation: "vf_candidaturas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vf_votos_delegado_id_fkey"
+            columns: ["delegado_id"]
+            isOneToOne: false
+            referencedRelation: "vf_delegados"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vf_votos_eleicao_id_fkey"
+            columns: ["eleicao_id"]
+            isOneToOne: false
+            referencedRelation: "vf_eleicoes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
@@ -876,6 +1168,16 @@ export type Database = {
         Args: { _conv: string; _user: string }
         Returns: boolean
       }
+      vf_apuracao: {
+        Args: { _eleicao_id: string }
+        Returns: {
+          candidato: string
+          candidatura_id: string
+          cargo: string
+          tipo: Database["public"]["Enums"]["vf_tipo_voto"]
+          votos: number
+        }[]
+      }
     }
     Enums: {
       app_role: "admin" | "member"
@@ -883,6 +1185,16 @@ export type Database = {
       election_type: "single" | "yes_no" | "multiple_choice" | "multi_position"
       notification_type: "like" | "comment" | "message" | "approved" | "mention"
       profile_status: "pending" | "approved" | "rejected"
+      vf_funcao_comissao: "presidente" | "vice_presidente" | "membro" | "vogal"
+      vf_status_candidatura: "ativa" | "indeferida" | "desistencia"
+      vf_status_eleicao:
+        | "configurando"
+        | "credenciamento"
+        | "votacao_aberta"
+        | "votacao_encerrada"
+        | "apurada"
+      vf_tipo_delegado: "titular" | "suplente" | "nato"
+      vf_tipo_voto: "sim" | "nao" | "nulo" | "candidato"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -1015,6 +1327,17 @@ export const Constants = {
       election_type: ["single", "yes_no", "multiple_choice", "multi_position"],
       notification_type: ["like", "comment", "message", "approved", "mention"],
       profile_status: ["pending", "approved", "rejected"],
+      vf_funcao_comissao: ["presidente", "vice_presidente", "membro", "vogal"],
+      vf_status_candidatura: ["ativa", "indeferida", "desistencia"],
+      vf_status_eleicao: [
+        "configurando",
+        "credenciamento",
+        "votacao_aberta",
+        "votacao_encerrada",
+        "apurada",
+      ],
+      vf_tipo_delegado: ["titular", "suplente", "nato"],
+      vf_tipo_voto: ["sim", "nao", "nulo", "candidato"],
     },
   },
 } as const
