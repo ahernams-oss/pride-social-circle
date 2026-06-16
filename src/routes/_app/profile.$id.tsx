@@ -23,15 +23,21 @@ function ProfilePage() {
   const { id } = useParams({ from: "/_app/profile/$id" });
   const { user, refresh } = useAuth();
   const nav = useNavigate();
-  const [profile, setProfile] = useState<Profile | null>(null);
+  const [profile, setProfile] = useState<any>(null);
   const [posts, setPosts] = useState<FeedPost[]>([]);
   const [editing, setEditing] = useState(false);
   const [uploading, setUploading] = useState(false);
-  const [form, setForm] = useState({ full_name: "", bio: "", club_name: "", city: "", role_in_club: "", role_in_district: "", avatar_url: "" });
+  const [cepLoading, setCepLoading] = useState(false);
+  const [form, setForm] = useState({
+    full_name: "", bio: "", club_name: "", city: "", role_in_club: "", role_in_district: "", avatar_url: "",
+    birth_date: "", cep: "", logradouro: "", numero: "", complemento: "", bairro: "", estado: "",
+  });
   const [districtRoles, setDistrictRoles] = useState<{ id: string; name: string }[]>([]);
   const [clubRoles, setClubRoles] = useState<{ id: string; name: string }[]>([]);
   const [history, setHistory] = useState<Array<{ id: string; scope: string; role_name: string; start_date: string; end_date: string | null }>>([]);
   const [newHist, setNewHist] = useState<{ scope: "club" | "district"; role_name: string; start_date: string; end_date: string }>({ scope: "club", role_name: "", start_date: "", end_date: "" });
+  const [educations, setEducations] = useState<Array<{ id: string; institution: string; course: string; level: string; year_start: number | null; year_end: number | null }>>([]);
+  const [newEdu, setNewEdu] = useState({ institution: "", course: "", level: "", year_start: "", year_end: "" });
   const isMe = user?.id === id;
 
   const load = useCallback(async () => {
