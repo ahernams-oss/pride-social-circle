@@ -42,21 +42,30 @@ function ProfilePage() {
 
   const load = useCallback(async () => {
     const { data: p } = await supabase.from("profiles").select("*").eq("id", id).maybeSingle();
-    setProfile(p as Profile | null);
+    setProfile(p);
     if (p) setForm({
       full_name: p.full_name, bio: p.bio, club_name: p.club_name, city: p.city,
       role_in_club: p.role_in_club, role_in_district: p.role_in_district ?? "",
       avatar_url: p.avatar_url ?? "",
+      birth_date: (p as any).birth_date ?? "",
+      cep: (p as any).cep ?? "",
+      logradouro: (p as any).logradouro ?? "",
+      numero: (p as any).numero ?? "",
+      complemento: (p as any).complemento ?? "",
+      bairro: (p as any).bairro ?? "",
+      estado: (p as any).estado ?? "",
     });
 
-    const [{ data: dr }, { data: cr }, { data: hist }] = await Promise.all([
+    const [{ data: dr }, { data: cr }, { data: hist }, { data: edus }] = await Promise.all([
       supabase.from("district_roles").select("id, name").order("name"),
       supabase.from("club_roles").select("id, name").order("name"),
       supabase.from("user_role_history").select("id, scope, role_name, start_date, end_date").eq("user_id", id).order("start_date", { ascending: false }),
+      supabase.from("profile_educations" as any).select("id, institution, course, level, year_start, year_end").eq("user_id", id).order("year_start", { ascending: false }),
     ]);
     setDistrictRoles(dr ?? []);
     setClubRoles(cr ?? []);
     setHistory((hist ?? []) as any);
+    setEducations((edus ?? []) as any);
 
     const { data: rows } = await supabase
       .from("posts").select("id, author_id, content, image_url, created_at")
