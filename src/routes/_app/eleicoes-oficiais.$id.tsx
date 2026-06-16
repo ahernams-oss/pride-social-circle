@@ -211,17 +211,32 @@ function CandidaturasList({ items, isAdmin, onChanged }: { items: Candidatura[];
   );
 }
 
+function useAssociados() {
+  const [list, setList] = useState<Associado[]>([]);
+  useEffect(() => {
+    supabase.from("profiles").select("id, full_name, club_name").eq("status", "approved").order("full_name")
+      .then(({ data }) => setList((data ?? []) as Associado[]));
+  }, []);
+  return list;
+}
+
 function NewDelegado({ eleicaoId, onCreated }: { eleicaoId: string; onCreated: () => void }) {
   const [open, setOpen] = useState(false);
-  const [f, setF] = useState({ nome: "", clube: "", tipo: "titular" as "titular" | "suplente" | "nato" });
+  const associados = useAssociados();
+  const [f, setF] = useState({ associado_id: "", nome: "", clube: "", tipo: "titular" as "titular" | "suplente" | "nato" });
+  const pick = (aid: string) => {
+    const a = associados.find((x) => x.id === aid);
+    setF({ ...f, associado_id: aid, nome: a?.full_name ?? "", clube: a?.club_name ?? "" });
+  };
   const save = async () => {
-    if (!f.nome) return toast.error("Nome é obrigatório");
+    if (!f.nome) return toast.error("Selecione um associado ou informe o nome");
     const { error } = await supabase.from("vf_delegados").insert({
-      eleicao_id: eleicaoId, nome: f.nome, clube: f.clube || null, tipo: f.tipo, codigo_acesso: genCodigo(),
+      eleicao_id: eleicaoId, associado_id: f.associado_id || null,
+      nome: f.nome, clube: f.clube || null, tipo: f.tipo, codigo_acesso: genCodigo(),
     } as any);
     if (error) return toast.error(error.message);
     toast.success("Delegado cadastrado");
-    setF({ nome: "", clube: "", tipo: "titular" });
+    setF({ associado_id: "", nome: "", clube: "", tipo: "titular" });
     setOpen(false); onCreated();
   };
   return (
@@ -230,6 +245,17 @@ function NewDelegado({ eleicaoId, onCreated }: { eleicaoId: string; onCreated: (
       <DialogContent>
         <DialogHeader><DialogTitle>Novo delegado</DialogTitle></DialogHeader>
         <div className="space-y-3">
+          <div><Label>Associado do sistema (recomendado)</Label>
+            <Select value={f.associado_id} onValueChange={pick}>
+              <SelectTrigger><SelectValue placeholder="Selecionar associado..." /></SelectTrigger>
+              <SelectContent>
+                {associados.map((a) => (
+                  <SelectItem key={a.id} value={a.id}>{a.full_name}{a.club_name ? ` — ${a.club_name}` : ""}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <p className="mt-1 text-xs text-muted-foreground">Vincular ao login permite votação remota com a conta do associado.</p>
+          </div>
           <div><Label>Nome</Label><Input value={f.nome} onChange={(e) => setF({ ...f, nome: e.target.value })} /></div>
           <div><Label>Clube</Label><Input value={f.clube} onChange={(e) => setF({ ...f, clube: e.target.value })} /></div>
           <div><Label>Tipo</Label>
