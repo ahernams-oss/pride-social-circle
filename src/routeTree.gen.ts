@@ -32,6 +32,7 @@ import { Route as AppDistrictRolesRouteImport } from './routes/_app/district-rol
 import { Route as AppClubsRouteImport } from './routes/_app/clubs'
 import { Route as AppClubRolesRouteImport } from './routes/_app/club-roles'
 import { Route as AppAdminRouteImport } from './routes/_app/admin'
+import { Route as AppEleicoesOficiaisIndexRouteImport } from './routes/_app/eleicoes-oficiais.index'
 import { Route as ApiPublicElectionsRouteImport } from './routes/api/public/elections'
 import { Route as AppProfileIdRouteImport } from './routes/_app/profile.$id'
 import { Route as AppEleicoesOficiaisIdRouteImport } from './routes/_app/eleicoes-oficiais.$id'
@@ -151,6 +152,12 @@ const AppAdminRoute = AppAdminRouteImport.update({
   path: '/admin',
   getParentRoute: () => AppRoute,
 } as any)
+const AppEleicoesOficiaisIndexRoute =
+  AppEleicoesOficiaisIndexRouteImport.update({
+    id: '/',
+    path: '/',
+    getParentRoute: () => AppEleicoesOficiaisRoute,
+  } as any)
 const ApiPublicElectionsRoute = ApiPublicElectionsRouteImport.update({
   id: '/api/public/elections',
   path: '/api/public/elections',
@@ -199,6 +206,7 @@ export interface FileRoutesByFullPath {
   '/eleicoes-oficiais/$id': typeof AppEleicoesOficiaisIdRoute
   '/profile/$id': typeof AppProfileIdRoute
   '/api/public/elections': typeof ApiPublicElectionsRoute
+  '/eleicoes-oficiais/': typeof AppEleicoesOficiaisIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -212,7 +220,6 @@ export interface FileRoutesByTo {
   '/distrito': typeof AppDistritoRoute
   '/documents': typeof AppDocumentsRoute
   '/elections': typeof AppElectionsRouteWithChildren
-  '/eleicoes-oficiais': typeof AppEleicoesOficiaisRouteWithChildren
   '/events': typeof AppEventsRoute
   '/feed': typeof AppFeedRoute
   '/friends': typeof AppFriendsRoute
@@ -227,6 +234,7 @@ export interface FileRoutesByTo {
   '/eleicoes-oficiais/$id': typeof AppEleicoesOficiaisIdRoute
   '/profile/$id': typeof AppProfileIdRoute
   '/api/public/elections': typeof ApiPublicElectionsRoute
+  '/eleicoes-oficiais': typeof AppEleicoesOficiaisIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -257,6 +265,7 @@ export interface FileRoutesById {
   '/_app/eleicoes-oficiais/$id': typeof AppEleicoesOficiaisIdRoute
   '/_app/profile/$id': typeof AppProfileIdRoute
   '/api/public/elections': typeof ApiPublicElectionsRoute
+  '/_app/eleicoes-oficiais/': typeof AppEleicoesOficiaisIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -287,6 +296,7 @@ export interface FileRouteTypes {
     | '/eleicoes-oficiais/$id'
     | '/profile/$id'
     | '/api/public/elections'
+    | '/eleicoes-oficiais/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -300,7 +310,6 @@ export interface FileRouteTypes {
     | '/distrito'
     | '/documents'
     | '/elections'
-    | '/eleicoes-oficiais'
     | '/events'
     | '/feed'
     | '/friends'
@@ -315,6 +324,7 @@ export interface FileRouteTypes {
     | '/eleicoes-oficiais/$id'
     | '/profile/$id'
     | '/api/public/elections'
+    | '/eleicoes-oficiais'
   id:
     | '__root__'
     | '/'
@@ -344,6 +354,7 @@ export interface FileRouteTypes {
     | '/_app/eleicoes-oficiais/$id'
     | '/_app/profile/$id'
     | '/api/public/elections'
+    | '/_app/eleicoes-oficiais/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -518,6 +529,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppAdminRouteImport
       parentRoute: typeof AppRoute
     }
+    '/_app/eleicoes-oficiais/': {
+      id: '/_app/eleicoes-oficiais/'
+      path: '/'
+      fullPath: '/eleicoes-oficiais/'
+      preLoaderRoute: typeof AppEleicoesOficiaisIndexRouteImport
+      parentRoute: typeof AppEleicoesOficiaisRoute
+    }
     '/api/public/elections': {
       id: '/api/public/elections'
       path: '/api/public/elections'
@@ -563,10 +581,12 @@ const AppElectionsRouteWithChildren = AppElectionsRoute._addFileChildren(
 
 interface AppEleicoesOficiaisRouteChildren {
   AppEleicoesOficiaisIdRoute: typeof AppEleicoesOficiaisIdRoute
+  AppEleicoesOficiaisIndexRoute: typeof AppEleicoesOficiaisIndexRoute
 }
 
 const AppEleicoesOficiaisRouteChildren: AppEleicoesOficiaisRouteChildren = {
   AppEleicoesOficiaisIdRoute: AppEleicoesOficiaisIdRoute,
+  AppEleicoesOficiaisIndexRoute: AppEleicoesOficiaisIndexRoute,
 }
 
 const AppEleicoesOficiaisRouteWithChildren =
