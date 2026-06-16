@@ -288,6 +288,29 @@ function ProfilePage() {
                   ))}
                 </select>
               </div>
+              <div><Label>Data de Nascimento</Label><Input type="date" value={form.birth_date} onChange={(e) => setForm({ ...form, birth_date: e.target.value })} /></div>
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-[160px_1fr]">
+                <div>
+                  <Label>CEP</Label>
+                  <Input
+                    value={form.cep}
+                    placeholder="00000-000"
+                    disabled={cepLoading}
+                    onChange={(e) => setForm({ ...form, cep: e.target.value })}
+                    onBlur={(e) => lookupCep(e.target.value)}
+                  />
+                </div>
+                <div><Label>Logradouro</Label><Input value={form.logradouro} onChange={(e) => setForm({ ...form, logradouro: e.target.value })} /></div>
+              </div>
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+                <div><Label>Número</Label><Input value={form.numero} onChange={(e) => setForm({ ...form, numero: e.target.value })} /></div>
+                <div><Label>Complemento</Label><Input value={form.complemento} onChange={(e) => setForm({ ...form, complemento: e.target.value })} /></div>
+                <div><Label>Bairro</Label><Input value={form.bairro} onChange={(e) => setForm({ ...form, bairro: e.target.value })} /></div>
+              </div>
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-[1fr_120px]">
+                <div><Label>Cidade (endereço)</Label><Input value={form.city} onChange={(e) => setForm({ ...form, city: e.target.value })} /></div>
+                <div><Label>Estado (UF)</Label><Input maxLength={2} value={form.estado} onChange={(e) => setForm({ ...form, estado: e.target.value.toUpperCase() })} /></div>
+              </div>
               <div><Label>Bio</Label><Textarea value={form.bio} onChange={(e) => setForm({ ...form, bio: e.target.value })} rows={3} /></div>
               <Button type="submit" disabled={uploading}>{uploading ? "Enviando..." : "Salvar"}</Button>
             </form>
