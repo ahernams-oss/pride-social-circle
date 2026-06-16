@@ -380,6 +380,54 @@ function ProfilePage() {
         )}
       </div>
 
+      <div className="rounded-xl border bg-card p-4 shadow-sm">
+        <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-muted-foreground">Formação</h2>
+        {educations.length === 0 ? (
+          <p className="text-sm text-muted-foreground">Nenhuma formação registrada.</p>
+        ) : (
+          <ul className="space-y-2">
+            {educations.map((e) => (
+              <li key={e.id} className="flex items-center justify-between gap-3 rounded-md border bg-background px-3 py-2 text-sm">
+                <div className="flex flex-wrap items-center gap-2">
+                  {e.level && <span className="rounded-md bg-accent px-2 py-0.5 text-xs font-medium text-accent-foreground">{e.level}</span>}
+                  <span className="font-medium">{e.course}</span>
+                  <span className="text-muted-foreground">{e.institution}</span>
+                  {(e.year_start || e.year_end) && (
+                    <span className="text-muted-foreground">{e.year_start ?? "?"}{e.year_end ? ` – ${e.year_end}` : " – atual"}</span>
+                  )}
+                </div>
+                {isMe && (
+                  <Button variant="ghost" size="sm" onClick={() => removeEducation(e.id)}>Remover</Button>
+                )}
+              </li>
+            ))}
+          </ul>
+        )}
+        {isMe && (
+          <div className="mt-4 grid grid-cols-1 gap-2 border-t pt-4 sm:grid-cols-[1fr_1fr_140px_100px_100px_auto]">
+            <Input placeholder="Instituição" value={newEdu.institution} onChange={(e) => setNewEdu({ ...newEdu, institution: e.target.value })} />
+            <Input placeholder="Curso" value={newEdu.course} onChange={(e) => setNewEdu({ ...newEdu, course: e.target.value })} />
+            <select
+              className="h-10 rounded-md border border-input bg-background px-3 text-sm"
+              value={newEdu.level}
+              onChange={(e) => setNewEdu({ ...newEdu, level: e.target.value })}
+            >
+              <option value="">Nível</option>
+              <option value="Ensino Médio">Ensino Médio</option>
+              <option value="Técnico">Técnico</option>
+              <option value="Graduação">Graduação</option>
+              <option value="Pós-graduação">Pós-graduação</option>
+              <option value="Mestrado">Mestrado</option>
+              <option value="Doutorado">Doutorado</option>
+            </select>
+            <Input type="number" placeholder="Início" value={newEdu.year_start} onChange={(e) => setNewEdu({ ...newEdu, year_start: e.target.value })} />
+            <Input type="number" placeholder="Fim" value={newEdu.year_end} onChange={(e) => setNewEdu({ ...newEdu, year_end: e.target.value })} />
+            <Button onClick={addEducation}>Adicionar</Button>
+          </div>
+        )}
+      </div>
+
+
       <h2 className="px-1 text-sm font-semibold uppercase tracking-wide text-muted-foreground">Publicações</h2>
       {posts.length === 0 ? (
         <p className="rounded-xl border bg-card p-8 text-center text-muted-foreground">Nenhuma publicação ainda.</p>
