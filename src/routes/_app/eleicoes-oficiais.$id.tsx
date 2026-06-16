@@ -147,15 +147,21 @@ function Page() {
 
 function NewCandidatura({ eleicaoId, onCreated }: { eleicaoId: string; onCreated: () => void }) {
   const [open, setOpen] = useState(false);
-  const [f, setF] = useState({ nome: "", cargo: "", numero: "", proposta: "" });
+  const associados = useAssociados();
+  const [f, setF] = useState({ associado_id: "", nome: "", cargo: "", numero: "", proposta: "" });
+  const pick = (aid: string) => {
+    const a = associados.find((x) => x.id === aid);
+    setF({ ...f, associado_id: aid, nome: a?.full_name ?? f.nome });
+  };
   const save = async () => {
     if (!f.nome || !f.cargo) return toast.error("Nome e cargo são obrigatórios");
     const { error } = await supabase.from("vf_candidaturas").insert({
-      eleicao_id: eleicaoId, nome: f.nome, cargo: f.cargo, numero: f.numero || null, proposta: f.proposta || null,
+      eleicao_id: eleicaoId, associado_id: f.associado_id || null,
+      nome: f.nome, cargo: f.cargo, numero: f.numero || null, proposta: f.proposta || null,
     } as any);
     if (error) return toast.error(error.message);
     toast.success("Candidatura cadastrada");
-    setF({ nome: "", cargo: "", numero: "", proposta: "" });
+    setF({ associado_id: "", nome: "", cargo: "", numero: "", proposta: "" });
     setOpen(false);
     onCreated();
   };
@@ -165,6 +171,16 @@ function NewCandidatura({ eleicaoId, onCreated }: { eleicaoId: string; onCreated
       <DialogContent>
         <DialogHeader><DialogTitle>Nova candidatura</DialogTitle></DialogHeader>
         <div className="space-y-3">
+          <div><Label>Associado (opcional)</Label>
+            <Select value={f.associado_id} onValueChange={pick}>
+              <SelectTrigger><SelectValue placeholder="Selecionar associado..." /></SelectTrigger>
+              <SelectContent>
+                {associados.map((a) => (
+                  <SelectItem key={a.id} value={a.id}>{a.full_name}{a.club_name ? ` — ${a.club_name}` : ""}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
           <div><Label>Nome</Label><Input value={f.nome} onChange={(e) => setF({ ...f, nome: e.target.value })} /></div>
           <div><Label>Cargo</Label><Input placeholder="Ex: Governador" value={f.cargo} onChange={(e) => setF({ ...f, cargo: e.target.value })} /></div>
           <div><Label>Número (opcional)</Label><Input value={f.numero} onChange={(e) => setF({ ...f, numero: e.target.value })} /></div>
