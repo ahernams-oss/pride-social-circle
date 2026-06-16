@@ -100,13 +100,62 @@ function ProfilePage() {
       full_name: form.full_name, bio: form.bio, club_name: form.club_name,
       city: form.city, role_in_club: form.role_in_club, role_in_district: form.role_in_district,
       avatar_url: form.avatar_url || null,
-    }).eq("id", id);
+      birth_date: form.birth_date || null,
+      cep: form.cep, logradouro: form.logradouro, numero: form.numero,
+      complemento: form.complemento, bairro: form.bairro, estado: form.estado,
+    } as any).eq("id", id);
     if (error) return toast.error(error.message);
     toast.success("Perfil atualizado");
     setEditing(false);
     await load();
     if (isMe) await refresh();
   };
+
+  const lookupCep = async (raw: string) => {
+    const cep = raw.replace(/\D/g, "");
+    if (cep.length !== 8) return;
+    setCepLoading(true);
+    try {
+      const res = await fetch(`https://viacep.com.br/ws/${cep}/json/`);
+      const data = await res.json();
+      if (data.erro) { toast.error("CEP não encontrado"); return; }
+      setForm((f) => ({
+        ...f,
+        logradouro: data.logradouro ?? f.logradouro,
+        bairro: data.bairro ?? f.bairro,
+        city: data.localidade ?? f.city,
+        estado: data.uf ?? f.estado,
+      }));
+    } catch {
+      toast.error("Falha ao consultar CEP");
+    } finally {
+      setCepLoading(false);
+    }
+  };
+
+  const addEducation = async () => {
+    if (!user) return;
+    if (!newEdu.institution || !newEdu.course) return toast.error("Preencha instituição e curso");
+    const { error } = await supabase.from("profile_educations" as any).insert({
+      user_id: id,
+      institution: newEdu.institution,
+      course: newEdu.course,
+      level: newEdu.level,
+      year_start: newEdu.year_start ? Number(newEdu.year_start) : null,
+      year_end: newEdu.year_end ? Number(newEdu.year_end) : null,
+    });
+    if (error) return toast.error(error.message);
+    toast.success("Formação adicionada");
+    setNewEdu({ institution: "", course: "", level: "", year_start: "", year_end: "" });
+    await load();
+  };
+
+  const removeEducation = async (eid: string) => {
+    const { error } = await supabase.from("profile_educations" as any).delete().eq("id", eid);
+    if (error) return toast.error(error.message);
+    await load();
+  };
+
 
   const addHistory = async () => {
     if (!user) return;
