@@ -11,7 +11,7 @@ import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Monitor, LogIn, LogOut, ShieldAlert } from "lucide-react";
 import { toast } from "sonner";
-import { ElectionDetail } from "./elections.$id";
+import { ElectionDetail } from "@/components/ElectionDetail";
 
 export const Route = createFileRoute("/_app/kiosk")({ component: KioskPage });
 
