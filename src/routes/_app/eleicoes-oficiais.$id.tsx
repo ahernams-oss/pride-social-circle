@@ -114,8 +114,8 @@ function Page() {
         </div>
       )}
 
-      <Tabs defaultValue="candidaturas">
-        <TabsList>
+      <Tabs defaultValue="candidaturas" className="w-full">
+        <TabsList className="grid h-auto w-full grid-cols-2 sm:grid-cols-4">
           <TabsTrigger value="candidaturas">Candidaturas</TabsTrigger>
           <TabsTrigger value="delegados">Delegados</TabsTrigger>
           <TabsTrigger value="comissao">Comissão</TabsTrigger>
