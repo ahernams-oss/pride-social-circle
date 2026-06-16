@@ -14,6 +14,55 @@ export type Database = {
   }
   public: {
     Tables: {
+      ballot_choices: {
+        Row: {
+          ballot_id: string
+          candidate_id: string | null
+          created_at: string
+          id: string
+          position_id: string | null
+          value: string | null
+        }
+        Insert: {
+          ballot_id: string
+          candidate_id?: string | null
+          created_at?: string
+          id?: string
+          position_id?: string | null
+          value?: string | null
+        }
+        Update: {
+          ballot_id?: string
+          candidate_id?: string | null
+          created_at?: string
+          id?: string
+          position_id?: string | null
+          value?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ballot_choices_ballot_id_fkey"
+            columns: ["ballot_id"]
+            isOneToOne: false
+            referencedRelation: "election_ballots"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ballot_choices_candidate_id_fkey"
+            columns: ["candidate_id"]
+            isOneToOne: false
+            referencedRelation: "election_candidates"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ballot_choices_position_id_fkey"
+            columns: ["position_id"]
+            isOneToOne: false
+            referencedRelation: "election_positions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       club_roles: {
         Row: {
           created_at: string
@@ -187,6 +236,170 @@ export type Database = {
         }
         Relationships: []
       }
+      election_ballots: {
+        Row: {
+          election_id: string
+          id: string
+          kiosk_session_id: string | null
+          submitted_at: string
+          voter_id: string
+        }
+        Insert: {
+          election_id: string
+          id?: string
+          kiosk_session_id?: string | null
+          submitted_at?: string
+          voter_id: string
+        }
+        Update: {
+          election_id?: string
+          id?: string
+          kiosk_session_id?: string | null
+          submitted_at?: string
+          voter_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "election_ballots_election_id_fkey"
+            columns: ["election_id"]
+            isOneToOne: false
+            referencedRelation: "elections"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "election_ballots_kiosk_session_id_fkey"
+            columns: ["kiosk_session_id"]
+            isOneToOne: false
+            referencedRelation: "kiosk_sessions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      election_candidates: {
+        Row: {
+          created_at: string
+          description: string | null
+          election_id: string
+          id: string
+          name: string
+          order_index: number
+          photo_url: string | null
+          position_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          election_id: string
+          id?: string
+          name: string
+          order_index?: number
+          photo_url?: string | null
+          position_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          election_id?: string
+          id?: string
+          name?: string
+          order_index?: number
+          photo_url?: string | null
+          position_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "election_candidates_election_id_fkey"
+            columns: ["election_id"]
+            isOneToOne: false
+            referencedRelation: "elections"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "election_candidates_position_id_fkey"
+            columns: ["position_id"]
+            isOneToOne: false
+            referencedRelation: "election_positions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      election_positions: {
+        Row: {
+          created_at: string
+          election_id: string
+          id: string
+          name: string
+          order_index: number
+        }
+        Insert: {
+          created_at?: string
+          election_id: string
+          id?: string
+          name: string
+          order_index?: number
+        }
+        Update: {
+          created_at?: string
+          election_id?: string
+          id?: string
+          name?: string
+          order_index?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "election_positions_election_id_fkey"
+            columns: ["election_id"]
+            isOneToOne: false
+            referencedRelation: "elections"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      elections: {
+        Row: {
+          allow_kiosk: boolean
+          created_at: string
+          created_by: string
+          description: string | null
+          ends_at: string | null
+          id: string
+          max_choices: number
+          starts_at: string | null
+          status: Database["public"]["Enums"]["election_status"]
+          title: string
+          type: Database["public"]["Enums"]["election_type"]
+          updated_at: string
+        }
+        Insert: {
+          allow_kiosk?: boolean
+          created_at?: string
+          created_by: string
+          description?: string | null
+          ends_at?: string | null
+          id?: string
+          max_choices?: number
+          starts_at?: string | null
+          status?: Database["public"]["Enums"]["election_status"]
+          title: string
+          type: Database["public"]["Enums"]["election_type"]
+          updated_at?: string
+        }
+        Update: {
+          allow_kiosk?: boolean
+          created_at?: string
+          created_by?: string
+          description?: string | null
+          ends_at?: string | null
+          id?: string
+          max_choices?: number
+          starts_at?: string | null
+          status?: Database["public"]["Enums"]["election_status"]
+          title?: string
+          type?: Database["public"]["Enums"]["election_type"]
+          updated_at?: string
+        }
+        Relationships: []
+      }
       events: {
         Row: {
           created_at: string
@@ -216,6 +429,41 @@ export type Database = {
           title?: string
         }
         Relationships: []
+      }
+      kiosk_sessions: {
+        Row: {
+          active: boolean
+          closed_at: string | null
+          election_id: string
+          id: string
+          opened_at: string
+          opened_by: string
+        }
+        Insert: {
+          active?: boolean
+          closed_at?: string | null
+          election_id: string
+          id?: string
+          opened_at?: string
+          opened_by: string
+        }
+        Update: {
+          active?: boolean
+          closed_at?: string | null
+          election_id?: string
+          id?: string
+          opened_at?: string
+          opened_by?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "kiosk_sessions_election_id_fkey"
+            columns: ["election_id"]
+            isOneToOne: false
+            referencedRelation: "elections"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       messages: {
         Row: {
@@ -605,6 +853,17 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      election_results: {
+        Args: { _election_id: string }
+        Returns: {
+          candidate_id: string
+          candidate_name: string
+          position_id: string
+          position_name: string
+          value: string
+          votes: number
+        }[]
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -620,6 +879,8 @@ export type Database = {
     }
     Enums: {
       app_role: "admin" | "member"
+      election_status: "draft" | "open" | "closed"
+      election_type: "single" | "yes_no" | "multiple_choice" | "multi_position"
       notification_type: "like" | "comment" | "message" | "approved" | "mention"
       profile_status: "pending" | "approved" | "rejected"
     }
@@ -750,6 +1011,8 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["admin", "member"],
+      election_status: ["draft", "open", "closed"],
+      election_type: ["single", "yes_no", "multiple_choice", "multi_position"],
       notification_type: ["like", "comment", "message", "approved", "mention"],
       profile_status: ["pending", "approved", "rejected"],
     },
