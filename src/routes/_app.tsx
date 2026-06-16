@@ -81,7 +81,7 @@ function AppLayout() {
         <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4">
           <Link to="/feed" className="flex items-center gap-2">
             <img src={lionsLogo} alt="Lions International" className="h-9 w-9 object-contain" />
-            <span className="text-lg font-bold tracking-tight">Lions Connect</span>
+            <span className="text-lg font-bold tracking-tight">Lions Connecta</span>
           </Link>
 
           <nav className="hidden items-center gap-1 md:flex">
