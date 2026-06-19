@@ -106,6 +106,7 @@ function ProfilePage() {
       birth_date: form.birth_date || null,
       cep: form.cep, logradouro: form.logradouro, numero: form.numero,
       complemento: form.complemento, bairro: form.bairro, estado: form.estado,
+      phone: form.phone, email: form.email,
     } as any).eq("id", id);
     if (error) return toast.error(error.message);
     toast.success("Perfil atualizado");
