@@ -30,15 +30,27 @@ export function GovernadoresSidebar() {
     queryKey: ["sidebar", "district-governadores"],
     queryFn: async () => {
       const today = new Date().toISOString().slice(0, 10);
-      const { data, error } = await supabase
+      const { data: rows, error } = await supabase
         .from("user_role_history")
-        .select("id,user_id,role_name,start_date,end_date,profile:profiles!user_role_history_user_id_fkey(id,full_name,avatar_url,club_name,role_in_club)")
+        .select("id,user_id,role_name,start_date,end_date")
         .eq("scope", "district")
         .ilike("role_name", "%governador%")
         .or(`end_date.is.null,end_date.gte.${today}`)
         .order("start_date", { ascending: false });
       if (error) throw error;
-      return (data ?? []) as unknown as RoleRow[];
+      const ids = Array.from(new Set((rows ?? []).map((r) => r.user_id)));
+      let profiles: RoleRow["profile"][] = [];
+      if (ids.length) {
+        const { data: profs } = await supabase
+          .from("profiles")
+          .select("id,full_name,avatar_url,club_name,role_in_club")
+          .in("id", ids);
+        profiles = (profs ?? []) as RoleRow["profile"][];
+      }
+      return (rows ?? []).map((r) => ({
+        ...r,
+        profile: profiles.find((p) => p?.id === r.user_id) ?? null,
+      })) as RoleRow[];
     },
   });
 
