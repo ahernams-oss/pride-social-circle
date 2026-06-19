@@ -319,7 +319,7 @@ function AppLayout() {
                 <span className="flex h-10 w-10 items-center justify-center rounded-full bg-muted">
                   <Monitor className="h-5 w-5" />
                 </span>
-                Kiosk de Votação
+                Urna Eletrônica
               </Link>
             )}
             <Link
