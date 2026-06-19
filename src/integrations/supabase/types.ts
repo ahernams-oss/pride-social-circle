@@ -169,6 +169,7 @@ export type Database = {
       }
       district_roles: {
         Row: {
+          assigned_user_id: string | null
           created_at: string
           created_by: string | null
           description: string
@@ -177,6 +178,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          assigned_user_id?: string | null
           created_at?: string
           created_by?: string | null
           description?: string
@@ -185,6 +187,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          assigned_user_id?: string | null
           created_at?: string
           created_by?: string | null
           description?: string
@@ -192,7 +195,15 @@ export type Database = {
           name?: string
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "district_roles_assigned_user_id_fkey"
+            columns: ["assigned_user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       documents: {
         Row: {
