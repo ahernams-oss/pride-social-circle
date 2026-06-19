@@ -12,7 +12,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Progress } from "@/components/ui/progress";
-import { Plus, Play, Square, CheckCircle2, Copy, ShieldAlert, Trash2, Gavel } from "lucide-react";
+import { Plus, Play, Square, CheckCircle2, Copy, ShieldAlert, Trash2, Gavel, Printer, Send, Mail, MessageCircle } from "lucide-react";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/_app/eleicoes-oficiais/$id")({ component: Page });
@@ -128,8 +128,15 @@ function Page() {
         </TabsContent>
 
         <TabsContent value="delegados" className="space-y-3 pt-4">
-          {isAdmin && <NewDelegado eleicaoId={id} onCreated={load} />}
-          <DelegadosList items={dels} isAdmin={isAdmin} onChanged={load} />
+          <div className="flex flex-wrap items-center gap-2">
+            {isAdmin && <NewDelegado eleicaoId={id} onCreated={load} />}
+            {dels.length > 0 && (
+              <Button size="sm" variant="outline" onClick={() => printCredenciais(dels, eleicao)}>
+                <Printer className="mr-2 h-4 w-4" /> Imprimir todas
+              </Button>
+            )}
+          </div>
+          <DelegadosList items={dels} isAdmin={isAdmin} onChanged={load} eleicao={eleicao} />
         </TabsContent>
 
         <TabsContent value="comissao" className="space-y-3 pt-4">
@@ -291,7 +298,8 @@ function NewDelegado({ eleicaoId, onCreated }: { eleicaoId: string; onCreated: (
   );
 }
 
-function DelegadosList({ items, isAdmin, onChanged }: { items: Delegado[]; isAdmin: boolean; onChanged: () => void }) {
+function DelegadosList({ items, isAdmin, onChanged, eleicao }: { items: Delegado[]; isAdmin: boolean; onChanged: () => void; eleicao: Eleicao }) {
+  const [sendFor, setSendFor] = useState<Delegado | null>(null);
   const toggle = async (id: string, field: "credenciado" | "presente" | "habilitado_votar", val: boolean) => {
     const { error } = await supabase.from("vf_delegados").update({ [field]: val } as any).eq("id", id);
     if (error) return toast.error(error.message);
@@ -326,14 +334,132 @@ function DelegadosList({ items, isAdmin, onChanged }: { items: Delegado[]; isAdm
                 <Button size="sm" variant={d.credenciado ? "default" : "outline"} onClick={() => toggle(d.id, "credenciado", !d.credenciado)}>Credenciado</Button>
                 <Button size="sm" variant={d.presente ? "default" : "outline"} onClick={() => toggle(d.id, "presente", !d.presente)}>Presente</Button>
                 <Button size="sm" variant={d.habilitado_votar ? "default" : "outline"} onClick={() => toggle(d.id, "habilitado_votar", !d.habilitado_votar)}>Habilitado</Button>
+                <Button size="sm" variant="outline" onClick={() => setSendFor(d)} title="Enviar credenciais">
+                  <Send className="h-4 w-4" />
+                </Button>
+                <Button size="sm" variant="outline" onClick={() => printCredenciais([d], eleicao)} title="Imprimir credencial">
+                  <Printer className="h-4 w-4" />
+                </Button>
                 <Button size="icon" variant="ghost" onClick={() => remove(d.id)}><Trash2 className="h-4 w-4" /></Button>
               </>
             )}
           </div>
         </CardContent></Card>
       ))}
+      <SendCredencialDialog delegado={sendFor} eleicao={eleicao} onClose={() => setSendFor(null)} />
     </div>
   );
+}
+
+function buildCredencialMsg(d: Delegado, e: Eleicao) {
+  const dateStr = new Date(e.data_eleicao).toLocaleDateString("pt-BR");
+  return `Olá ${d.nome},\n\nVocê está credenciado(a) como delegado(a) (${d.tipo}) na eleição "${e.titulo}" — ${dateStr}.\n\nSeu código de acesso para a votação: ${d.codigo_acesso}\n\nGuarde este código com segurança. Ele será solicitado na urna eletrônica.`;
+}
+
+function SendCredencialDialog({ delegado, eleicao, onClose }: { delegado: Delegado | null; eleicao: Eleicao; onClose: () => void }) {
+  const [email, setEmail] = useState("");
+  const [phone, setPhone] = useState("");
+  useEffect(() => { setEmail(""); setPhone(""); }, [delegado?.id]);
+  if (!delegado) return null;
+  const msg = buildCredencialMsg(delegado, eleicao);
+  const sendEmail = () => {
+    if (!email) return toast.error("Informe o e-mail");
+    const subject = encodeURIComponent(`Credencial — ${eleicao.titulo}`);
+    const body = encodeURIComponent(msg);
+    window.open(`mailto:${email}?subject=${subject}&body=${body}`, "_blank");
+  };
+  const sendWhats = () => {
+    if (!phone) return toast.error("Informe o telefone");
+    const num = phone.replace(/\D/g, "");
+    window.open(`https://wa.me/${num}?text=${encodeURIComponent(msg)}`, "_blank");
+  };
+  return (
+    <Dialog open={!!delegado} onOpenChange={(o) => !o && onClose()}>
+      <DialogContent>
+        <DialogHeader><DialogTitle>Enviar credencial — {delegado.nome}</DialogTitle></DialogHeader>
+        <div className="space-y-4">
+          <div className="rounded-md border bg-muted/40 p-3 text-xs whitespace-pre-wrap font-mono">{msg}</div>
+          <div className="space-y-2">
+            <Label>WhatsApp (com DDI, ex: 5521999998888)</Label>
+            <div className="flex gap-2">
+              <Input value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="5521..." />
+              <Button onClick={sendWhats}><MessageCircle className="mr-2 h-4 w-4" /> WhatsApp</Button>
+            </div>
+          </div>
+          <div className="space-y-2">
+            <Label>E-mail</Label>
+            <div className="flex gap-2">
+              <Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="delegado@exemplo.com" />
+              <Button onClick={sendEmail}><Mail className="mr-2 h-4 w-4" /> E-mail</Button>
+            </div>
+          </div>
+          <p className="text-xs text-muted-foreground">
+            Os botões abrem o WhatsApp Web e o cliente de e-mail com a mensagem já preenchida — você confirma o envio.
+          </p>
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+function printCredenciais(list: Delegado[], e: Eleicao) {
+  const dateStr = new Date(e.data_eleicao).toLocaleDateString("pt-BR");
+  const cards = list.map((d) => `
+    <div class="cred">
+      <div class="head">
+        <div class="title">CREDENCIAL DE DELEGADO</div>
+        <div class="sub">${escapeHtml(e.titulo)}${e.distrito ? " · " + escapeHtml(e.distrito) : ""}</div>
+        <div class="sub">${dateStr}</div>
+      </div>
+      <div class="body">
+        <div class="row"><span class="lbl">Nome</span><span class="val">${escapeHtml(d.nome)}</span></div>
+        <div class="row"><span class="lbl">Clube</span><span class="val">${escapeHtml(d.clube ?? "—")}</span></div>
+        <div class="row"><span class="lbl">Tipo</span><span class="val">${escapeHtml(d.tipo)}</span></div>
+        <div class="code">${escapeHtml(d.codigo_acesso)}</div>
+        <div class="hint">Código de acesso para votação na urna eletrônica</div>
+      </div>
+      <div class="sig">
+        <div class="line"></div>
+        <div class="sub">Assinatura da Comissão Eleitoral</div>
+      </div>
+    </div>
+  `).join("");
+  const html = `<!doctype html><html><head><meta charset="utf-8"/><title>Credenciais — ${escapeHtml(e.titulo)}</title>
+    <style>
+      *{box-sizing:border-box;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif}
+      body{margin:0;padding:16px;background:#f3f4f6}
+      .toolbar{display:flex;gap:8px;margin-bottom:16px}
+      .toolbar button{padding:8px 14px;border:1px solid #1e3a8a;background:#1e3a8a;color:#fff;border-radius:6px;cursor:pointer}
+      .toolbar button.sec{background:#fff;color:#1e3a8a}
+      .grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+      .cred{border:2px solid #1e3a8a;border-radius:10px;padding:16px;background:#fff;page-break-inside:avoid}
+      .head{border-bottom:2px solid #1e3a8a;padding-bottom:8px;margin-bottom:10px;text-align:center}
+      .title{font-weight:800;color:#1e3a8a;letter-spacing:1px}
+      .sub{font-size:12px;color:#555}
+      .row{display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px dashed #ddd;font-size:13px}
+      .lbl{color:#666;text-transform:uppercase;font-size:11px}
+      .val{font-weight:600}
+      .code{margin:14px 0 4px;text-align:center;font-family:ui-monospace,Menlo,monospace;font-size:34px;font-weight:800;letter-spacing:6px;color:#1e3a8a;background:#eef2ff;border-radius:6px;padding:8px}
+      .hint{text-align:center;font-size:11px;color:#666}
+      .sig{margin-top:18px;text-align:center}
+      .line{margin:0 auto 4px;width:80%;border-top:1px solid #333}
+      @media print{.toolbar{display:none}body{background:#fff;padding:0}.grid{gap:8px}}
+    </style></head>
+    <body>
+      <div class="toolbar">
+        <button onclick="window.print()">Imprimir</button>
+        <button class="sec" onclick="window.close()">Fechar</button>
+      </div>
+      <div class="grid">${cards}</div>
+    </body></html>`;
+  const w = window.open("", "_blank", "width=900,height=700");
+  if (!w) { toast.error("Permita pop-ups para imprimir"); return; }
+  w.document.write(html);
+  w.document.close();
+}
+
+function escapeHtml(s: string) {
+  return s.replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]!));
 }
 
 function NewComissao({ eleicaoId, onCreated }: { eleicaoId: string; onCreated: () => void }) {
