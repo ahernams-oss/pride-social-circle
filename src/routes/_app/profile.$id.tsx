@@ -55,6 +55,8 @@ function ProfilePage() {
       complemento: (p as any).complemento ?? "",
       bairro: (p as any).bairro ?? "",
       estado: (p as any).estado ?? "",
+      phone: (p as any).phone ?? "",
+      email: (p as any).email ?? "",
     });
 
     const [{ data: dr }, { data: cr }, { data: hist }, { data: edus }] = await Promise.all([
