@@ -1,6 +1,8 @@
 import { useQuery } from "@tanstack/react-query";
-import { fetchDistrito, type Governador } from "@/lib/distrito-api";
+import { Link } from "@tanstack/react-router";
+import { supabase } from "@/integrations/supabase/client";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 const ROLES = [
   { key: "governador", label: "Governador", match: (r: string) => /governador/i.test(r) && !/vice/i.test(r) },
@@ -8,42 +10,66 @@ const ROLES = [
   { key: "vice2", label: "2º Vice Governador", match: (r: string) => /2º?\s*vice|segundo\s*vice/i.test(r) },
 ];
 
+type RoleRow = {
+  id: string;
+  user_id: string;
+  role_name: string;
+  start_date: string;
+  end_date: string | null;
+  profile: {
+    id: string;
+    full_name: string | null;
+    avatar_url: string | null;
+    club_name: string | null;
+    role_in_club: string | null;
+  } | null;
+};
+
 export function GovernadoresSidebar() {
   const { data, isLoading } = useQuery({
-    queryKey: ["distrito", "governadores"],
-    queryFn: () => fetchDistrito<Governador[]>("/api/public/governadores"),
+    queryKey: ["sidebar", "district-governadores"],
+    queryFn: async () => {
+      const today = new Date().toISOString().slice(0, 10);
+      const { data, error } = await supabase
+        .from("user_role_history")
+        .select("id,user_id,role_name,start_date,end_date,profile:profiles!user_role_history_user_id_fkey(id,full_name,avatar_url,club_name,role_in_club)")
+        .eq("scope", "district")
+        .ilike("role_name", "%governador%")
+        .or(`end_date.is.null,end_date.gte.${today}`)
+        .order("start_date", { ascending: false });
+      if (error) throw error;
+      return (data ?? []) as unknown as RoleRow[];
+    },
   });
 
   return (
     <aside className="hidden lg:block">
       <div className="sticky top-24 space-y-4 rounded-xl border bg-card p-4 shadow-sm">
         {ROLES.map(({ key, label, match }) => {
-          const g = data?.find((x) => match(x.role ?? ""));
+          const row = data?.find((x) => match(x.role_name ?? ""));
+          const p = row?.profile;
           return (
             <div key={key} className="space-y-2">
               <h3 className="text-sm font-semibold">{label}</h3>
               {isLoading ? (
-                <Skeleton className="h-40 w-full rounded-lg" />
-              ) : g ? (
-                <div className="space-y-2">
-                  {g.photo_url ? (
-                    <img
-                      src={g.photo_url}
-                      alt={g.name}
-                      className="aspect-[3/4] w-full rounded-lg object-cover ring-1 ring-border"
-                    />
-                  ) : (
-                    <div className="flex aspect-[3/4] w-full items-center justify-center rounded-lg bg-muted text-2xl font-semibold text-muted-foreground ring-1 ring-border">
-                      {g.name?.[0] ?? "?"}
-                    </div>
-                  )}
-                  <div>
-                    <p className="text-sm font-medium leading-tight">{g.name}</p>
-                    {g.year_label && (
-                      <p className="text-xs text-muted-foreground">{g.year_label}</p>
+                <Skeleton className="h-14 w-full rounded-lg" />
+              ) : p ? (
+                <Link
+                  to="/profile/$id"
+                  params={{ id: p.id }}
+                  className="flex items-center gap-3 rounded-lg border bg-background p-2 transition-colors hover:bg-muted/50"
+                >
+                  <Avatar className="h-10 w-10">
+                    <AvatarImage src={p.avatar_url ?? undefined} alt={p.full_name ?? ""} />
+                    <AvatarFallback>{p.full_name?.[0] ?? "?"}</AvatarFallback>
+                  </Avatar>
+                  <div className="min-w-0">
+                    <p className="truncate text-sm font-medium leading-tight">{p.full_name}</p>
+                    {p.club_name && (
+                      <p className="truncate text-xs text-muted-foreground">{p.club_name}</p>
                     )}
                   </div>
-                </div>
+                </Link>
               ) : (
                 <p className="text-xs text-muted-foreground">Não informado</p>
               )}
