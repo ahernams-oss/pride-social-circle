@@ -31,6 +31,7 @@ function ProfilePage() {
   const [form, setForm] = useState({
     full_name: "", bio: "", club_name: "", city: "", role_in_club: "", role_in_district: "", avatar_url: "",
     birth_date: "", cep: "", logradouro: "", numero: "", complemento: "", bairro: "", estado: "",
+    phone: "", email: "",
   });
   const [districtRoles, setDistrictRoles] = useState<{ id: string; name: string }[]>([]);
   const [clubRoles, setClubRoles] = useState<{ id: string; name: string }[]>([]);
