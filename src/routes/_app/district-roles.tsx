@@ -225,12 +225,32 @@ function DistrictRolesPage() {
                       <div className="mt-3 flex flex-col gap-2 sm:flex-row">
                         <Select value={assignSelect} onValueChange={setAssignSelect}>
                           <SelectTrigger className="flex-1">
-                            <SelectValue placeholder="Selecione o membro" />
+                            <SelectValue placeholder="Selecione o membro">
+                              {(() => {
+                                const sel = profiles.find((x) => x.id === assignSelect);
+                                if (!sel) return "Selecione o membro";
+                                return (
+                                  <span className="flex items-center gap-2">
+                                    <Avatar className="h-6 w-6">
+                                      <AvatarImage src={sel.avatar_url ?? undefined} alt={sel.full_name ?? ""} />
+                                      <AvatarFallback className="text-[10px]">{sel.full_name?.[0] ?? "?"}</AvatarFallback>
+                                    </Avatar>
+                                    <span className="truncate">{sel.full_name}{sel.club_name ? ` — ${sel.club_name}` : ""}</span>
+                                  </span>
+                                );
+                              })()}
+                            </SelectValue>
                           </SelectTrigger>
                           <SelectContent>
                             {profiles.map((pp) => (
                               <SelectItem key={pp.id} value={pp.id}>
-                                {pp.full_name ?? "(sem nome)"}{pp.club_name ? ` — ${pp.club_name}` : ""}
+                                <span className="flex items-center gap-2">
+                                  <Avatar className="h-6 w-6">
+                                    <AvatarImage src={pp.avatar_url ?? undefined} alt={pp.full_name ?? ""} />
+                                    <AvatarFallback className="text-[10px]">{pp.full_name?.[0] ?? "?"}</AvatarFallback>
+                                  </Avatar>
+                                  <span>{pp.full_name ?? "(sem nome)"}{pp.club_name ? ` — ${pp.club_name}` : ""}</span>
+                                </span>
                               </SelectItem>
                             ))}
                           </SelectContent>
