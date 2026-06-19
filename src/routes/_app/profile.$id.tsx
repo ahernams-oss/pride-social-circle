@@ -266,6 +266,10 @@ function ProfilePage() {
                 <div><Label>Clube</Label><Input value={form.club_name} onChange={(e) => setForm({ ...form, club_name: e.target.value })} /></div>
                 <div><Label>Cidade</Label><Input value={form.city} onChange={(e) => setForm({ ...form, city: e.target.value })} /></div>
               </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div><Label>Telefone Celular</Label><Input value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} /></div>
+                <div><Label>E-mail</Label><Input type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} /></div>
+              </div>
               <div>
                 <Label>Cargo no clube</Label>
                 <select
