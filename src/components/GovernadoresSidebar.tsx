@@ -12,54 +12,51 @@ const ROLES = [
 
 type RoleRow = {
   id: string;
-  user_id: string;
-  role_name: string;
-  start_date: string;
-  end_date: string | null;
-  profile: {
-    id: string;
-    full_name: string | null;
-    avatar_url: string | null;
-    club_name: string | null;
-    role_in_club: string | null;
-  } | null;
+  name: string;
+  assigned_user_id: string | null;
+};
+
+type ProfileLite = {
+  id: string;
+  full_name: string | null;
+  avatar_url: string | null;
+  club_name: string | null;
 };
 
 export function GovernadoresSidebar() {
   const { data, isLoading } = useQuery({
     queryKey: ["sidebar", "district-governadores"],
     queryFn: async () => {
-      const today = new Date().toISOString().slice(0, 10);
       const { data: rows, error } = await supabase
-        .from("user_role_history")
-        .select("id,user_id,role_name,start_date,end_date")
-        .eq("scope", "district")
-        .ilike("role_name", "%governador%")
-        .or(`end_date.is.null,end_date.gte.${today}`)
-        .order("start_date", { ascending: false });
+        .from("district_roles")
+        .select("id,name,assigned_user_id");
       if (error) throw error;
-      const ids = Array.from(new Set((rows ?? []).map((r) => r.user_id)));
-      let profiles: RoleRow["profile"][] = [];
+      const ids = (rows ?? [])
+        .map((r) => r.assigned_user_id)
+        .filter((v): v is string => !!v);
+      let profiles: ProfileLite[] = [];
       if (ids.length) {
         const { data: profs } = await supabase
           .from("profiles")
-          .select("id,full_name,avatar_url,club_name,role_in_club")
+          .select("id,full_name,avatar_url,club_name")
           .in("id", ids);
-        profiles = (profs ?? []) as RoleRow["profile"][];
+        profiles = (profs ?? []) as ProfileLite[];
       }
-      return (rows ?? []).map((r) => ({
-        ...r,
-        profile: profiles.find((p) => p?.id === r.user_id) ?? null,
-      })) as RoleRow[];
+      return { roles: (rows ?? []) as RoleRow[], profiles };
     },
   });
+
+  const findProfile = (roleMatch: (r: string) => boolean) => {
+    const row = data?.roles.find((r) => roleMatch(r.name));
+    if (!row?.assigned_user_id) return null;
+    return data?.profiles.find((p) => p.id === row.assigned_user_id) ?? null;
+  };
 
   return (
     <aside className="hidden lg:block">
       <div className="sticky top-24 space-y-4 rounded-xl border bg-card p-4 shadow-sm">
         {ROLES.map(({ key, label, match }) => {
-          const row = data?.find((x) => match(x.role_name ?? ""));
-          const p = row?.profile;
+          const p = findProfile(match);
           return (
             <div key={key} className="space-y-2">
               <h3 className="text-sm font-semibold">{label}</h3>
