@@ -31,6 +31,7 @@ function ProfilePage() {
   const [form, setForm] = useState({
     full_name: "", bio: "", club_name: "", city: "", role_in_club: "", role_in_district: "", avatar_url: "",
     birth_date: "", cep: "", logradouro: "", numero: "", complemento: "", bairro: "", estado: "",
+    phone: "", email: "",
   });
   const [districtRoles, setDistrictRoles] = useState<{ id: string; name: string }[]>([]);
   const [clubRoles, setClubRoles] = useState<{ id: string; name: string }[]>([]);
@@ -54,6 +55,8 @@ function ProfilePage() {
       complemento: (p as any).complemento ?? "",
       bairro: (p as any).bairro ?? "",
       estado: (p as any).estado ?? "",
+      phone: (p as any).phone ?? "",
+      email: (p as any).email ?? "",
     });
 
     const [{ data: dr }, { data: cr }, { data: hist }, { data: edus }] = await Promise.all([
@@ -103,6 +106,7 @@ function ProfilePage() {
       birth_date: form.birth_date || null,
       cep: form.cep, logradouro: form.logradouro, numero: form.numero,
       complemento: form.complemento, bairro: form.bairro, estado: form.estado,
+      phone: form.phone, email: form.email,
     } as any).eq("id", id);
     if (error) return toast.error(error.message);
     toast.success("Perfil atualizado");
@@ -261,6 +265,10 @@ function ProfilePage() {
               <div className="grid grid-cols-2 gap-3">
                 <div><Label>Clube</Label><Input value={form.club_name} onChange={(e) => setForm({ ...form, club_name: e.target.value })} /></div>
                 <div><Label>Cidade</Label><Input value={form.city} onChange={(e) => setForm({ ...form, city: e.target.value })} /></div>
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div><Label>Telefone Celular</Label><Input value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} /></div>
+                <div><Label>E-mail</Label><Input type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} /></div>
               </div>
               <div>
                 <Label>Cargo no clube</Label>

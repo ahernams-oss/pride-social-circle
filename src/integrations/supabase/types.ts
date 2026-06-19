@@ -745,11 +745,13 @@ export type Database = {
           complemento: string
           cover_url: string | null
           created_at: string
+          email: string | null
           estado: string
           full_name: string
           id: string
           logradouro: string
           numero: string
+          phone: string | null
           role_in_club: string
           role_in_district: string
           status: Database["public"]["Enums"]["profile_status"]
@@ -766,11 +768,13 @@ export type Database = {
           complemento?: string
           cover_url?: string | null
           created_at?: string
+          email?: string | null
           estado?: string
           full_name?: string
           id: string
           logradouro?: string
           numero?: string
+          phone?: string | null
           role_in_club?: string
           role_in_district?: string
           status?: Database["public"]["Enums"]["profile_status"]
@@ -787,11 +791,13 @@ export type Database = {
           complemento?: string
           cover_url?: string | null
           created_at?: string
+          email?: string | null
           estado?: string
           full_name?: string
           id?: string
           logradouro?: string
           numero?: string
+          phone?: string | null
           role_in_club?: string
           role_in_district?: string
           status?: Database["public"]["Enums"]["profile_status"]
