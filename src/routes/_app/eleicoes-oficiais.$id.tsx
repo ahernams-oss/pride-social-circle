@@ -128,8 +128,15 @@ function Page() {
         </TabsContent>
 
         <TabsContent value="delegados" className="space-y-3 pt-4">
-          {isAdmin && <NewDelegado eleicaoId={id} onCreated={load} />}
-          <DelegadosList items={dels} isAdmin={isAdmin} onChanged={load} />
+          <div className="flex flex-wrap items-center gap-2">
+            {isAdmin && <NewDelegado eleicaoId={id} onCreated={load} />}
+            {dels.length > 0 && (
+              <Button size="sm" variant="outline" onClick={() => printCredenciais(dels, eleicao)}>
+                <Printer className="mr-2 h-4 w-4" /> Imprimir todas
+              </Button>
+            )}
+          </div>
+          <DelegadosList items={dels} isAdmin={isAdmin} onChanged={load} eleicao={eleicao} />
         </TabsContent>
 
         <TabsContent value="comissao" className="space-y-3 pt-4">
