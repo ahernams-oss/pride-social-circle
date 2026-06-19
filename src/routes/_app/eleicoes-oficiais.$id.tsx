@@ -12,7 +12,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Progress } from "@/components/ui/progress";
-import { Plus, Play, Square, CheckCircle2, Copy, ShieldAlert, Trash2, Gavel } from "lucide-react";
+import { Plus, Play, Square, CheckCircle2, Copy, ShieldAlert, Trash2, Gavel, Printer, Send, Mail, MessageCircle } from "lucide-react";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/_app/eleicoes-oficiais/$id")({ component: Page });
