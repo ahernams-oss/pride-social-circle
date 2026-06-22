@@ -67,7 +67,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Lions Connect — Rede social dos associados Lions Clube" },
+      { title: "Lions Connecta — Rede social dos associados Lions Clube" },
       { name: "description", content: "Rede social para associados do Lions Clube interagirem, compartilharem ações e se conectarem." },
     ],
     links: [{ rel: "stylesheet", href: appCss }],

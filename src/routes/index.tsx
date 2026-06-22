@@ -23,7 +23,7 @@ function Landing() {
         <nav className="mx-auto flex max-w-6xl items-center justify-between px-6 py-5">
           <div className="flex items-center gap-3">
             <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gold text-gold-foreground font-bold">L</div>
-            <span className="text-lg font-semibold tracking-tight">Lions Connect</span>
+            <span className="text-lg font-semibold tracking-tight">Lions Connecta</span>
           </div>
           <div className="flex items-center gap-2">
             <Button variant="ghost" asChild className="text-primary-foreground hover:bg-white/10 hover:text-primary-foreground">
@@ -74,7 +74,7 @@ function Landing() {
 
       <footer className="border-t bg-muted/30">
         <div className="mx-auto max-w-6xl px-6 py-8 text-center text-sm text-muted-foreground">
-          Lions Connect — rede social independente para associados Lions Clube.
+          Lions Connecta — rede social independente para associados Lions Clube.
         </div>
       </footer>
     </div>
