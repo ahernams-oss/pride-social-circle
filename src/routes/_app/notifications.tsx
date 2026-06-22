@@ -89,7 +89,7 @@ function NotifPage() {
               </div>
               <div className="flex-1">
                 <div className="text-sm">
-                  <span className="font-semibold">{n.actor?.full_name ?? "Lions Connect"}</span>{" "}
+                  <span className="font-semibold">{n.actor?.full_name ?? "Lions Connecta"}</span>{" "}
                   {textFor(n.type)}
                 </div>
                 <div className="text-xs text-muted-foreground">

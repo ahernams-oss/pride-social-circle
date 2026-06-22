@@ -29,7 +29,7 @@ function LoginPage() {
       <div className="w-full max-w-md rounded-2xl bg-card p-8 shadow-2xl">
         <div className="mb-6 text-center">
           <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-gold text-gold-foreground text-xl font-bold">L</div>
-          <h1 className="text-2xl font-bold text-card-foreground">Lions Connect</h1>
+          <h1 className="text-2xl font-bold text-card-foreground">Lions Connecta</h1>
           <p className="mt-1 text-sm text-muted-foreground">Entre na rede dos associados</p>
         </div>
         <form onSubmit={onSubmit} className="space-y-4">
