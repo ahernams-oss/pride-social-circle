@@ -31,9 +31,10 @@ function AppLayout() {
       nav({ to: "/login", replace: true });
       return;
     }
-    if (profile && profile.status !== "approved") {
+    if (profile?.status !== "approved") {
       nav({ to: "/pending", replace: true });
     }
+
   }, [hydrated, loading, nav, profile, user]);
 
   useEffect(() => {
