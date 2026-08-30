@@ -17,7 +17,17 @@ export type Profile = {
   role_in_district: string;
   status: "pending" | "approved" | "rejected";
   is_active: boolean;
-
+  onboarding_done: boolean;
+  cpf: string | null;
+  lion_number: string | null;
+  birth_date: string | null;
+  phone: string | null;
+  email: string | null;
+  cep: string | null;
+  logradouro: string | null;
+  numero: string | null;
+  bairro: string | null;
+  estado: string | null;
 };
 
 type AuthCtx = {
@@ -25,6 +35,7 @@ type AuthCtx = {
   session: Session | null;
   profile: Profile | null;
   isAdmin: boolean;
+  isModerator: boolean;
   isApproved: boolean;
   level: AccessLevel;
   can: (required: AccessLevel) => boolean;
@@ -40,6 +51,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
   const [isAdmin, setIsAdmin] = useState(false);
+  const [isModerator, setIsModerator] = useState(false);
   const [loading, setLoading] = useState(true);
 
   const loadExtras = async (uid: string) => {
@@ -51,12 +63,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (p && (p as Profile).is_active === false) {
       setProfile(null);
       setIsAdmin(false);
+      setIsModerator(false);
       toast.error("Sua conta está desativada. Fale com um administrador.");
       await supabase.auth.signOut();
       return;
     }
     setProfile((p as Profile) ?? null);
     setIsAdmin(!!roles?.some((r) => r.role === "admin"));
+    setIsModerator(!!roles?.some((r) => r.role === "moderator"));
   };
 
 
@@ -70,6 +84,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       } else {
         setProfile(null);
         setIsAdmin(false);
+        setIsModerator(false);
         setLoading(false);
       }
     });
@@ -91,7 +106,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     await supabase.auth.signOut();
   };
 
-  const level = resolveLevel({ hasUser: !!user, status: profile?.status ?? null, isAdmin });
+  const level = resolveLevel({ hasUser: !!user, status: profile?.status ?? null, isAdmin, isModerator });
   const can = (required: AccessLevel) => hasLevel(level, required);
 
   return (
@@ -101,6 +116,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         session,
         profile,
         isAdmin,
+        isModerator,
         isApproved: profile?.status === "approved",
         level,
         can,

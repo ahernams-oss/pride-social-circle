@@ -1,7 +1,10 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { RequireAdmin } from "@/components/RequireAdmin";
+import { RequireAccess } from "@/components/RequireAccess";
+import { AdminCreateUser } from "@/components/AdminCreateUser";
+import { useAuth } from "@/lib/auth-context";
+import { LEVEL_LABEL } from "@/lib/permissions";
 import { AdminUserLevels } from "@/components/AdminUserLevels";
 import { AdminMemberRegistry } from "@/components/AdminMemberRegistry";
 import { formatCpf, matchProfile, type RegistryEntry } from "@/lib/registry";
@@ -26,9 +29,9 @@ function initials(n?: string | null) {
 
 function AdminPage() {
   return (
-    <RequireAdmin>
+    <RequireAccess level="moderator">
       <AdminPanel />
-    </RequireAdmin>
+    </RequireAccess>
   );
 }
 
@@ -39,6 +42,18 @@ function AdminPanel() {
   const [tab, setTab] = useState<"pending" | "approved" | "rejected">("pending");
   const [bulk, setBulk] = useState(false);
   const [selected, setSelected] = useState<Set<string>>(new Set());
+  const { isAdmin, level } = useAuth();
+
+  const sections = useMemo(
+    () =>
+      ([
+        ["cadastros", "Cadastros"],
+        ...(isAdmin
+          ? ([["niveis", "Usuários e níveis"], ["base", "Base de associados"]] as const)
+          : ([] as const)),
+      ] as ["cadastros" | "niveis" | "base", string][]),
+    [isAdmin],
+  );
 
 
 
@@ -126,13 +141,17 @@ function AdminPanel() {
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center gap-2">
-        <ShieldCheck className="h-6 w-6 text-primary" />
-        <h1 className="text-xl font-bold">Painel administrativo</h1>
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <div className="flex items-center gap-2">
+          <ShieldCheck className="h-6 w-6 text-primary" />
+          <h1 className="text-xl font-bold">Painel administrativo</h1>
+          <Badge variant="outline">{LEVEL_LABEL[level]}</Badge>
+        </div>
+        {isAdmin && <AdminCreateUser onCreated={load} />}
       </div>
 
       <div className="flex flex-wrap gap-2 border-b">
-        {([["cadastros", "Cadastros"], ["niveis", "Usuários e níveis"], ["base", "Base de associados"]] as const).map(([k, label]) => (
+        {sections.map(([k, label]) => (
           <button
             key={k}
             onClick={() => setSection(k)}
@@ -143,9 +162,9 @@ function AdminPanel() {
         ))}
       </div>
 
-      {section === "niveis" ? (
+      {section === "niveis" && isAdmin ? (
         <AdminUserLevels />
-      ) : section === "base" ? (
+      ) : section === "base" && isAdmin ? (
         <AdminMemberRegistry />
       ) : (
       <>

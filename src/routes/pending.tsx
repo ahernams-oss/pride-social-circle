@@ -3,6 +3,7 @@ import { useAuth } from "@/lib/auth-context";
 import { Button } from "@/components/ui/button";
 import { Clock } from "lucide-react";
 import { useEffect } from "react";
+import { needsOnboarding } from "@/lib/profile-completeness";
 
 export const Route = createFileRoute("/pending")({ component: Pending });
 
@@ -15,6 +16,10 @@ function Pending() {
     if (!hydrated || loading) return;
     if (!user) {
       nav({ to: "/login", replace: true });
+      return;
+    }
+    if (profile && needsOnboarding(profile)) {
+      nav({ to: "/onboarding", replace: true });
       return;
     }
     if (profile?.status === "approved") {
