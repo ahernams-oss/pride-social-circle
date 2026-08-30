@@ -11,12 +11,13 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Monitor, LogIn, LogOut, ShieldAlert, CheckCircle2, Vote } from "lucide-react";
 import { toast } from "sonner";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 export const Route = createFileRoute("/_app/kiosk")({ component: KioskPage });
 
 type ElectionLite = { id: string; titulo: string };
 type Delegado = { id: string; nome: string; eleicao_id: string; habilitado_votar: boolean; ja_votou: boolean };
-type Cand = { id: string; nome: string; cargo: string; numero: string | null; proposta: string | null };
+type Cand = { id: string; nome: string; cargo: string; numero: string | null; proposta: string | null; foto_url: string | null };
 
 function KioskPage() {
   const { isAdmin, loading } = useAuth();
@@ -160,6 +161,10 @@ function KioskPage() {
                   {cands.filter((c) => c.cargo === cargo).map((c) => (
                     <label key={c.id} className="flex cursor-pointer items-center gap-3 rounded border p-3 hover:bg-accent">
                       <RadioGroupItem value={c.id} />
+                      <Avatar className="h-16 w-16 rounded-md">
+                        {c.foto_url ? <AvatarImage src={c.foto_url} alt={c.nome} className="object-cover" /> : null}
+                        <AvatarFallback className="rounded-md text-sm">{c.nome.slice(0, 2).toUpperCase()}</AvatarFallback>
+                      </Avatar>
                       <div className="flex-1"><div className="font-medium">{c.nome}</div>{c.proposta && <div className="text-xs text-muted-foreground">{c.proposta}</div>}</div>
                       {c.numero && <Badge variant="outline">{c.numero}</Badge>}
                     </label>
