@@ -15,6 +15,8 @@ import { Progress } from "@/components/ui/progress";
 import { Plus, Play, Square, CheckCircle2, Copy, ShieldAlert, Trash2, Gavel, Printer, Send, Mail, MessageCircle } from "lucide-react";
 import { toast } from "sonner";
 import { AssociadoCombobox, type Associado } from "@/components/AssociadoCombobox";
+import { CandidatoFotoUpload } from "@/components/CandidatoFotoUpload";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 export const Route = createFileRoute("/_app/eleicoes-oficiais/$id")({ component: Page });
 
