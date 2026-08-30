@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Vote, CheckCircle2 } from "lucide-react";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/_app/votar-eleicao")({ component: Page });
@@ -16,7 +17,7 @@ type Delegado = {
   habilitado_votar: boolean; ja_votou: boolean;
 };
 type Eleicao = { id: string; titulo: string; status: string };
-type Cand = { id: string; nome: string; cargo: string; numero: string | null; proposta: string | null };
+type Cand = { id: string; nome: string; cargo: string; numero: string | null; proposta: string | null; foto_url: string | null };
 
 function Page() {
   const [codigo, setCodigo] = useState("");
@@ -106,8 +107,16 @@ function Page() {
               <button key={c.id} type="button"
                 onClick={() => setVotos({ ...votos, [cargo]: c.id })}
                 className={`w-full rounded-lg border p-3 text-left transition ${votos[cargo] === c.id ? "border-primary bg-primary/5" : "hover:bg-muted"}`}>
-                <div className="font-medium">{c.numero ? `${c.numero} — ` : ""}{c.nome}</div>
-                {c.proposta && <p className="line-clamp-2 text-xs text-muted-foreground">{c.proposta}</p>}
+                <div className="flex items-center gap-3">
+                  <Avatar className="h-14 w-14 rounded-md">
+                    {c.foto_url ? <AvatarImage src={c.foto_url} alt={c.nome} className="object-cover" /> : null}
+                    <AvatarFallback className="rounded-md text-xs">{c.nome.slice(0, 2).toUpperCase()}</AvatarFallback>
+                  </Avatar>
+                  <div className="min-w-0">
+                    <div className="font-medium">{c.numero ? `${c.numero} — ` : ""}{c.nome}</div>
+                    {c.proposta && <p className="line-clamp-2 text-xs text-muted-foreground">{c.proposta}</p>}
+                  </div>
+                </div>
               </button>
             ))}
             <div className="flex gap-2">

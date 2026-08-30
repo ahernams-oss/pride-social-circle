@@ -15,12 +15,14 @@ import { Progress } from "@/components/ui/progress";
 import { Plus, Play, Square, CheckCircle2, Copy, ShieldAlert, Trash2, Gavel, Printer, Send, Mail, MessageCircle } from "lucide-react";
 import { toast } from "sonner";
 import { AssociadoCombobox, type Associado } from "@/components/AssociadoCombobox";
+import { CandidatoFotoUpload } from "@/components/CandidatoFotoUpload";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 export const Route = createFileRoute("/_app/eleicoes-oficiais/$id")({ component: Page });
 
 type Status = "configurando" | "credenciamento" | "votacao_aberta" | "votacao_encerrada" | "apurada";
 type Eleicao = { id: string; titulo: string; descricao: string | null; distrito: string | null; data_eleicao: string; status: Status };
-type Candidatura = { id: string; nome: string; cargo: string; numero: string | null; proposta: string | null; status: string };
+type Candidatura = { id: string; nome: string; cargo: string; numero: string | null; proposta: string | null; status: string; foto_url: string | null };
 type Delegado = {
   id: string; nome: string; clube: string | null; tipo: "titular" | "suplente" | "nato";
   codigo_acesso: string; credenciado: boolean; presente: boolean; habilitado_votar: boolean; ja_votou: boolean;
@@ -156,20 +158,23 @@ function Page() {
 function NewCandidatura({ eleicaoId, onCreated }: { eleicaoId: string; onCreated: () => void }) {
   const [open, setOpen] = useState(false);
   const associados = useAssociados();
-  const [f, setF] = useState({ associado_id: "", nome: "", cargo: "", numero: "", proposta: "" });
+  const [f, setF] = useState<{ associado_id: string; nome: string; cargo: string; numero: string; proposta: string; foto_url: string | null }>(
+    { associado_id: "", nome: "", cargo: "", numero: "", proposta: "", foto_url: null },
+  );
   const pick = (aid: string) => {
     const a = associados.find((x) => x.id === aid);
-    setF({ ...f, associado_id: aid, nome: a?.full_name ?? f.nome });
+    setF({ ...f, associado_id: aid, nome: a?.full_name ?? f.nome, foto_url: a?.avatar_url ?? f.foto_url });
   };
   const save = async () => {
     if (!f.nome || !f.cargo) return toast.error("Nome e cargo são obrigatórios");
     const { error } = await supabase.from("vf_candidaturas").insert({
       eleicao_id: eleicaoId, associado_id: f.associado_id || null,
       nome: f.nome, cargo: f.cargo, numero: f.numero || null, proposta: f.proposta || null,
+      foto_url: f.foto_url,
     } as any);
     if (error) return toast.error(error.message);
     toast.success("Candidatura cadastrada");
-    setF({ associado_id: "", nome: "", cargo: "", numero: "", proposta: "" });
+    setF({ associado_id: "", nome: "", cargo: "", numero: "", proposta: "", foto_url: null });
     setOpen(false);
     onCreated();
   };
@@ -181,6 +186,9 @@ function NewCandidatura({ eleicaoId, onCreated }: { eleicaoId: string; onCreated
         <div className="space-y-3">
           <div><Label>Associado (opcional)</Label>
             <AssociadoCombobox items={associados} value={f.associado_id} onChange={pick} />
+          </div>
+          <div><Label>Foto do candidato</Label>
+            <div className="pt-1"><CandidatoFotoUpload value={f.foto_url} onChange={(url) => setF({ ...f, foto_url: url })} /></div>
           </div>
           <div><Label>Nome</Label><Input value={f.nome} onChange={(e) => setF({ ...f, nome: e.target.value })} /></div>
           <div><Label>Cargo</Label><Input placeholder="Ex: Governador" value={f.cargo} onChange={(e) => setF({ ...f, cargo: e.target.value })} /></div>
@@ -214,9 +222,15 @@ function CandidaturasList({ items, isAdmin, onChanged }: { items: Candidatura[];
           <div className="grid gap-2 sm:grid-cols-2">
             {list.map((c) => (
               <Card key={c.id}><CardContent className="flex items-start justify-between gap-2 py-3">
-                <div>
+                <div className="flex items-start gap-3">
+                  <Avatar className="h-12 w-12 rounded-md">
+                    {c.foto_url ? <AvatarImage src={c.foto_url} alt={c.nome} className="object-cover" /> : null}
+                    <AvatarFallback className="rounded-md text-xs">{c.nome.slice(0, 2).toUpperCase()}</AvatarFallback>
+                  </Avatar>
+                  <div>
                   <div className="font-medium">{c.numero ? `${c.numero} — ` : ""}{c.nome}</div>
                   {c.proposta && <p className="mt-1 line-clamp-2 text-xs text-muted-foreground">{c.proposta}</p>}
+                  </div>
                 </div>
                 {isAdmin && <Button size="icon" variant="ghost" onClick={() => remove(c.id)}><Trash2 className="h-4 w-4" /></Button>}
               </CardContent></Card>
