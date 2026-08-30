@@ -20,7 +20,7 @@ export const Route = createFileRoute("/_app/eleicoes-oficiais/$id")({ component:
 
 type Status = "configurando" | "credenciamento" | "votacao_aberta" | "votacao_encerrada" | "apurada";
 type Eleicao = { id: string; titulo: string; descricao: string | null; distrito: string | null; data_eleicao: string; status: Status };
-type Candidatura = { id: string; nome: string; cargo: string; numero: string | null; proposta: string | null; status: string };
+type Candidatura = { id: string; nome: string; cargo: string; numero: string | null; proposta: string | null; status: string; foto_url: string | null };
 type Delegado = {
   id: string; nome: string; clube: string | null; tipo: "titular" | "suplente" | "nato";
   codigo_acesso: string; credenciado: boolean; presente: boolean; habilitado_votar: boolean; ja_votou: boolean;
