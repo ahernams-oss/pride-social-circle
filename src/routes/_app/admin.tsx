@@ -7,6 +7,7 @@ import { useAuth } from "@/lib/auth-context";
 import { LEVEL_LABEL } from "@/lib/permissions";
 import { AdminUserLevels } from "@/components/AdminUserLevels";
 import { AdminMemberRegistry } from "@/components/AdminMemberRegistry";
+import { AdminAccessLevels } from "@/components/AdminAccessLevels";
 import { formatCpf, matchProfile, type RegistryEntry } from "@/lib/registry";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -38,7 +39,7 @@ function AdminPage() {
 function AdminPanel() {
   const [rows, setRows] = useState<Row[]>([]);
   const [registry, setRegistry] = useState<RegistryEntry[]>([]);
-  const [section, setSection] = useState<"cadastros" | "niveis" | "base">("cadastros");
+  const [section, setSection] = useState<"cadastros" | "niveis" | "permissoes" | "base">("cadastros");
   const [tab, setTab] = useState<"pending" | "approved" | "rejected">("pending");
   const [bulk, setBulk] = useState(false);
   const [selected, setSelected] = useState<Set<string>>(new Set());
@@ -49,9 +50,9 @@ function AdminPanel() {
       ([
         ["cadastros", "Cadastros"],
         ...(isAdmin
-          ? ([["niveis", "Usuários e níveis"], ["base", "Base de associados"]] as const)
+          ? ([["niveis", "Usuários e níveis"], ["permissoes", "Níveis e permissões"], ["base", "Base de associados"]] as const)
           : ([] as const)),
-      ] as ["cadastros" | "niveis" | "base", string][]),
+      ] as ["cadastros" | "niveis" | "permissoes" | "base", string][]),
     [isAdmin],
   );
 
@@ -164,6 +165,8 @@ function AdminPanel() {
 
       {section === "niveis" && isAdmin ? (
         <AdminUserLevels />
+      ) : section === "permissoes" && isAdmin ? (
+        <AdminAccessLevels />
       ) : section === "base" && isAdmin ? (
         <AdminMemberRegistry />
       ) : (

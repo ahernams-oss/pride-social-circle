@@ -18,6 +18,7 @@ export type Profile = {
   status: "pending" | "approved" | "rejected";
   is_active: boolean;
   onboarding_done: boolean;
+  access_level: string | null;
   cpf: string | null;
   lion_number: string | null;
   birth_date: string | null;
