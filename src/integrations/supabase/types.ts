@@ -14,6 +14,36 @@ export type Database = {
   }
   public: {
     Tables: {
+      access_level_audit: {
+        Row: {
+          changed_by: string | null
+          created_at: string
+          id: string
+          new_level: string
+          old_level: string
+          reason: string | null
+          target_user_id: string
+        }
+        Insert: {
+          changed_by?: string | null
+          created_at?: string
+          id?: string
+          new_level: string
+          old_level: string
+          reason?: string | null
+          target_user_id: string
+        }
+        Update: {
+          changed_by?: string | null
+          created_at?: string
+          id?: string
+          new_level?: string
+          old_level?: string
+          reason?: string | null
+          target_user_id?: string
+        }
+        Relationships: []
+      }
       ballot_choices: {
         Row: {
           ballot_id: string
@@ -1162,6 +1192,11 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      admin_set_access_level: {
+        Args: { _level: string; _reason?: string; _user_id: string }
+        Returns: string
+      }
+      current_access_level: { Args: { _user_id: string }; Returns: string }
       election_results: {
         Args: { _election_id: string }
         Returns: {
