@@ -779,6 +779,7 @@ export type Database = {
           estado: string
           full_name: string
           id: string
+          is_active: boolean
           logradouro: string
           numero: string
           phone: string | null
@@ -802,6 +803,7 @@ export type Database = {
           estado?: string
           full_name?: string
           id: string
+          is_active?: boolean
           logradouro?: string
           numero?: string
           phone?: string | null
@@ -825,6 +827,7 @@ export type Database = {
           estado?: string
           full_name?: string
           id?: string
+          is_active?: boolean
           logradouro?: string
           numero?: string
           phone?: string | null
@@ -832,6 +835,33 @@ export type Database = {
           role_in_district?: string
           status?: Database["public"]["Enums"]["profile_status"]
           updated_at?: string
+        }
+        Relationships: []
+      }
+      user_activation_audit: {
+        Row: {
+          active: boolean
+          changed_by: string | null
+          created_at: string
+          id: string
+          reason: string | null
+          target_user_id: string
+        }
+        Insert: {
+          active: boolean
+          changed_by?: string | null
+          created_at?: string
+          id?: string
+          reason?: string | null
+          target_user_id: string
+        }
+        Update: {
+          active?: boolean
+          changed_by?: string | null
+          created_at?: string
+          id?: string
+          reason?: string | null
+          target_user_id?: string
         }
         Relationships: []
       }
@@ -1192,9 +1222,14 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      account_is_active: { Args: { _user_id: string }; Returns: boolean }
       admin_set_access_level: {
         Args: { _level: string; _reason?: string; _user_id: string }
         Returns: string
+      }
+      admin_set_user_active: {
+        Args: { _active: boolean; _reason?: string; _user_id: string }
+        Returns: boolean
       }
       current_access_level: { Args: { _user_id: string }; Returns: string }
       election_results: {

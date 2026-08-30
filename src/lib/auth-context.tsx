@@ -1,6 +1,8 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
 import type { Session, User } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
+
 import { hasLevel, resolveLevel, type AccessLevel } from "@/lib/permissions";
 
 export type Profile = {
@@ -14,6 +16,8 @@ export type Profile = {
   role_in_club: string;
   role_in_district: string;
   status: "pending" | "approved" | "rejected";
+  is_active: boolean;
+
 };
 
 type AuthCtx = {
@@ -43,9 +47,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       supabase.from("profiles").select("*").eq("id", uid).maybeSingle(),
       supabase.from("user_roles").select("role").eq("user_id", uid),
     ]);
+    // Conta desativada pelo administrador: encerra a sessão imediatamente
+    if (p && (p as Profile).is_active === false) {
+      setProfile(null);
+      setIsAdmin(false);
+      toast.error("Sua conta está desativada. Fale com um administrador.");
+      await supabase.auth.signOut();
+      return;
+    }
     setProfile((p as Profile) ?? null);
     setIsAdmin(!!roles?.some((r) => r.role === "admin"));
   };
+
 
   useEffect(() => {
     const { data: sub } = supabase.auth.onAuthStateChange((_e, s) => {
