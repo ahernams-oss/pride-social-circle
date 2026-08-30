@@ -506,6 +506,39 @@ export type Database = {
           },
         ]
       }
+      member_registry: {
+        Row: {
+          birth_date: string | null
+          cpf: string
+          created_at: string
+          created_by: string | null
+          full_name: string
+          id: string
+          lion_number: string
+          updated_at: string
+        }
+        Insert: {
+          birth_date?: string | null
+          cpf: string
+          created_at?: string
+          created_by?: string | null
+          full_name: string
+          id?: string
+          lion_number: string
+          updated_at?: string
+        }
+        Update: {
+          birth_date?: string | null
+          cpf?: string
+          created_at?: string
+          created_by?: string | null
+          full_name?: string
+          id?: string
+          lion_number?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       messages: {
         Row: {
           content: string
@@ -774,12 +807,14 @@ export type Database = {
           club_name: string
           complemento: string
           cover_url: string | null
+          cpf: string
           created_at: string
           email: string | null
           estado: string
           full_name: string
           id: string
           is_active: boolean
+          lion_number: string
           logradouro: string
           numero: string
           phone: string | null
@@ -798,12 +833,14 @@ export type Database = {
           club_name?: string
           complemento?: string
           cover_url?: string | null
+          cpf?: string
           created_at?: string
           email?: string | null
           estado?: string
           full_name?: string
           id: string
           is_active?: boolean
+          lion_number?: string
           logradouro?: string
           numero?: string
           phone?: string | null
@@ -822,12 +859,14 @@ export type Database = {
           club_name?: string
           complemento?: string
           cover_url?: string | null
+          cpf?: string
           created_at?: string
           email?: string | null
           estado?: string
           full_name?: string
           id?: string
           is_active?: boolean
+          lion_number?: string
           logradouro?: string
           numero?: string
           phone?: string | null
@@ -1254,6 +1293,16 @@ export type Database = {
       is_conversation_participant: {
         Args: { _conv: string; _user: string }
         Returns: boolean
+      }
+      registry_verification: {
+        Args: { _user_id: string }
+        Returns: {
+          birth_ok: boolean
+          cpf_ok: boolean
+          lion_ok: boolean
+          matched: boolean
+          name_ok: boolean
+        }[]
       }
       vf_apuracao: {
         Args: { _eleicao_id: string }
