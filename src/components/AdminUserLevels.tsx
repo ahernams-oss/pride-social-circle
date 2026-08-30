@@ -83,10 +83,17 @@ export function AdminUserLevels() {
     ]);
 
     const admins = new Set((roles ?? []).filter((r) => r.role === "admin").map((r) => r.user_id));
+    const mods = new Set((roles ?? []).filter((r) => r.role === "moderator").map((r) => r.user_id));
     setUsers(
       (profiles ?? []).map((p) => ({
         ...p,
-        level: admins.has(p.id) ? "admin" : p.status === "approved" ? "approved" : "user",
+        level: admins.has(p.id)
+          ? "admin"
+          : mods.has(p.id)
+            ? "moderator"
+            : p.status === "approved"
+              ? "approved"
+              : "user",
       })) as UserRow[],
     );
 
