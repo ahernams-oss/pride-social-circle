@@ -28,7 +28,7 @@ type Delegado = {
 };
 type Comissao = { id: string; nome: string; funcao: "presidente" | "vice_presidente" | "membro" | "vogal" };
 type Apuracao = { cargo: string; candidatura_id: string | null; candidato: string; tipo: string; votos: number };
-type Associado = { id: string; full_name: string; club_name: string | null };
+
 
 const STATUS_LABEL: Record<Status, string> = {
   configurando: "Configurando", credenciamento: "Credenciamento",
