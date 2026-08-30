@@ -17,12 +17,29 @@ function LoginPage() {
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
+    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+    if (error) {
+      setLoading(false);
+      return toast.error(error.message);
+    }
+
+    // Bloqueia contas desativadas pelo administrador
+    const uid = data.user?.id;
+    if (uid) {
+      const { data: prof } = await supabase
+        .from("profiles").select("is_active").eq("id", uid).maybeSingle();
+      if (prof && prof.is_active === false) {
+        await supabase.auth.signOut();
+        setLoading(false);
+        return toast.error("Sua conta está desativada. Fale com um administrador.");
+      }
+    }
+
     setLoading(false);
-    if (error) return toast.error(error.message);
     toast.success("Bem-vindo de volta!");
     nav({ to: "/feed" });
   };
+
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-lions-gradient p-4">
