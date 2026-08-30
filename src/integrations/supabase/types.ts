@@ -817,6 +817,7 @@ export type Database = {
           lion_number: string
           logradouro: string
           numero: string
+          onboarding_done: boolean
           phone: string | null
           role_in_club: string
           role_in_district: string
@@ -843,6 +844,7 @@ export type Database = {
           lion_number?: string
           logradouro?: string
           numero?: string
+          onboarding_done?: boolean
           phone?: string | null
           role_in_club?: string
           role_in_district?: string
@@ -869,6 +871,7 @@ export type Database = {
           lion_number?: string
           logradouro?: string
           numero?: string
+          onboarding_done?: boolean
           phone?: string | null
           role_in_club?: string
           role_in_district?: string
@@ -1316,7 +1319,7 @@ export type Database = {
       }
     }
     Enums: {
-      app_role: "admin" | "member"
+      app_role: "admin" | "member" | "moderator"
       election_status: "draft" | "open" | "closed"
       election_type: "single" | "yes_no" | "multiple_choice" | "multi_position"
       notification_type: "like" | "comment" | "message" | "approved" | "mention"
@@ -1458,7 +1461,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
-      app_role: ["admin", "member"],
+      app_role: ["admin", "member", "moderator"],
       election_status: ["draft", "open", "closed"],
       election_type: ["single", "yes_no", "multiple_choice", "multi_position"],
       notification_type: ["like", "comment", "message", "approved", "mention"],
