@@ -37,6 +37,8 @@ function AdminPanel() {
   const [registry, setRegistry] = useState<RegistryEntry[]>([]);
   const [section, setSection] = useState<"cadastros" | "niveis" | "base">("cadastros");
   const [tab, setTab] = useState<"pending" | "approved" | "rejected">("pending");
+  const [bulk, setBulk] = useState(false);
+
 
   const load = useCallback(async () => {
     const [{ data }, { data: reg }] = await Promise.all([
