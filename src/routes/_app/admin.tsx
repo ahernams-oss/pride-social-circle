@@ -64,6 +64,33 @@ function AdminPanel() {
     load();
   };
 
+  const verifiedPending = useMemo(
+    () => rows.filter((r) => r.status === "pending" && matchProfile(r, registryMap).matched),
+    [rows, registryMap],
+  );
+
+  const approveVerified = async () => {
+    if (verifiedPending.length === 0) return;
+    setBulk(true);
+    const reason = `Aprovação em lote — dados conferidos com a base oficial de associados (importação) em ${new Date().toLocaleString("pt-BR")}`;
+    let ok = 0;
+    const fails: string[] = [];
+    for (const r of verifiedPending) {
+      const { error } = await supabase.rpc("admin_set_access_level", {
+        _user_id: r.id,
+        _level: "approved",
+        _reason: reason,
+      });
+      if (error) fails.push(`${r.full_name}: ${error.message}`);
+      else ok++;
+    }
+    setBulk(false);
+    if (ok) toast.success(`${ok} cadastro(s) aprovado(s) em lote com auditoria registrada.`);
+    if (fails.length) toast.error(`Falhas: ${fails.slice(0, 3).join(" · ")}${fails.length > 3 ? "…" : ""}`);
+    load();
+  };
+
+
   return (
     <div className="space-y-4">
       <div className="flex items-center gap-2">
