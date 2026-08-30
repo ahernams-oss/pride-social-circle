@@ -38,6 +38,9 @@ function AdminPanel() {
   const [section, setSection] = useState<"cadastros" | "niveis" | "base">("cadastros");
   const [tab, setTab] = useState<"pending" | "approved" | "rejected">("pending");
   const [bulk, setBulk] = useState(false);
+  const [selected, setSelected] = useState<Set<string>>(new Set());
+
+
 
 
   const load = useCallback(async () => {
