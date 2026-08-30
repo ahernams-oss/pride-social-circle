@@ -3,6 +3,7 @@ import { useAuth } from "@/lib/auth-context";
 import { Button } from "@/components/ui/button";
 import { Users, MessageCircle, FileText, ShieldCheck } from "lucide-react";
 import { useEffect } from "react";
+import distritoLogo from "@/assets/distrito-lc11-logo.png.asset.json";
 
 export const Route = createFileRoute("/")({
   component: Landing,
@@ -71,9 +72,11 @@ function Landing() {
     <div className="min-h-screen bg-secondary/60 text-foreground">
       <nav className="mx-auto flex max-w-7xl items-center justify-between px-6 py-6">
         <div className="flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary font-bold text-gold">
-            L
-          </div>
+          <img
+            src={distritoLogo.url}
+            alt="Lions Clubs International - Distrito LC-11"
+            className="h-12 w-auto object-contain"
+          />
           <span className="font-display text-2xl font-bold tracking-tight text-primary">
             Lions Connecta
           </span>
