@@ -198,162 +198,24 @@ function AppLayout() {
                 </div>
               </div>
             )}
-            <Link
-              to="/ranking"
-              className={`flex items-center gap-3 rounded-lg px-2 py-2 text-sm font-medium transition-colors ${
-                loc.pathname.startsWith("/ranking") ? "bg-primary/10 text-primary" : "text-foreground hover:bg-muted"
-              }`}
-            >
-              <span className="flex h-10 w-10 items-center justify-center rounded-full bg-muted">
-                <Trophy className="h-5 w-5" />
-              </span>
-              Ranking
-            </Link>
-            <Link
-              to="/friends"
-              className={`flex items-center gap-3 rounded-lg px-2 py-2 text-sm font-medium transition-colors ${
-                loc.pathname.startsWith("/friends") ? "bg-primary/10 text-primary" : "text-foreground hover:bg-muted"
-              }`}
-            >
-              <span className="flex h-10 w-10 items-center justify-center rounded-full bg-muted">
-                <Users className="h-5 w-5" />
-              </span>
-              Amigos
-            </Link>
-            <Link
-              to="/groups"
-              className={`flex items-center gap-3 rounded-lg px-2 py-2 text-sm font-medium transition-colors ${
-                loc.pathname.startsWith("/groups") ? "bg-primary/10 text-primary" : "text-foreground hover:bg-muted"
-              }`}
-            >
-              <span className="flex h-10 w-10 items-center justify-center rounded-full bg-muted">
-                <Users2 className="h-5 w-5" />
-              </span>
-              Grupos
-            </Link>
-            <Link
-              to="/events"
-              className={`flex items-center gap-3 rounded-lg px-2 py-2 text-sm font-medium transition-colors ${
-                loc.pathname.startsWith("/events") ? "bg-primary/10 text-primary" : "text-foreground hover:bg-muted"
-              }`}
-            >
-              <span className="flex h-10 w-10 items-center justify-center rounded-full bg-muted">
-                <Calendar className="h-5 w-5" />
-              </span>
-              Eventos
-            </Link>
-            <Link
-              to="/missions"
-              className={`flex items-center gap-3 rounded-lg px-2 py-2 text-sm font-medium transition-colors ${
-                loc.pathname.startsWith("/missions") ? "bg-primary/10 text-primary" : "text-foreground hover:bg-muted"
-              }`}
-            >
-              <span className="flex h-10 w-10 items-center justify-center rounded-full bg-muted">
-                <Target className="h-5 w-5" />
-              </span>
-              Missões
-            </Link>
-            <Link
-              to="/clubs"
-              className={`flex items-center gap-3 rounded-lg px-2 py-2 text-sm font-medium transition-colors ${
-                loc.pathname.startsWith("/clubs") ? "bg-primary/10 text-primary" : "text-foreground hover:bg-muted"
-              }`}
-            >
-              <span className="flex h-10 w-10 items-center justify-center rounded-full bg-muted">
-                <Landmark className="h-5 w-5" />
-              </span>
-              Clubes
-            </Link>
-            <Link
-              to="/district-roles"
-              className={`flex items-center gap-3 rounded-lg px-2 py-2 text-sm font-medium transition-colors ${
-                loc.pathname.startsWith("/district-roles") ? "bg-primary/10 text-primary" : "text-foreground hover:bg-muted"
-              }`}
-            >
-              <span className="flex h-10 w-10 items-center justify-center rounded-full bg-muted">
-                <Award className="h-5 w-5" />
-              </span>
-              Cargos no Distrito
-            </Link>
-            <Link
-              to="/club-roles"
-              className={`flex items-center gap-3 rounded-lg px-2 py-2 text-sm font-medium transition-colors ${
-                loc.pathname.startsWith("/club-roles") ? "bg-primary/10 text-primary" : "text-foreground hover:bg-muted"
-              }`}
-            >
-              <span className="flex h-10 w-10 items-center justify-center rounded-full bg-muted">
-                <BadgeCheck className="h-5 w-5" />
-              </span>
-              Cargos no Clube
-            </Link>
-            <Link
-              to="/distrito"
-              className={`flex items-center gap-3 rounded-lg px-2 py-2 text-sm font-medium transition-colors ${
-                loc.pathname.startsWith("/distrito") ? "bg-primary/10 text-primary" : "text-foreground hover:bg-muted"
-              }`}
-            >
-              <span className="flex h-10 w-10 items-center justify-center rounded-full bg-muted">
-                <Globe className="h-5 w-5" />
-              </span>
-              Distrito LC-11
-            </Link>
-            <Link
-              to="/documents"
-              className={`flex items-center gap-3 rounded-lg px-2 py-2 text-sm font-medium transition-colors ${
-                loc.pathname.startsWith("/documents") ? "bg-primary/10 text-primary" : "text-foreground hover:bg-muted"
-              }`}
-            >
-              <span className="flex h-10 w-10 items-center justify-center rounded-full bg-muted">
-                <FileText className="h-5 w-5" />
-              </span>
-              Documentos
-            </Link>
-            <Link
-              to="/elections"
-              className={`flex items-center gap-3 rounded-lg px-2 py-2 text-sm font-medium transition-colors ${
-                loc.pathname.startsWith("/elections") ? "bg-primary/10 text-primary" : "text-foreground hover:bg-muted"
-              }`}
-            >
-              <span className="flex h-10 w-10 items-center justify-center rounded-full bg-muted">
-                <Vote className="h-5 w-5" />
-              </span>
-              Votações
-            </Link>
-            {isAdmin && (
-              <Link
-                to="/kiosk"
-                className={`flex items-center gap-3 rounded-lg px-2 py-2 text-sm font-medium transition-colors ${
-                  loc.pathname.startsWith("/kiosk") ? "bg-primary/10 text-primary" : "text-foreground hover:bg-muted"
-                }`}
-              >
-                <span className="flex h-10 w-10 items-center justify-center rounded-full bg-muted">
-                  <Monitor className="h-5 w-5" />
-                </span>
-                Urna Eletrônica
-              </Link>
-            )}
-            <Link
-              to="/eleicoes-oficiais"
-              className={`flex items-center gap-3 rounded-lg px-2 py-2 text-sm font-medium transition-colors ${
-                loc.pathname.startsWith("/eleicoes-oficiais") ? "bg-primary/10 text-primary" : "text-foreground hover:bg-muted"
-              }`}
-            >
-              <span className="flex h-10 w-10 items-center justify-center rounded-full bg-muted">
-                <Gavel className="h-5 w-5" />
-              </span>
-              Eleições Oficiais
-            </Link>
-            <Link
-              to="/votar-eleicao"
-              className={`flex items-center gap-3 rounded-lg px-2 py-2 text-sm font-medium transition-colors ${
-                loc.pathname.startsWith("/votar-eleicao") ? "bg-primary/10 text-primary" : "text-foreground hover:bg-muted"
-              }`}
-            >
-              <span className="flex h-10 w-10 items-center justify-center rounded-full bg-muted">
-                <Vote className="h-5 w-5" />
-              </span>
-              Votar (delegado)
-            </Link>
+            {sidebarMenus.map((m) => {
+              const Icon = MENU_ICONS[m.icon] ?? Home;
+              const active = loc.pathname.startsWith(m.path);
+              return (
+                <Link
+                  key={m.key}
+                  to={m.path as never}
+                  className={`flex items-center gap-3 rounded-lg px-2 py-2 text-sm font-medium transition-colors ${
+                    active ? "bg-primary/10 text-primary" : "text-foreground hover:bg-muted"
+                  }`}
+                >
+                  <span className="flex h-10 w-10 items-center justify-center rounded-full bg-muted">
+                    <Icon className="h-5 w-5" />
+                  </span>
+                  {m.label}
+                </Link>
+              );
+            })}
           </div>
         </aside>
         <main className="min-w-0">
