@@ -17,7 +17,17 @@ export type Profile = {
   role_in_district: string;
   status: "pending" | "approved" | "rejected";
   is_active: boolean;
-
+  onboarding_done: boolean;
+  cpf: string | null;
+  lion_number: string | null;
+  birth_date: string | null;
+  phone: string | null;
+  email: string | null;
+  cep: string | null;
+  logradouro: string | null;
+  numero: string | null;
+  bairro: string | null;
+  estado: string | null;
 };
 
 type AuthCtx = {
@@ -25,6 +35,7 @@ type AuthCtx = {
   session: Session | null;
   profile: Profile | null;
   isAdmin: boolean;
+  isModerator: boolean;
   isApproved: boolean;
   level: AccessLevel;
   can: (required: AccessLevel) => boolean;
