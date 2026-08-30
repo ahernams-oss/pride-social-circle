@@ -187,6 +187,9 @@ function NewCandidatura({ eleicaoId, onCreated }: { eleicaoId: string; onCreated
           <div><Label>Associado (opcional)</Label>
             <AssociadoCombobox items={associados} value={f.associado_id} onChange={pick} />
           </div>
+          <div><Label>Foto do candidato</Label>
+            <div className="pt-1"><CandidatoFotoUpload value={f.foto_url} onChange={(url) => setF({ ...f, foto_url: url })} /></div>
+          </div>
           <div><Label>Nome</Label><Input value={f.nome} onChange={(e) => setF({ ...f, nome: e.target.value })} /></div>
           <div><Label>Cargo</Label><Input placeholder="Ex: Governador" value={f.cargo} onChange={(e) => setF({ ...f, cargo: e.target.value })} /></div>
           <div><Label>Número (opcional)</Label><Input value={f.numero} onChange={(e) => setF({ ...f, numero: e.target.value })} /></div>
