@@ -15,7 +15,7 @@ import { toast } from "sonner";
 import { History, Power, PowerOff, Search, UserCog } from "lucide-react";
 import { LEVEL_LABEL, type AccessLevel } from "@/lib/permissions";
 
-type ManagedLevel = Extract<AccessLevel, "user" | "approved" | "admin">;
+type ManagedLevel = Extract<AccessLevel, "user" | "approved" | "moderator" | "admin">;
 
 type UserRow = {
   id: string;
@@ -39,14 +39,14 @@ type AuditRow = {
   created_at: string;
 };
 
-const LEVELS: ManagedLevel[] = ["user", "approved", "admin"];
+const LEVELS: ManagedLevel[] = ["user", "approved", "moderator", "admin"];
 
 function initials(n?: string | null) {
   return (n ?? "L").split(" ").filter(Boolean).slice(0, 2).map((p) => p[0]?.toUpperCase()).join("");
 }
 
 function levelVariant(l: string) {
-  return l === "admin" ? "default" : l === "approved" ? "secondary" : "outline";
+  return l === "admin" ? "default" : l === "moderator" ? "default" : l === "approved" ? "secondary" : "outline";
 }
 
 function labelFor(v: string) {
