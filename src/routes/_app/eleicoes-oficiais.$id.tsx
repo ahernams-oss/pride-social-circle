@@ -263,14 +263,7 @@ function NewDelegado({ eleicaoId, onCreated }: { eleicaoId: string; onCreated: (
         <DialogHeader><DialogTitle>Novo delegado</DialogTitle></DialogHeader>
         <div className="space-y-3">
           <div><Label>Associado do sistema (recomendado)</Label>
-            <Select value={f.associado_id} onValueChange={pick}>
-              <SelectTrigger><SelectValue placeholder="Selecionar associado..." /></SelectTrigger>
-              <SelectContent>
-                {associados.map((a) => (
-                  <SelectItem key={a.id} value={a.id}>{a.full_name}{a.club_name ? ` — ${a.club_name}` : ""}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <AssociadoCombobox items={associados} value={f.associado_id} onChange={pick} />
             <p className="mt-1 text-xs text-muted-foreground">Vincular ao login permite votação remota com a conta do associado.</p>
           </div>
           <div><Label>Nome</Label><Input value={f.nome} onChange={(e) => setF({ ...f, nome: e.target.value })} /></div>
