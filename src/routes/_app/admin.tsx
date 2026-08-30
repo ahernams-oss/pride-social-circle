@@ -30,7 +30,9 @@ function AdminPage() {
 
 function AdminPanel() {
   const [rows, setRows] = useState<Row[]>([]);
+  const [section, setSection] = useState<"cadastros" | "niveis">("cadastros");
   const [tab, setTab] = useState<"pending" | "approved" | "rejected">("pending");
+
 
   const load = useCallback(async () => {
     const { data } = await supabase.from("profiles")
