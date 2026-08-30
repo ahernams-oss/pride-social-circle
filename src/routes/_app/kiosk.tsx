@@ -11,6 +11,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Monitor, LogIn, LogOut, ShieldAlert, CheckCircle2, Vote } from "lucide-react";
 import { toast } from "sonner";
+import { autenticarDelegado } from "@/lib/vf-credencial";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 export const Route = createFileRoute("/_app/kiosk")({ component: KioskPage });
@@ -66,13 +67,9 @@ function KioskPage() {
 
   const entrar = async () => {
     setBusy(true);
-    const { data: d } = await supabase
-      .from("vf_delegados")
-      .select("id,nome,eleicao_id,habilitado_votar,ja_votou")
-      .eq("codigo_acesso", codigo.trim().toUpperCase())
-      .maybeSingle();
+    const { delegado: d, erro } = await autenticarDelegado(codigo);
     setBusy(false);
-    if (!d) return toast.error("Código inválido");
+    if (!d) return toast.error(erro ?? "Código inválido");
     if (d.eleicao_id !== selectedId) return toast.error("Código não pertence a esta eleição");
     if (!d.habilitado_votar) return toast.error("Delegado não habilitado");
     if (d.ja_votou) return toast.error("Este delegado já votou");
@@ -140,8 +137,9 @@ function KioskPage() {
         <Card>
           <CardContent className="space-y-3 py-5">
             <div className="flex items-center gap-2"><Badge>Sessão ativa</Badge><span className="text-sm text-muted-foreground">Aguardando próximo delegado</span></div>
-            <Label><LogIn className="mr-1 inline h-4 w-4" /> Código de acesso do delegado</Label>
-            <Input value={codigo} onChange={(e) => setCodigo(e.target.value)} placeholder="0000" autoComplete="off" />
+            <Label><LogIn className="mr-1 inline h-4 w-4" /> Código de acesso do delegado (6 dígitos)</Label>
+            <Input value={codigo} onChange={(e) => setCodigo(e.target.value.replace(/\D/g, "").slice(0, 6))} placeholder="000000" inputMode="numeric" maxLength={6} autoComplete="off" />
+            <p className="text-xs text-muted-foreground">Código da credencial + o dia do nascimento do delegado.</p>
             <Button onClick={entrar} disabled={busy || !codigo} className="w-full">{busy ? "Validando..." : "Entrar e votar"}</Button>
           </CardContent>
         </Card>

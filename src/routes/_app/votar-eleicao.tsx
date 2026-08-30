@@ -9,6 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { Vote, CheckCircle2 } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { toast } from "sonner";
+import { autenticarDelegado } from "@/lib/vf-credencial";
 
 export const Route = createFileRoute("/_app/votar-eleicao")({ component: Page });
 
@@ -30,12 +31,8 @@ function Page() {
 
   const entrar = async () => {
     setBusy(true);
-    const { data: d } = await supabase
-      .from("vf_delegados")
-      .select("id,nome,eleicao_id,habilitado_votar,ja_votou")
-      .eq("codigo_acesso", codigo.trim().toUpperCase())
-      .maybeSingle();
-    if (!d) { setBusy(false); return toast.error("Código inválido"); }
+    const { delegado: d, erro } = await autenticarDelegado(codigo);
+    if (!d) { setBusy(false); return toast.error(erro ?? "Código inválido"); }
     if (!d.habilitado_votar) { setBusy(false); return toast.error("Delegado não habilitado a votar"); }
     if (d.ja_votou) { setBusy(false); return toast.error("Você já votou nesta eleição"); }
     const { data: e } = await supabase.from("vf_eleicoes").select("id,titulo,status").eq("id", d.eleicao_id).maybeSingle();
@@ -83,8 +80,9 @@ function Page() {
       <div className="mx-auto max-w-md space-y-4">
         <h1 className="flex items-center gap-2 text-2xl font-bold"><Vote className="h-6 w-6 text-primary" /> Votação Remota</h1>
         <Card><CardContent className="space-y-3 py-6">
-          <Label>Código de acesso do delegado</Label>
-          <Input value={codigo} onChange={(e) => setCodigo(e.target.value.replace(/\D/g, "").slice(0, 4))} placeholder="0000" inputMode="numeric" maxLength={4} />
+          <Label>Código de acesso do delegado (6 dígitos)</Label>
+          <Input value={codigo} onChange={(e) => setCodigo(e.target.value.replace(/\D/g, "").slice(0, 6))} placeholder="000000" inputMode="numeric" maxLength={6} />
+          <p className="text-xs text-muted-foreground">Código da credencial (4 dígitos) + o dia da sua data de nascimento. Ex.: 2522 + 15 = 252215</p>
           <Button disabled={busy || !codigo} onClick={entrar} className="w-full">Entrar</Button>
         </CardContent></Card>
       </div>
