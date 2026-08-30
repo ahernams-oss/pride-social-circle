@@ -45,9 +45,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       supabase.from("profiles").select("*").eq("id", uid).maybeSingle(),
       supabase.from("user_roles").select("role").eq("user_id", uid),
     ]);
+    // Conta desativada pelo administrador: encerra a sessão imediatamente
+    if (p && (p as Profile).is_active === false) {
+      setProfile(null);
+      setIsAdmin(false);
+      toast.error("Sua conta está desativada. Fale com um administrador.");
+      await supabase.auth.signOut();
+      return;
+    }
     setProfile((p as Profile) ?? null);
     setIsAdmin(!!roles?.some((r) => r.role === "admin"));
   };
+
 
   useEffect(() => {
     const { data: sub } = supabase.auth.onAuthStateChange((_e, s) => {
