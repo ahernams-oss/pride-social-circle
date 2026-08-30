@@ -1,6 +1,7 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
 import type { Session, User } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
+import { hasLevel, resolveLevel, type AccessLevel } from "@/lib/permissions";
 
 export type Profile = {
   id: string;
@@ -20,6 +21,9 @@ type AuthCtx = {
   session: Session | null;
   profile: Profile | null;
   isAdmin: boolean;
+  isApproved: boolean;
+  level: AccessLevel;
+  can: (required: AccessLevel) => boolean;
   loading: boolean;
   refresh: () => Promise<void>;
   signOut: () => Promise<void>;
