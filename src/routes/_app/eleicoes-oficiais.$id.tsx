@@ -14,6 +14,7 @@ import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogT
 import { Progress } from "@/components/ui/progress";
 import { Plus, Play, Square, CheckCircle2, Copy, ShieldAlert, Trash2, Gavel, Printer, Send, Mail, MessageCircle } from "lucide-react";
 import { toast } from "sonner";
+import { AssociadoCombobox, type Associado } from "@/components/AssociadoCombobox";
 
 export const Route = createFileRoute("/_app/eleicoes-oficiais/$id")({ component: Page });
 
@@ -179,14 +180,7 @@ function NewCandidatura({ eleicaoId, onCreated }: { eleicaoId: string; onCreated
         <DialogHeader><DialogTitle>Nova candidatura</DialogTitle></DialogHeader>
         <div className="space-y-3">
           <div><Label>Associado (opcional)</Label>
-            <Select value={f.associado_id} onValueChange={pick}>
-              <SelectTrigger><SelectValue placeholder="Selecionar associado..." /></SelectTrigger>
-              <SelectContent>
-                {associados.map((a) => (
-                  <SelectItem key={a.id} value={a.id}>{a.full_name}{a.club_name ? ` — ${a.club_name}` : ""}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <AssociadoCombobox items={associados} value={f.associado_id} onChange={pick} />
           </div>
           <div><Label>Nome</Label><Input value={f.nome} onChange={(e) => setF({ ...f, nome: e.target.value })} /></div>
           <div><Label>Cargo</Label><Input placeholder="Ex: Governador" value={f.cargo} onChange={(e) => setF({ ...f, cargo: e.target.value })} /></div>
@@ -237,7 +231,7 @@ function CandidaturasList({ items, isAdmin, onChanged }: { items: Candidatura[];
 function useAssociados() {
   const [list, setList] = useState<Associado[]>([]);
   useEffect(() => {
-    supabase.from("profiles").select("id, full_name, club_name").eq("status", "approved").order("full_name")
+    supabase.from("profiles").select("id, full_name, club_name, avatar_url").eq("status", "approved").order("full_name")
       .then(({ data }) => setList((data ?? []) as Associado[]));
   }, []);
   return list;
