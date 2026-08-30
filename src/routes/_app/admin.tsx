@@ -2,6 +2,8 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useCallback, useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { RequireAdmin } from "@/components/RequireAdmin";
+import { AdminUserLevels } from "@/components/AdminUserLevels";
+
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
@@ -30,7 +32,9 @@ function AdminPage() {
 
 function AdminPanel() {
   const [rows, setRows] = useState<Row[]>([]);
+  const [section, setSection] = useState<"cadastros" | "niveis">("cadastros");
   const [tab, setTab] = useState<"pending" | "approved" | "rejected">("pending");
+
 
   const load = useCallback(async () => {
     const { data } = await supabase.from("profiles")
@@ -56,6 +60,23 @@ function AdminPanel() {
         <ShieldCheck className="h-6 w-6 text-primary" />
         <h1 className="text-xl font-bold">Painel administrativo</h1>
       </div>
+
+      <div className="flex gap-2 border-b">
+        {([["cadastros", "Cadastros"], ["niveis", "Usuários e níveis"]] as const).map(([k, label]) => (
+          <button
+            key={k}
+            onClick={() => setSection(k)}
+            className={`-mb-px border-b-2 px-4 py-2 text-sm font-semibold ${section === k ? "border-primary text-primary" : "border-transparent text-muted-foreground"}`}
+          >
+            {label}
+          </button>
+        ))}
+      </div>
+
+      {section === "niveis" ? (
+        <AdminUserLevels />
+      ) : (
+      <>
       <div className="flex gap-2 border-b">
         {(["pending", "approved", "rejected"] as const).map((t) => (
           <button
@@ -67,6 +88,7 @@ function AdminPanel() {
           </button>
         ))}
       </div>
+
       {rows.length === 0 ? (
         <p className="rounded-xl border bg-card p-12 text-center text-muted-foreground">Nada por aqui.</p>
       ) : (
@@ -97,8 +119,11 @@ function AdminPanel() {
         ))
       )}
       <p className="rounded-lg bg-muted p-4 text-xs text-muted-foreground">
-        Dica: para tornar alguém administrador, insira um registro em <code>user_roles</code> com role <code>admin</code> via painel do banco.
+        Dica: para promover alguém a administrador, use a aba <strong>Usuários e níveis</strong>.
       </p>
+      </>
+      )}
+
     </div>
   );
 }
