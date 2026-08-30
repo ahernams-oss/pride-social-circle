@@ -230,6 +230,7 @@ function CandidaturasList({ items, isAdmin, onChanged }: { items: Candidatura[];
                   <div>
                   <div className="font-medium">{c.numero ? `${c.numero} — ` : ""}{c.nome}</div>
                   {c.proposta && <p className="mt-1 line-clamp-2 text-xs text-muted-foreground">{c.proposta}</p>}
+                  </div>
                 </div>
                 {isAdmin && <Button size="icon" variant="ghost" onClick={() => remove(c.id)}><Trash2 className="h-4 w-4" /></Button>}
               </CardContent></Card>
