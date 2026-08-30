@@ -165,7 +165,9 @@ function AdminPanel() {
         ))}
       </div>
 
-      {section === "niveis" && isAdmin ? (
+      {section === "dashboard" ? (
+        <AdminDashboard />
+      ) : section === "niveis" && isAdmin ? (
         <AdminUserLevels />
       ) : section === "permissoes" && isAdmin ? (
         <AdminAccessLevels />
