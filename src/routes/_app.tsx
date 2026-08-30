@@ -9,7 +9,7 @@ import { Home, MessageCircle, Bell, Shield, LogOut, User as UserIcon, Users, Use
 import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import lionsLogo from "@/assets/lions-logo.jpg";
+import distritoLogo from "@/assets/distrito-lc11-logo.png.asset.json";
 import { GovernadoresSidebar } from "@/components/GovernadoresSidebar";
 import { RequireMenu } from "@/components/RequireMenu";
 import { useAccess } from "@/lib/access-control";
@@ -97,7 +97,7 @@ function AppLayout() {
       <header className="sticky top-0 z-40 border-b bg-card/95 backdrop-blur">
         <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4">
           <Link to="/feed" className="flex items-center gap-2">
-            <img src={lionsLogo} alt="Lions International" className="h-9 w-9 object-contain" />
+            <img src={distritoLogo.url} alt="Lions Clubs International - Distrito LC-11" className="h-9 w-auto object-contain" />
             <span className="text-lg font-bold tracking-tight">Lions Connecta</span>
           </Link>
 
