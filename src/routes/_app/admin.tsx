@@ -130,7 +130,29 @@ function AdminPanel() {
         ))}
       </div>
 
+      {tab === "pending" && (
+        <div className="flex flex-wrap items-center gap-3 rounded-xl border border-[#39FF14] bg-[#39FF14]/10 p-4">
+          <BadgeCheck className="h-5 w-5 text-[#2bb80f]" />
+          <div className="min-w-0 flex-1 text-sm">
+            <div className="font-semibold">Aprovação em lote de verificados</div>
+            <div className="text-muted-foreground">
+              {verifiedPending.length === 0
+                ? "Nenhum cadastro pendente confere com a base oficial no momento."
+                : `${verifiedPending.length} cadastro(s) pendente(s) conferem com a base oficial e podem ser aprovados de uma vez.`}
+            </div>
+          </div>
+          <Button
+            disabled={bulk || verifiedPending.length === 0}
+            onClick={approveVerified}
+          >
+            <ShieldCheck className="mr-1 h-4 w-4" />
+            {bulk ? "Aprovando…" : `Aprovar ${verifiedPending.length} verificado(s)`}
+          </Button>
+        </div>
+      )}
+
       <div className="flex flex-wrap items-center gap-3 rounded-lg bg-muted p-3 text-xs text-muted-foreground">
+
         <span className="inline-flex items-center gap-1">
           <span className="h-3 w-3 rounded-sm bg-[#39FF14]" /> Dados conferem com a base oficial
         </span>
