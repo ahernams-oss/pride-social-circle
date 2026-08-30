@@ -38,6 +38,9 @@ function AdminPanel() {
   const [section, setSection] = useState<"cadastros" | "niveis" | "base">("cadastros");
   const [tab, setTab] = useState<"pending" | "approved" | "rejected">("pending");
   const [bulk, setBulk] = useState(false);
+  const [selected, setSelected] = useState<Set<string>>(new Set());
+
+
 
 
   const load = useCallback(async () => {
@@ -71,13 +74,40 @@ function AdminPanel() {
     [rows, registryMap],
   );
 
+  // Limpa seleções que não são mais verificadas pendentes
+  useEffect(() => {
+    const valid = new Set(verifiedPending.map((r) => r.id));
+    setSelected((prev) => {
+      const next = new Set([...prev].filter((id) => valid.has(id)));
+      return next.size === prev.size ? prev : next;
+    });
+  }, [verifiedPending]);
+
+  const selectedVerified = useMemo(
+    () => verifiedPending.filter((r) => selected.has(r.id)),
+    [verifiedPending, selected],
+  );
+
+  const toggleSelect = (id: string) =>
+    setSelected((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+
+  const toggleSelectAll = () => {
+    if (selectedVerified.length === verifiedPending.length) setSelected(new Set());
+    else setSelected(new Set(verifiedPending.map((r) => r.id)));
+  };
+
   const approveVerified = async () => {
-    if (verifiedPending.length === 0) return;
+    if (selectedVerified.length === 0) return;
     setBulk(true);
     const reason = `Aprovação em lote — dados conferidos com a base oficial de associados (importação) em ${new Date().toLocaleString("pt-BR")}`;
     let ok = 0;
     const fails: string[] = [];
-    for (const r of verifiedPending) {
+    for (const r of selectedVerified) {
       const { error } = await supabase.rpc("admin_set_access_level", {
         _user_id: r.id,
         _level: "approved",
@@ -87,10 +117,11 @@ function AdminPanel() {
       else ok++;
     }
     setBulk(false);
-    if (ok) toast.success(`${ok} cadastro(s) aprovado(s) em lote com auditoria registrada.`);
+    if (ok) toast.success(`${ok} cadastro(s) aprovado(s) com auditoria registrada.`);
     if (fails.length) toast.error(`Falhas: ${fails.slice(0, 3).join(" · ")}${fails.length > 3 ? "…" : ""}`);
     load();
   };
+
 
 
   return (
@@ -138,15 +169,20 @@ function AdminPanel() {
             <div className="text-muted-foreground">
               {verifiedPending.length === 0
                 ? "Nenhum cadastro pendente confere com a base oficial no momento."
-                : `${verifiedPending.length} cadastro(s) pendente(s) conferem com a base oficial e podem ser aprovados de uma vez.`}
+                : `Marque os cadastros verificados que deseja aprovar (${verifiedPending.length} disponível(is), ${selectedVerified.length} selecionado(s)).`}
             </div>
           </div>
+          {verifiedPending.length > 0 && (
+            <Button size="sm" variant="outline" onClick={toggleSelectAll}>
+              {selectedVerified.length === verifiedPending.length ? "Desmarcar todos" : "Selecionar todos"}
+            </Button>
+          )}
           <Button
-            disabled={bulk || verifiedPending.length === 0}
+            disabled={bulk || selectedVerified.length === 0}
             onClick={approveVerified}
           >
             <ShieldCheck className="mr-1 h-4 w-4" />
-            {bulk ? "Aprovando…" : `Aprovar ${verifiedPending.length} verificado(s)`}
+            {bulk ? "Aprovando…" : `Aprovar ${selectedVerified.length} selecionado(s)`}
           </Button>
         </div>
       )}
@@ -176,6 +212,16 @@ function AdminPanel() {
               : "";
           return (
           <div key={r.id} className={`flex flex-wrap items-center gap-4 rounded-xl border bg-card p-4 shadow-sm transition ${cls}`}>
+            {r.status === "pending" && m.matched && (
+              <label className="flex cursor-pointer items-center" title="Selecionar para aprovação em lote">
+                <input
+                  type="checkbox"
+                  className="h-5 w-5 cursor-pointer accent-[#2bb80f]"
+                  checked={selected.has(r.id)}
+                  onChange={() => toggleSelect(r.id)}
+                />
+              </label>
+            )}
             <Avatar className="h-12 w-12">
               <AvatarImage src={r.avatar_url ?? undefined} />
               <AvatarFallback className="bg-primary text-primary-foreground">{initials(r.full_name)}</AvatarFallback>
