@@ -27,6 +27,7 @@ type Delegado = {
   id: string; nome: string; clube: string | null; tipo: "titular" | "suplente" | "nato";
   codigo_acesso: string; credenciado: boolean; presente: boolean; habilitado_votar: boolean; ja_votou: boolean;
   associado_id: string | null;
+  birth_date?: string | null;
 };
 type Comissao = { id: string; nome: string; funcao: "presidente" | "vice_presidente" | "membro" | "vogal" };
 type Apuracao = { cargo: string; candidatura_id: string | null; candidato: string; tipo: string; votos: number };
