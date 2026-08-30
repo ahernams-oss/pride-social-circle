@@ -1,7 +1,8 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
 import { useCallback, useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { useAuth } from "@/lib/auth-context";
+import { RequireAdmin } from "@/components/RequireAdmin";
+
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
