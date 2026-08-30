@@ -5,12 +5,22 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
+import { formatCpf, onlyDigits } from "@/lib/registry";
 
 export const Route = createFileRoute("/signup")({ component: SignupPage });
 
 function SignupPage() {
   const nav = useNavigate();
-  const [form, setForm] = useState({ full_name: "", club_name: "", city: "", email: "", password: "" });
+  const [form, setForm] = useState({
+    full_name: "",
+    club_name: "",
+    city: "",
+    cpf: "",
+    lion_number: "",
+    birth_date: "",
+    email: "",
+    password: "",
+  });
   const [loading, setLoading] = useState(false);
 
   const upd = (k: keyof typeof form) => (e: React.ChangeEvent<HTMLInputElement>) =>
@@ -19,13 +29,21 @@ function SignupPage() {
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (form.password.length < 8) return toast.error("A senha deve ter ao menos 8 caracteres.");
+    if (onlyDigits(form.cpf).length !== 11) return toast.error("Informe um CPF válido (11 dígitos).");
     setLoading(true);
     const { error } = await supabase.auth.signUp({
       email: form.email,
       password: form.password,
       options: {
         emailRedirectTo: window.location.origin,
-        data: { full_name: form.full_name, club_name: form.club_name, city: form.city },
+        data: {
+          full_name: form.full_name,
+          club_name: form.club_name,
+          city: form.city,
+          cpf: onlyDigits(form.cpf),
+          lion_number: onlyDigits(form.lion_number),
+          birth_date: form.birth_date,
+        },
       },
     });
     setLoading(false);
@@ -46,6 +64,34 @@ function SignupPage() {
           <div>
             <Label htmlFor="name">Nome completo</Label>
             <Input id="name" required value={form.full_name} onChange={upd("full_name")} />
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <Label htmlFor="cpf">CPF</Label>
+              <Input
+                id="cpf"
+                required
+                inputMode="numeric"
+                value={formatCpf(form.cpf)}
+                onChange={(e) => setForm((f) => ({ ...f, cpf: onlyDigits(e.target.value) }))}
+                placeholder="000.000.000-00"
+              />
+            </div>
+            <div>
+              <Label htmlFor="lion">Número Lion</Label>
+              <Input
+                id="lion"
+                required
+                inputMode="numeric"
+                value={form.lion_number}
+                onChange={(e) => setForm((f) => ({ ...f, lion_number: onlyDigits(e.target.value) }))}
+                placeholder="Somente números"
+              />
+            </div>
+          </div>
+          <div>
+            <Label htmlFor="birth">Data de nascimento</Label>
+            <Input id="birth" type="date" required value={form.birth_date} onChange={upd("birth_date")} />
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div>
