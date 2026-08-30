@@ -1297,6 +1297,7 @@ export type Database = {
         Args: { _conv: string; _user: string }
         Returns: boolean
       }
+      is_moderator: { Args: { _user_id: string }; Returns: boolean }
       registry_verification: {
         Args: { _user_id: string }
         Returns: {
