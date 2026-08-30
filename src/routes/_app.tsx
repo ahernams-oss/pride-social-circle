@@ -13,6 +13,8 @@ import lionsLogo from "@/assets/lions-logo.jpg";
 import { GovernadoresSidebar } from "@/components/GovernadoresSidebar";
 import { RequireAccess } from "@/components/RequireAccess";
 import { requiredLevelFor } from "@/lib/permissions";
+import { needsOnboarding } from "@/lib/profile-completeness";
+import { ProfileCompleteness } from "@/components/ProfileCompleteness";
 
 export const Route = createFileRoute("/_app")({ component: AppLayout });
 
@@ -22,7 +24,7 @@ function initials(name: string) {
 
 function AppLayout() {
   const hydrated = useHydrated();
-  const { user, profile, isAdmin, loading, signOut } = useAuth();
+  const { user, profile, isAdmin, isModerator, loading, signOut } = useAuth();
   const nav = useNavigate();
   const loc = useLocation();
   const [unread, setUnread] = useState(0);
@@ -31,6 +33,10 @@ function AppLayout() {
     if (!hydrated || loading) return;
     if (!user) {
       nav({ to: "/login", replace: true });
+      return;
+    }
+    if (profile && needsOnboarding(profile)) {
+      nav({ to: "/onboarding", replace: true });
       return;
     }
     if (profile?.status !== "approved") {
@@ -106,7 +112,7 @@ function AppLayout() {
                 </Link>
               );
             })}
-            {isAdmin && (
+            {(isAdmin || isModerator) && (
               <Link to="/admin" className={`flex items-center gap-2 rounded-md px-4 py-2 text-sm font-medium ${
                 loc.pathname.startsWith("/admin") ? "bg-primary/10 text-primary" : "text-muted-foreground hover:bg-muted hover:text-foreground"
               }`}>
@@ -136,7 +142,7 @@ function AppLayout() {
               <DropdownMenuItem onClick={() => nav({ to: "/profile/$id", params: { id: user.id } })}>
                 <UserIcon className="mr-2 h-4 w-4" /> Meu perfil
               </DropdownMenuItem>
-              {isAdmin && (
+              {(isAdmin || isModerator) && (
                 <DropdownMenuItem onClick={() => nav({ to: "/admin" })}>
                   <Shield className="mr-2 h-4 w-4" /> Painel admin
                 </DropdownMenuItem>
@@ -180,6 +186,7 @@ function AppLayout() {
               <span className="truncate text-sm font-semibold">{profile?.full_name}</span>
             </Link>
             <div className="my-1 border-t" />
+            <ProfileCompleteness profile={profile} userId={user.id} compact />
             {profile?.club_name && (
               <div className="flex items-center gap-3 rounded-lg px-2 py-2 text-sm font-medium text-foreground">
                 <span className="flex h-10 w-10 items-center justify-center rounded-full bg-accent/30 text-primary">
