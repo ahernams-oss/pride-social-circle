@@ -58,6 +58,23 @@ function AdminPanel() {
         <ShieldCheck className="h-6 w-6 text-primary" />
         <h1 className="text-xl font-bold">Painel administrativo</h1>
       </div>
+
+      <div className="flex gap-2 border-b">
+        {([["cadastros", "Cadastros"], ["niveis", "Usuários e níveis"]] as const).map(([k, label]) => (
+          <button
+            key={k}
+            onClick={() => setSection(k)}
+            className={`-mb-px border-b-2 px-4 py-2 text-sm font-semibold ${section === k ? "border-primary text-primary" : "border-transparent text-muted-foreground"}`}
+          >
+            {label}
+          </button>
+        ))}
+      </div>
+
+      {section === "niveis" ? (
+        <AdminUserLevels />
+      ) : (
+      <>
       <div className="flex gap-2 border-b">
         {(["pending", "approved", "rejected"] as const).map((t) => (
           <button
@@ -69,6 +86,7 @@ function AdminPanel() {
           </button>
         ))}
       </div>
+
       {rows.length === 0 ? (
         <p className="rounded-xl border bg-card p-12 text-center text-muted-foreground">Nada por aqui.</p>
       ) : (
