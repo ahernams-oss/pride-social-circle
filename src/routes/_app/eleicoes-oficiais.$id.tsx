@@ -17,6 +17,7 @@ import { toast } from "sonner";
 import { AssociadoCombobox, type Associado } from "@/components/AssociadoCombobox";
 import { CandidatoFotoUpload } from "@/components/CandidatoFotoUpload";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { assinaturaEletronica, codigoUrna } from "@/lib/vf-credencial";
 
 export const Route = createFileRoute("/_app/eleicoes-oficiais/$id")({ component: Page });
 
@@ -62,7 +63,14 @@ function Page() {
     ]);
     setEleicao(el as Eleicao | null);
     setCands((c ?? []) as Candidatura[]);
-    setDels((d ?? []) as Delegado[]);
+    const delegados = (d ?? []) as Delegado[];
+    const assocIds = delegados.map((x) => x.associado_id).filter(Boolean) as string[];
+    if (assocIds.length > 0) {
+      const { data: profs } = await supabase.from("profiles").select("id, birth_date").in("id", assocIds);
+      const map = new Map((profs ?? []).map((p: any) => [p.id, p.birth_date as string | null]));
+      for (const del of delegados) del.birth_date = del.associado_id ? map.get(del.associado_id) ?? null : null;
+    }
+    setDels(delegados);
     setCom((m ?? []) as Comissao[]);
     const { data: ap } = await supabase.rpc("vf_apuracao", { _eleicao_id: id });
     setApur((ap ?? []) as any);
@@ -83,6 +91,8 @@ function Page() {
     toast.success("Status atualizado");
     load();
   };
+
+  const presidente = com.find((c) => c.funcao === "presidente")?.nome ?? null;
 
   if (loading) return <p className="text-sm text-muted-foreground">Carregando...</p>;
   if (!eleicao) return <Card><CardContent className="py-10 text-center text-sm">Eleição não encontrada.</CardContent></Card>;
@@ -135,12 +145,12 @@ function Page() {
           <div className="flex flex-wrap items-center gap-2">
             {isAdmin && <NewDelegado eleicaoId={id} onCreated={load} />}
             {dels.length > 0 && (
-              <Button size="sm" variant="outline" onClick={() => printCredenciais(dels, eleicao)}>
+              <Button size="sm" variant="outline" onClick={() => printCredenciais(dels, eleicao, presidente)}>
                 <Printer className="mr-2 h-4 w-4" /> Imprimir todas
               </Button>
             )}
           </div>
-          <DelegadosList items={dels} isAdmin={isAdmin} onChanged={load} eleicao={eleicao} />
+          <DelegadosList items={dels} isAdmin={isAdmin} onChanged={load} eleicao={eleicao} presidente={presidente} />
         </TabsContent>
 
         <TabsContent value="comissao" className="space-y-3 pt-4">
@@ -309,7 +319,7 @@ function NewDelegado({ eleicaoId, onCreated }: { eleicaoId: string; onCreated: (
   );
 }
 
-function DelegadosList({ items, isAdmin, onChanged, eleicao }: { items: Delegado[]; isAdmin: boolean; onChanged: () => void; eleicao: Eleicao }) {
+function DelegadosList({ items, isAdmin, onChanged, eleicao, presidente }: { items: Delegado[]; isAdmin: boolean; onChanged: () => void; eleicao: Eleicao; presidente: string | null }) {
   const [sendFor, setSendFor] = useState<Delegado | null>(null);
   const toggle = async (id: string, field: "credenciado" | "presente" | "habilitado_votar", val: boolean) => {
     const { error } = await supabase.from("vf_delegados").update({ [field]: val } as any).eq("id", id);
@@ -331,11 +341,14 @@ function DelegadosList({ items, isAdmin, onChanged, eleicao }: { items: Delegado
             <div className="font-medium">{d.nome} <Badge variant="outline" className="ml-2 text-[10px]">{d.tipo}</Badge></div>
             <div className="text-xs text-muted-foreground">{d.clube ?? "—"}</div>
             <div className="mt-1 flex items-center gap-2">
-              <code className="rounded bg-muted px-2 py-0.5 text-xs font-mono">{d.codigo_acesso}</code>
+              <code className="rounded bg-muted px-2 py-0.5 text-xs font-mono">{codigoUrna(d.codigo_acesso, d.birth_date)}</code>
               <Button size="icon" variant="ghost" className="h-6 w-6"
-                onClick={() => { navigator.clipboard.writeText(d.codigo_acesso); toast.success("Código copiado"); }}>
+                onClick={() => { navigator.clipboard.writeText(codigoUrna(d.codigo_acesso, d.birth_date)); toast.success("Código copiado"); }}>
                 <Copy className="h-3 w-3" />
               </Button>
+              {!d.birth_date && (
+                <span className="text-[10px] text-destructive">Sem data de nascimento no perfil</span>
+              )}
             </div>
           </div>
           <div className="flex flex-wrap items-center gap-2">
@@ -348,7 +361,7 @@ function DelegadosList({ items, isAdmin, onChanged, eleicao }: { items: Delegado
                 <Button size="sm" variant="outline" onClick={() => setSendFor(d)} title="Enviar credenciais">
                   <Send className="h-4 w-4" />
                 </Button>
-                <Button size="sm" variant="outline" onClick={() => printCredenciais([d], eleicao)} title="Imprimir credencial">
+                <Button size="sm" variant="outline" onClick={() => printCredenciais([d], eleicao, presidente)} title="Imprimir credencial">
                   <Printer className="h-4 w-4" />
                 </Button>
                 <Button size="icon" variant="ghost" onClick={() => remove(d.id)}><Trash2 className="h-4 w-4" /></Button>
@@ -364,7 +377,7 @@ function DelegadosList({ items, isAdmin, onChanged, eleicao }: { items: Delegado
 
 function buildCredencialMsg(d: Delegado, e: Eleicao) {
   const dateStr = new Date(e.data_eleicao).toLocaleDateString("pt-BR");
-  return `Olá ${d.nome},\n\nVocê está credenciado(a) como delegado(a) (${d.tipo}) na eleição "${e.titulo}" — ${dateStr}.\n\nSeu código de acesso para a votação: ${d.codigo_acesso}\n\nGuarde este código com segurança. Ele será solicitado na urna eletrônica.`;
+  return `Olá ${d.nome},\n\nVocê está credenciado(a) como delegado(a) (${d.tipo}) na eleição "${e.titulo}" — ${dateStr}.\n\nSeu código de acesso para a votação: ${codigoUrna(d.codigo_acesso, d.birth_date)}\n\nGuarde este código com segurança. Ele será solicitado na urna eletrônica.`;
 }
 
 function SendCredencialDialog({ delegado, eleicao, onClose }: { delegado: Delegado | null; eleicao: Eleicao; onClose: () => void }) {
@@ -413,7 +426,7 @@ function SendCredencialDialog({ delegado, eleicao, onClose }: { delegado: Delega
   );
 }
 
-function printCredenciais(list: Delegado[], e: Eleicao) {
+function printCredenciais(list: Delegado[], e: Eleicao, presidente: string | null) {
   const dateStr = new Date(e.data_eleicao).toLocaleDateString("pt-BR");
   const cards = list.map((d) => `
     <div class="cred">
@@ -426,12 +439,14 @@ function printCredenciais(list: Delegado[], e: Eleicao) {
         <div class="row"><span class="lbl">Nome</span><span class="val">${escapeHtml(d.nome)}</span></div>
         <div class="row"><span class="lbl">Clube</span><span class="val">${escapeHtml(d.clube ?? "—")}</span></div>
         <div class="row"><span class="lbl">Tipo</span><span class="val">${escapeHtml(d.tipo)}</span></div>
-        <div class="code">${escapeHtml(d.codigo_acesso)}</div>
+        <div class="code">${escapeHtml(codigoUrna(d.codigo_acesso, d.birth_date))}</div>
         <div class="hint">Código de acesso para votação na urna eletrônica</div>
       </div>
       <div class="sig">
+        <div class="sign">${escapeHtml(presidente ?? "Comissão Eleitoral")}</div>
         <div class="line"></div>
-        <div class="sub">Assinatura da Comissão Eleitoral</div>
+        <div class="sub">${escapeHtml(presidente ?? "Comissão Eleitoral")} — Presidente da Comissão Eleitoral</div>
+        <div class="esig">Assinado eletronicamente · cód. ${assinaturaEletronica(`${e.id}:${d.id}:${presidente ?? ""}`)}</div>
       </div>
     </div>
   `).join("");
@@ -453,6 +468,8 @@ function printCredenciais(list: Delegado[], e: Eleicao) {
       .code{margin:14px 0 4px;text-align:center;font-family:ui-monospace,Menlo,monospace;font-size:34px;font-weight:800;letter-spacing:6px;color:#1e3a8a;background:#eef2ff;border-radius:6px;padding:8px}
       .hint{text-align:center;font-size:11px;color:#666}
       .sig{margin-top:18px;text-align:center}
+      .sign{font-family:"Segoe Script","Brush Script MT",cursive;font-size:22px;color:#1e3a8a}
+      .esig{font-size:10px;color:#888;margin-top:2px}
       .line{margin:0 auto 4px;width:80%;border-top:1px solid #333}
       @media print{.toolbar{display:none}body{background:#fff;padding:0}.grid{gap:8px}}
     </style></head>
