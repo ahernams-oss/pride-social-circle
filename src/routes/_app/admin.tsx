@@ -20,8 +20,14 @@ function initials(n?: string | null) {
 }
 
 function AdminPage() {
-  const { isAdmin, loading } = useAuth();
-  const nav = useNavigate();
+  return (
+    <RequireAdmin>
+      <AdminPanel />
+    </RequireAdmin>
+  );
+}
+
+function AdminPanel() {
   const [rows, setRows] = useState<Row[]>([]);
   const [tab, setTab] = useState<"pending" | "approved" | "rejected">("pending");
 
@@ -34,12 +40,7 @@ function AdminPage() {
 
   useEffect(() => { load(); }, [load]);
 
-  useEffect(() => {
-    if (!loading && !isAdmin) nav({ to: "/feed", replace: true });
-  }, [isAdmin, loading, nav]);
 
-  if (loading) return null;
-  if (!isAdmin) return null;
 
   const setStatus = async (id: string, status: Row["status"]) => {
     const { error } = await supabase.from("profiles").update({ status }).eq("id", id);
