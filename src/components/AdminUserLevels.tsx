@@ -12,10 +12,11 @@ import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
 import { toast } from "sonner";
+import { useAccessMatrix } from "@/lib/access-control";
 import { History, Power, PowerOff, Search, UserCog } from "lucide-react";
 import { LEVEL_LABEL, type AccessLevel } from "@/lib/permissions";
 
-type ManagedLevel = Extract<AccessLevel, "user" | "approved" | "moderator" | "admin">;
+type ManagedLevel = string;
 
 type UserRow = {
   id: string;
@@ -39,7 +40,7 @@ type AuditRow = {
   created_at: string;
 };
 
-const LEVELS: ManagedLevel[] = ["user", "approved", "moderator", "admin"];
+
 
 function initials(n?: string | null) {
   return (n ?? "L").split(" ").filter(Boolean).slice(0, 2).map((p) => p[0]?.toUpperCase()).join("");
@@ -54,6 +55,8 @@ function labelFor(v: string) {
 }
 
 export function AdminUserLevels() {
+  const { levels: levelDefs } = useAccessMatrix();
+  const labelOf = (k: string) => levelDefs.find((l) => l.key === k)?.label ?? LEVEL_LABEL[k as AccessLevel] ?? k;
   const [users, setUsers] = useState<UserRow[]>([]);
   const [audit, setAudit] = useState<AuditRow[]>([]);
   const [query, setQuery] = useState("");
@@ -69,7 +72,7 @@ export function AdminUserLevels() {
     setLoading(true);
     const [{ data: profiles }, { data: roles }, { data: logs }, { data: actLogs }] = await Promise.all([
       supabase.from("profiles")
-        .select("id, full_name, club_name, city, avatar_url, status, is_active")
+        .select("id, full_name, club_name, city, avatar_url, status, is_active, access_level")
         .order("full_name"),
       supabase.from("user_roles").select("user_id, role"),
       supabase.from("access_level_audit")
@@ -87,7 +90,9 @@ export function AdminUserLevels() {
     setUsers(
       (profiles ?? []).map((p) => ({
         ...p,
-        level: admins.has(p.id)
+        level: (p as { access_level?: string | null }).access_level
+          ? (p as { access_level: string }).access_level
+          : admins.has(p.id)
           ? "admin"
           : mods.has(p.id)
             ? "moderator"
@@ -202,7 +207,7 @@ export function AdminUserLevels() {
                     {u.club_name || "—"} · {u.city || "—"}
                   </div>
                 </div>
-                <Badge variant={levelVariant(u.level)}>{LEVEL_LABEL[u.level]}</Badge>
+                <Badge variant={levelVariant(u.level)}>{labelOf(u.level)}</Badge>
                 <Badge variant={u.is_active ? "outline" : "destructive"}>
                   {u.is_active ? "Ativo" : "Desativado"}
                 </Badge>
@@ -275,8 +280,8 @@ export function AdminUserLevels() {
             <Select value={newLevel} onValueChange={(v) => setNewLevel(v as ManagedLevel)}>
               <SelectTrigger><SelectValue /></SelectTrigger>
               <SelectContent>
-                {LEVELS.map((l) => (
-                  <SelectItem key={l} value={l}>{LEVEL_LABEL[l]}</SelectItem>
+                {levelDefs.map((l) => (
+                  <SelectItem key={l.key} value={l.key}>{l.label}</SelectItem>
                 ))}
               </SelectContent>
             </Select>
