@@ -8,6 +8,7 @@ import { LEVEL_LABEL } from "@/lib/permissions";
 import { AdminUserLevels } from "@/components/AdminUserLevels";
 import { AdminMemberRegistry } from "@/components/AdminMemberRegistry";
 import { AdminAccessLevels } from "@/components/AdminAccessLevels";
+import { AdminDashboard } from "@/components/AdminDashboard";
 import { formatCpf, matchProfile, type RegistryEntry } from "@/lib/registry";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
