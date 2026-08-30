@@ -14,6 +14,8 @@ export type Profile = {
   role_in_club: string;
   role_in_district: string;
   status: "pending" | "approved" | "rejected";
+  is_active: boolean;
+
 };
 
 type AuthCtx = {
