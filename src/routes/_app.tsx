@@ -31,9 +31,10 @@ function AppLayout() {
       nav({ to: "/login", replace: true });
       return;
     }
-    if (profile && profile.status !== "approved") {
+    if (profile?.status !== "approved") {
       nav({ to: "/pending", replace: true });
     }
+
   }, [hydrated, loading, nav, profile, user]);
 
   useEffect(() => {
@@ -61,7 +62,7 @@ function AppLayout() {
       </div>
     );
   }
-  if (!user || (profile && profile.status !== "approved")) {
+  if (!user || profile?.status !== "approved") {
     return (
       <div className="flex min-h-screen items-center justify-center bg-background px-4">
         <p className="text-sm text-muted-foreground">Redirecionando...</p>
