@@ -11,12 +11,17 @@ import {
 } from "@/components/ui/dropdown-menu";
 import lionsLogo from "@/assets/lions-logo.jpg";
 import { GovernadoresSidebar } from "@/components/GovernadoresSidebar";
-import { RequireAccess } from "@/components/RequireAccess";
-import { requiredLevelFor } from "@/lib/permissions";
+import { RequireMenu } from "@/components/RequireMenu";
+import { useAccess } from "@/lib/access-control";
 import { needsOnboarding } from "@/lib/profile-completeness";
 import { ProfileCompleteness } from "@/components/ProfileCompleteness";
 
 export const Route = createFileRoute("/_app")({ component: AppLayout });
+
+const MENU_ICONS: Record<string, typeof Home> = {
+  Home, MessageCircle, Bell, Shield, UserIcon, Users, Users2, Building2, Trophy,
+  Calendar, Target, Landmark, Award, BadgeCheck, Globe, FileText, Vote, Monitor, Gavel,
+};
 
 function initials(name: string) {
   return name.split(" ").filter(Boolean).slice(0, 2).map((p) => p[0]?.toUpperCase()).join("") || "L";
@@ -25,6 +30,7 @@ function initials(name: string) {
 function AppLayout() {
   const hydrated = useHydrated();
   const { user, profile, isAdmin, isModerator, loading, signOut } = useAuth();
+  const { can, visibleMenus } = useAccess();
   const nav = useNavigate();
   const loc = useLocation();
   const [unread, setUnread] = useState(0);
@@ -78,6 +84,8 @@ function AppLayout() {
     );
   }
 
+  const sidebarMenus = visibleMenus.filter((m) => m.sidebar);
+
   const navItems = [
     { to: "/feed", label: "Feed", icon: Home },
     { to: "/messages", label: "Mensagens", icon: MessageCircle },
@@ -112,7 +120,7 @@ function AppLayout() {
                 </Link>
               );
             })}
-            {(isAdmin || isModerator) && (
+            {(isAdmin || isModerator || can("admin", "view")) && (
               <Link to="/admin" className={`flex items-center gap-2 rounded-md px-4 py-2 text-sm font-medium ${
                 loc.pathname.startsWith("/admin") ? "bg-primary/10 text-primary" : "text-muted-foreground hover:bg-muted hover:text-foreground"
               }`}>
@@ -219,9 +227,9 @@ function AppLayout() {
           </div>
         </aside>
         <main className="min-w-0">
-          <RequireAccess level={requiredLevelFor(loc.pathname)}>
+          <RequireMenu pathname={loc.pathname}>
             <Outlet />
-          </RequireAccess>
+          </RequireMenu>
         </main>
         {loc.pathname.startsWith("/feed") && <GovernadoresSidebar />}
       </div>
