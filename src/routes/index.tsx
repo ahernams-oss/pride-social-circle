@@ -122,12 +122,7 @@ function Landing() {
       {/* Header */}
       <header className="sticky top-0 z-40 border-b bg-background/95 backdrop-blur">
         <div className="mx-auto flex h-20 max-w-7xl items-center justify-between px-6">
-          <Link to="/" className="flex items-center gap-3">
-            <img
-              src={distritoLogo.url}
-              alt="Lions Clubs International - Distrito LC-11"
-              className="h-12 w-auto object-contain"
-            />
+          <Link to="/" className="flex items-center">
             <span className="leading-tight">
               <span className="block font-display text-xl font-bold tracking-tight">
                 <span className="text-primary">Lions</span> <span className="text-gold">Connecta</span>
