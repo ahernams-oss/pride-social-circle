@@ -169,15 +169,20 @@ function AdminPanel() {
             <div className="text-muted-foreground">
               {verifiedPending.length === 0
                 ? "Nenhum cadastro pendente confere com a base oficial no momento."
-                : `${verifiedPending.length} cadastro(s) pendente(s) conferem com a base oficial e podem ser aprovados de uma vez.`}
+                : `Marque os cadastros verificados que deseja aprovar (${verifiedPending.length} disponível(is), ${selectedVerified.length} selecionado(s)).`}
             </div>
           </div>
+          {verifiedPending.length > 0 && (
+            <Button size="sm" variant="outline" onClick={toggleSelectAll}>
+              {selectedVerified.length === verifiedPending.length ? "Desmarcar todos" : "Selecionar todos"}
+            </Button>
+          )}
           <Button
-            disabled={bulk || verifiedPending.length === 0}
+            disabled={bulk || selectedVerified.length === 0}
             onClick={approveVerified}
           >
             <ShieldCheck className="mr-1 h-4 w-4" />
-            {bulk ? "Aprovando…" : `Aprovar ${verifiedPending.length} verificado(s)`}
+            {bulk ? "Aprovando…" : `Aprovar ${selectedVerified.length} selecionado(s)`}
           </Button>
         </div>
       )}
