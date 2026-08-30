@@ -191,7 +191,16 @@ function NewCandidatura({ eleicaoId, onCreated }: { eleicaoId: string; onCreated
             <div className="pt-1"><CandidatoFotoUpload value={f.foto_url} onChange={(url) => setF({ ...f, foto_url: url })} /></div>
           </div>
           <div><Label>Nome</Label><Input value={f.nome} onChange={(e) => setF({ ...f, nome: e.target.value })} /></div>
-          <div><Label>Cargo</Label><Input placeholder="Ex: Governador" value={f.cargo} onChange={(e) => setF({ ...f, cargo: e.target.value })} /></div>
+          <div><Label>Cargo</Label>
+            <Select value={f.cargo} onValueChange={(v) => setF({ ...f, cargo: v })}>
+              <SelectTrigger><SelectValue placeholder="Selecione o cargo" /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="Governador">Governador</SelectItem>
+                <SelectItem value="1º Vice Governador">1º Vice Governador</SelectItem>
+                <SelectItem value="2º Vice Governador">2º Vice Governador</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
           <div><Label>Número (opcional)</Label><Input value={f.numero} onChange={(e) => setF({ ...f, numero: e.target.value })} /></div>
           <div><Label>Proposta</Label><Textarea value={f.proposta} onChange={(e) => setF({ ...f, proposta: e.target.value })} /></div>
         </div>
