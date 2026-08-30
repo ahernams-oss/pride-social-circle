@@ -158,20 +158,23 @@ function Page() {
 function NewCandidatura({ eleicaoId, onCreated }: { eleicaoId: string; onCreated: () => void }) {
   const [open, setOpen] = useState(false);
   const associados = useAssociados();
-  const [f, setF] = useState({ associado_id: "", nome: "", cargo: "", numero: "", proposta: "" });
+  const [f, setF] = useState<{ associado_id: string; nome: string; cargo: string; numero: string; proposta: string; foto_url: string | null }>(
+    { associado_id: "", nome: "", cargo: "", numero: "", proposta: "", foto_url: null },
+  );
   const pick = (aid: string) => {
     const a = associados.find((x) => x.id === aid);
-    setF({ ...f, associado_id: aid, nome: a?.full_name ?? f.nome });
+    setF({ ...f, associado_id: aid, nome: a?.full_name ?? f.nome, foto_url: a?.avatar_url ?? f.foto_url });
   };
   const save = async () => {
     if (!f.nome || !f.cargo) return toast.error("Nome e cargo são obrigatórios");
     const { error } = await supabase.from("vf_candidaturas").insert({
       eleicao_id: eleicaoId, associado_id: f.associado_id || null,
       nome: f.nome, cargo: f.cargo, numero: f.numero || null, proposta: f.proposta || null,
+      foto_url: f.foto_url,
     } as any);
     if (error) return toast.error(error.message);
     toast.success("Candidatura cadastrada");
-    setF({ associado_id: "", nome: "", cargo: "", numero: "", proposta: "" });
+    setF({ associado_id: "", nome: "", cargo: "", numero: "", proposta: "", foto_url: null });
     setOpen(false);
     onCreated();
   };
