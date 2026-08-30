@@ -37,6 +37,8 @@ function AdminPanel() {
   const [registry, setRegistry] = useState<RegistryEntry[]>([]);
   const [section, setSection] = useState<"cadastros" | "niveis" | "base">("cadastros");
   const [tab, setTab] = useState<"pending" | "approved" | "rejected">("pending");
+  const [bulk, setBulk] = useState(false);
+
 
   const load = useCallback(async () => {
     const [{ data }, { data: reg }] = await Promise.all([
@@ -63,6 +65,33 @@ function AdminPanel() {
     toast.success("Atualizado");
     load();
   };
+
+  const verifiedPending = useMemo(
+    () => rows.filter((r) => r.status === "pending" && matchProfile(r, registryMap).matched),
+    [rows, registryMap],
+  );
+
+  const approveVerified = async () => {
+    if (verifiedPending.length === 0) return;
+    setBulk(true);
+    const reason = `Aprovação em lote — dados conferidos com a base oficial de associados (importação) em ${new Date().toLocaleString("pt-BR")}`;
+    let ok = 0;
+    const fails: string[] = [];
+    for (const r of verifiedPending) {
+      const { error } = await supabase.rpc("admin_set_access_level", {
+        _user_id: r.id,
+        _level: "approved",
+        _reason: reason,
+      });
+      if (error) fails.push(`${r.full_name}: ${error.message}`);
+      else ok++;
+    }
+    setBulk(false);
+    if (ok) toast.success(`${ok} cadastro(s) aprovado(s) em lote com auditoria registrada.`);
+    if (fails.length) toast.error(`Falhas: ${fails.slice(0, 3).join(" · ")}${fails.length > 3 ? "…" : ""}`);
+    load();
+  };
+
 
   return (
     <div className="space-y-4">
@@ -101,7 +130,29 @@ function AdminPanel() {
         ))}
       </div>
 
+      {tab === "pending" && (
+        <div className="flex flex-wrap items-center gap-3 rounded-xl border border-[#39FF14] bg-[#39FF14]/10 p-4">
+          <BadgeCheck className="h-5 w-5 text-[#2bb80f]" />
+          <div className="min-w-0 flex-1 text-sm">
+            <div className="font-semibold">Aprovação em lote de verificados</div>
+            <div className="text-muted-foreground">
+              {verifiedPending.length === 0
+                ? "Nenhum cadastro pendente confere com a base oficial no momento."
+                : `${verifiedPending.length} cadastro(s) pendente(s) conferem com a base oficial e podem ser aprovados de uma vez.`}
+            </div>
+          </div>
+          <Button
+            disabled={bulk || verifiedPending.length === 0}
+            onClick={approveVerified}
+          >
+            <ShieldCheck className="mr-1 h-4 w-4" />
+            {bulk ? "Aprovando…" : `Aprovar ${verifiedPending.length} verificado(s)`}
+          </Button>
+        </div>
+      )}
+
       <div className="flex flex-wrap items-center gap-3 rounded-lg bg-muted p-3 text-xs text-muted-foreground">
+
         <span className="inline-flex items-center gap-1">
           <span className="h-3 w-3 rounded-sm bg-[#39FF14]" /> Dados conferem com a base oficial
         </span>
