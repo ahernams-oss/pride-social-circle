@@ -78,8 +78,24 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     await supabase.auth.signOut();
   };
 
+  const level = resolveLevel({ hasUser: !!user, status: profile?.status ?? null, isAdmin });
+  const can = (required: AccessLevel) => hasLevel(level, required);
+
   return (
-    <Ctx.Provider value={{ user, session, profile, isAdmin, loading, refresh, signOut }}>
+    <Ctx.Provider
+      value={{
+        user,
+        session,
+        profile,
+        isAdmin,
+        isApproved: profile?.status === "approved",
+        level,
+        can,
+        loading,
+        refresh,
+        signOut,
+      }}
+    >
       {children}
     </Ctx.Provider>
   );
