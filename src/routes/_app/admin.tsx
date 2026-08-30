@@ -39,7 +39,7 @@ function AdminPage() {
 function AdminPanel() {
   const [rows, setRows] = useState<Row[]>([]);
   const [registry, setRegistry] = useState<RegistryEntry[]>([]);
-  const [section, setSection] = useState<"cadastros" | "niveis" | "permissoes" | "base">("cadastros");
+  const [section, setSection] = useState<"dashboard" | "cadastros" | "niveis" | "permissoes" | "base">("dashboard");
   const [tab, setTab] = useState<"pending" | "approved" | "rejected">("pending");
   const [bulk, setBulk] = useState(false);
   const [selected, setSelected] = useState<Set<string>>(new Set());
@@ -48,13 +48,15 @@ function AdminPanel() {
   const sections = useMemo(
     () =>
       ([
+        ["dashboard", "Dashboard"],
         ["cadastros", "Cadastros"],
         ...(isAdmin
           ? ([["niveis", "Usuários e níveis"], ["permissoes", "Níveis e permissões"], ["base", "Base de associados"]] as const)
           : ([] as const)),
-      ] as ["cadastros" | "niveis" | "permissoes" | "base", string][]),
+      ] as ["dashboard" | "cadastros" | "niveis" | "permissoes" | "base", string][]),
     [isAdmin],
   );
+
 
 
 
