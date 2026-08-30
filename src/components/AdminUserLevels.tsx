@@ -149,7 +149,7 @@ export function AdminUserLevels() {
     });
     setSaving(false);
     if (error) return toast.error(error.message);
-    toast.success(`Nível alterado para ${LEVEL_LABEL[newLevel]}`);
+    toast.success(`Nível alterado para ${labelOf(newLevel)}`);
     setTarget(null);
     load();
   };
