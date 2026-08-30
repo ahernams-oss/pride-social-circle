@@ -44,6 +44,86 @@ export type Database = {
         }
         Relationships: []
       }
+      access_level_permissions: {
+        Row: {
+          can_approve: boolean
+          can_create: boolean
+          can_delete: boolean
+          can_edit: boolean
+          can_view: boolean
+          created_at: string
+          id: string
+          level_key: string
+          menu_key: string
+          updated_at: string
+        }
+        Insert: {
+          can_approve?: boolean
+          can_create?: boolean
+          can_delete?: boolean
+          can_edit?: boolean
+          can_view?: boolean
+          created_at?: string
+          id?: string
+          level_key: string
+          menu_key: string
+          updated_at?: string
+        }
+        Update: {
+          can_approve?: boolean
+          can_create?: boolean
+          can_delete?: boolean
+          can_edit?: boolean
+          can_view?: boolean
+          created_at?: string
+          id?: string
+          level_key?: string
+          menu_key?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "access_level_permissions_level_key_fkey"
+            columns: ["level_key"]
+            isOneToOne: false
+            referencedRelation: "access_levels"
+            referencedColumns: ["key"]
+          },
+        ]
+      }
+      access_levels: {
+        Row: {
+          base_level: string
+          created_at: string
+          description: string
+          is_builtin: boolean
+          key: string
+          label: string
+          rank: number
+          updated_at: string
+        }
+        Insert: {
+          base_level?: string
+          created_at?: string
+          description?: string
+          is_builtin?: boolean
+          key: string
+          label: string
+          rank?: number
+          updated_at?: string
+        }
+        Update: {
+          base_level?: string
+          created_at?: string
+          description?: string
+          is_builtin?: boolean
+          key?: string
+          label?: string
+          rank?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       ballot_choices: {
         Row: {
           ballot_id: string
@@ -798,6 +878,7 @@ export type Database = {
       }
       profiles: {
         Row: {
+          access_level: string | null
           avatar_url: string | null
           bairro: string
           bio: string
@@ -825,6 +906,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          access_level?: string | null
           avatar_url?: string | null
           bairro?: string
           bio?: string
@@ -852,6 +934,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          access_level?: string | null
           avatar_url?: string | null
           bairro?: string
           bio?: string
@@ -878,7 +961,15 @@ export type Database = {
           status?: Database["public"]["Enums"]["profile_status"]
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "profiles_access_level_fkey"
+            columns: ["access_level"]
+            isOneToOne: false
+            referencedRelation: "access_levels"
+            referencedColumns: ["key"]
+          },
+        ]
       }
       user_activation_audit: {
         Row: {
