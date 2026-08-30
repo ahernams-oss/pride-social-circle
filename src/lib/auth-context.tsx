@@ -1,6 +1,7 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
 import type { Session, User } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
+import { hasLevel, resolveLevel, type AccessLevel } from "@/lib/permissions";
 
 export type Profile = {
   id: string;
@@ -20,6 +21,9 @@ type AuthCtx = {
   session: Session | null;
   profile: Profile | null;
   isAdmin: boolean;
+  isApproved: boolean;
+  level: AccessLevel;
+  can: (required: AccessLevel) => boolean;
   loading: boolean;
   refresh: () => Promise<void>;
   signOut: () => Promise<void>;
@@ -74,8 +78,24 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     await supabase.auth.signOut();
   };
 
+  const level = resolveLevel({ hasUser: !!user, status: profile?.status ?? null, isAdmin });
+  const can = (required: AccessLevel) => hasLevel(level, required);
+
   return (
-    <Ctx.Provider value={{ user, session, profile, isAdmin, loading, refresh, signOut }}>
+    <Ctx.Provider
+      value={{
+        user,
+        session,
+        profile,
+        isAdmin,
+        isApproved: profile?.status === "approved",
+        level,
+        can,
+        loading,
+        refresh,
+        signOut,
+      }}
+    >
       {children}
     </Ctx.Provider>
   );

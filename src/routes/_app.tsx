@@ -11,6 +11,8 @@ import {
 } from "@/components/ui/dropdown-menu";
 import lionsLogo from "@/assets/lions-logo.jpg";
 import { GovernadoresSidebar } from "@/components/GovernadoresSidebar";
+import { RequireAccess } from "@/components/RequireAccess";
+import { requiredLevelFor } from "@/lib/permissions";
 
 export const Route = createFileRoute("/_app")({ component: AppLayout });
 
@@ -348,7 +350,9 @@ function AppLayout() {
           </div>
         </aside>
         <main className="min-w-0">
-          <Outlet />
+          <RequireAccess level={requiredLevelFor(loc.pathname)}>
+            <Outlet />
+          </RequireAccess>
         </main>
         {loc.pathname.startsWith("/feed") && <GovernadoresSidebar />}
       </div>
