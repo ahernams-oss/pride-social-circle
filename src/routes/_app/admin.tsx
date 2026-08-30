@@ -74,13 +74,40 @@ function AdminPanel() {
     [rows, registryMap],
   );
 
+  // Limpa seleções que não são mais verificadas pendentes
+  useEffect(() => {
+    const valid = new Set(verifiedPending.map((r) => r.id));
+    setSelected((prev) => {
+      const next = new Set([...prev].filter((id) => valid.has(id)));
+      return next.size === prev.size ? prev : next;
+    });
+  }, [verifiedPending]);
+
+  const selectedVerified = useMemo(
+    () => verifiedPending.filter((r) => selected.has(r.id)),
+    [verifiedPending, selected],
+  );
+
+  const toggleSelect = (id: string) =>
+    setSelected((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+
+  const toggleSelectAll = () => {
+    if (selectedVerified.length === verifiedPending.length) setSelected(new Set());
+    else setSelected(new Set(verifiedPending.map((r) => r.id)));
+  };
+
   const approveVerified = async () => {
-    if (verifiedPending.length === 0) return;
+    if (selectedVerified.length === 0) return;
     setBulk(true);
     const reason = `Aprovação em lote — dados conferidos com a base oficial de associados (importação) em ${new Date().toLocaleString("pt-BR")}`;
     let ok = 0;
     const fails: string[] = [];
-    for (const r of verifiedPending) {
+    for (const r of selectedVerified) {
       const { error } = await supabase.rpc("admin_set_access_level", {
         _user_id: r.id,
         _level: "approved",
@@ -90,10 +117,11 @@ function AdminPanel() {
       else ok++;
     }
     setBulk(false);
-    if (ok) toast.success(`${ok} cadastro(s) aprovado(s) em lote com auditoria registrada.`);
+    if (ok) toast.success(`${ok} cadastro(s) aprovado(s) com auditoria registrada.`);
     if (fails.length) toast.error(`Falhas: ${fails.slice(0, 3).join(" · ")}${fails.length > 3 ? "…" : ""}`);
     load();
   };
+
 
 
   return (
