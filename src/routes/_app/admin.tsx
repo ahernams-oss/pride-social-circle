@@ -117,8 +117,11 @@ function AdminPanel() {
         ))
       )}
       <p className="rounded-lg bg-muted p-4 text-xs text-muted-foreground">
-        Dica: para tornar alguém administrador, insira um registro em <code>user_roles</code> com role <code>admin</code> via painel do banco.
+        Dica: para promover alguém a administrador, use a aba <strong>Usuários e níveis</strong>.
       </p>
+      </>
+      )}
+
     </div>
   );
 }
