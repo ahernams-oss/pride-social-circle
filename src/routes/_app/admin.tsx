@@ -212,6 +212,16 @@ function AdminPanel() {
               : "";
           return (
           <div key={r.id} className={`flex flex-wrap items-center gap-4 rounded-xl border bg-card p-4 shadow-sm transition ${cls}`}>
+            {r.status === "pending" && m.matched && (
+              <label className="flex cursor-pointer items-center" title="Selecionar para aprovação em lote">
+                <input
+                  type="checkbox"
+                  className="h-5 w-5 cursor-pointer accent-[#2bb80f]"
+                  checked={selected.has(r.id)}
+                  onChange={() => toggleSelect(r.id)}
+                />
+              </label>
+            )}
             <Avatar className="h-12 w-12">
               <AvatarImage src={r.avatar_url ?? undefined} />
               <AvatarFallback className="bg-primary text-primary-foreground">{initials(r.full_name)}</AvatarFallback>
