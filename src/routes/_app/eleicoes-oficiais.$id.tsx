@@ -222,7 +222,12 @@ function CandidaturasList({ items, isAdmin, onChanged }: { items: Candidatura[];
           <div className="grid gap-2 sm:grid-cols-2">
             {list.map((c) => (
               <Card key={c.id}><CardContent className="flex items-start justify-between gap-2 py-3">
-                <div>
+                <div className="flex items-start gap-3">
+                  <Avatar className="h-12 w-12 rounded-md">
+                    {c.foto_url ? <AvatarImage src={c.foto_url} alt={c.nome} className="object-cover" /> : null}
+                    <AvatarFallback className="rounded-md text-xs">{c.nome.slice(0, 2).toUpperCase()}</AvatarFallback>
+                  </Avatar>
+                  <div>
                   <div className="font-medium">{c.numero ? `${c.numero} — ` : ""}{c.nome}</div>
                   {c.proposta && <p className="mt-1 line-clamp-2 text-xs text-muted-foreground">{c.proposta}</p>}
                 </div>
