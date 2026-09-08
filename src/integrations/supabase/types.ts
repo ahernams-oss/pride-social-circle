@@ -1376,6 +1376,10 @@ export type Database = {
           votes: number
         }[]
       }
+      get_or_create_direct_conversation: {
+        Args: { _target_user_id: string }
+        Returns: string
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
