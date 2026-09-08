@@ -185,25 +185,12 @@ function ProfilePage() {
 
   const startDM = async () => {
     if (!user || isMe) return;
-    // find existing 1:1
-    const { data: mine } = await supabase
-      .from("conversation_participants").select("conversation_id").eq("user_id", user.id);
-    const myConvIds = (mine ?? []).map((r: any) => r.conversation_id);
-    let convId: string | null = null;
-    if (myConvIds.length) {
-      const { data: shared } = await supabase
-        .from("conversation_participants").select("conversation_id")
-        .in("conversation_id", myConvIds).eq("user_id", id);
-      convId = shared?.[0]?.conversation_id ?? null;
-    }
-    if (!convId) {
-      const { data: conv, error } = await supabase.from("conversations").insert({}).select("id").single();
-      if (error || !conv) return toast.error(error?.message ?? "Erro");
-      convId = conv.id;
-      await supabase.from("conversation_participants").insert([
-        { conversation_id: convId, user_id: user.id },
-        { conversation_id: convId, user_id: id },
-      ]);
+    const { data: convId, error } = await supabase.rpc("get_or_create_direct_conversation", {
+      _target_user_id: id,
+    });
+    if (error || !convId) {
+      toast.error(error?.message ?? "Não foi possível iniciar a conversa");
+      return;
     }
     nav({ to: "/messages", search: { c: convId } });
   };
