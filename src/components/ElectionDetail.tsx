@@ -11,8 +11,9 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Separator } from "@/components/ui/separator";
-import { ArrowLeft, Plus, Trash2, BarChart3, CheckCircle2 } from "lucide-react";
+import { ArrowLeft, Plus, Trash2, BarChart3, CheckCircle2, FileText, FileType2, Sheet, Printer } from "lucide-react";
 import { toast } from "sonner";
+import { exportPdf, exportWord, exportExcel, type ReportSection } from "@/lib/election-report";
 
 type ElectionType = "single" | "yes_no" | "multiple_choice" | "multi_position";
 type Election = {
