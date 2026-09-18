@@ -633,8 +633,6 @@ function ApuracaoView({ items, status, eleicao, cands, presidente }: {
       </CardContent></Card>
     );
   }
-  const [filterCargo, setFilterCargo] = useState("all");
-  const [filterCandidato, setFilterCandidato] = useState("all");
   if (items.length === 0) return <p className="text-sm text-muted-foreground">Nenhum voto registrado.</p>;
   const fullReport = buildApuracaoReport(items, eleicao, cands, presidente);
   const cargoOptions = fullReport.cargos.map((c) => c.cargo);
