@@ -33,7 +33,6 @@ type Delegado = {
   codigo_acesso: string; credenciado: boolean; presente: boolean; habilitado_votar: boolean; ja_votou: boolean;
   associado_id: string | null;
   birth_date?: string | null;
-  avatar_url?: string | null;
 };
 type Comissao = { id: string; nome: string; funcao: "presidente" | "vice_presidente" | "membro" | "vogal" };
 type Apuracao = { cargo: string; candidatura_id: string | null; candidato: string; tipo: string; votos: number };
@@ -73,13 +72,9 @@ function Page() {
     const delegados = (d ?? []) as Delegado[];
     const assocIds = delegados.map((x) => x.associado_id).filter(Boolean) as string[];
     if (assocIds.length > 0) {
-      const { data: profs } = await supabase.from("profiles").select("id, birth_date, avatar_url").in("id", assocIds);
-      const map = new Map((profs ?? []).map((p: any) => [p.id, { birth_date: p.birth_date as string | null, avatar_url: p.avatar_url as string | null }]));
-      for (const del of delegados) {
-        const p = del.associado_id ? map.get(del.associado_id) : undefined;
-        del.birth_date = p?.birth_date ?? null;
-        del.avatar_url = p?.avatar_url ?? null;
-      }
+      const { data: profs } = await supabase.from("profiles").select("id, birth_date").in("id", assocIds);
+      const map = new Map((profs ?? []).map((p: any) => [p.id, p.birth_date as string | null]));
+      for (const del of delegados) del.birth_date = del.associado_id ? map.get(del.associado_id) ?? null : null;
     }
     setDels(delegados);
     setCom((m ?? []) as Comissao[]);
@@ -441,11 +436,7 @@ function printCredenciais(list: Delegado[], e: Eleicao, presidente: string | nul
   const dateStr = new Date(e.data_eleicao).toLocaleDateString("pt-BR");
   const emblem = window.location.origin + lciEmblem.url;
   const dist = e.distrito || "Distrito LC-11";
-  const cards = list.map((d) => {
-    const foto = d.avatar_url
-      ? `<img class="dphoto" src="${escapeHtml(d.avatar_url.startsWith("http") ? d.avatar_url : window.location.origin + d.avatar_url)}" alt="">`
-      : "";
-    return `
+  const cards = list.map((d) => `
     <div class="cred"><div class="in">
       <div class="wm"><img src="${emblem}" alt=""></div>
       <div class="corner l"><div class="n"></div><div class="g"></div></div>
@@ -469,14 +460,9 @@ function printCredenciais(list: Delegado[], e: Eleicao, presidente: string | nul
       </div>
       <div class="band"></div>
       <div class="bd">
-        <div class="idrows">
-          ${foto}
-          <div class="rows-wrap">
-            <div class="row"><span class="lbl">Nome</span><span class="val">${escapeHtml(d.nome)}</span></div>
-            <div class="row"><span class="lbl">Clube</span><span class="val">${escapeHtml(d.clube ?? "—")}</span></div>
-            <div class="row"><span class="lbl">Tipo</span><span class="val">${escapeHtml(d.tipo)}</span></div>
-          </div>
-        </div>
+        <div class="row"><span class="lbl">Nome</span><span class="val">${escapeHtml(d.nome)}</span></div>
+        <div class="row"><span class="lbl">Clube</span><span class="val">${escapeHtml(d.clube ?? "—")}</span></div>
+        <div class="row"><span class="lbl">Tipo</span><span class="val">${escapeHtml(d.tipo)}</span></div>
         <div class="codebox"><div class="code">${escapeHtml(codigoUrnaCredencial(d.codigo_acesso, d.birth_date))}</div></div>
         <div class="hint">Código de acesso para votação na urna eletrônica — complete os XX com o dia do seu nascimento</div>
         <div class="sig">
@@ -488,8 +474,7 @@ function printCredenciais(list: Delegado[], e: Eleicao, presidente: string | nul
         <div class="foot"><span class="fd"></span>LIDERANÇA&nbsp;•&nbsp;COMPANHEIRISMO&nbsp;•&nbsp;SERVIÇO<span class="fd"></span></div>
       </div>
     </div></div>
-  `;
-  }).join("");
+  `).join("");
   const html = `<!doctype html><html><head><meta charset="utf-8"/><title>Credenciais — ${escapeHtml(e.titulo)}</title>
     <style>
       *{box-sizing:border-box;-webkit-print-color-adjust:exact;print-color-adjust:exact}
@@ -517,9 +502,6 @@ function printCredenciais(list: Delegado[], e: Eleicao, presidente: string | nul
       .we2{font-size:8.5px;letter-spacing:1.5px;color:#14346e;line-height:1.5}
       .band{height:10px;background:#14346e}
       .bd{position:relative;padding:8px 20px 30px}
-      .idrows{display:flex;align-items:center;gap:14px}
-      .dphoto{width:64px;height:64px;flex:none;border-radius:50%;object-fit:cover;border:2px solid #d3a625;box-shadow:0 0 0 2px #14346e}
-      .rows-wrap{flex:1;min-width:0}
       .row{display:flex;justify-content:space-between;align-items:baseline;gap:10px;padding:8px 0 5px;border-bottom:1.5px dashed #c9d2e3}
       .lbl{font-size:12px;letter-spacing:1px;color:#5a6b85;text-transform:uppercase}
       .val{font-size:15px;font-weight:700;color:#14346e;text-align:right}
