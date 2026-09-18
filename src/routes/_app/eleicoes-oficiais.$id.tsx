@@ -670,6 +670,36 @@ function ApuracaoView({ items, status, eleicao, cands, presidente }: {
         </div>
       </CardContent></Card>
 
+      <Card><CardContent className="flex flex-wrap items-end gap-3 py-4">
+        <div className="grid gap-1.5">
+          <Label className="text-xs">Filtrar por cargo</Label>
+          <Select value={filterCargo} onValueChange={(v) => { setFilterCargo(v); setFilterCandidato("all"); }}>
+            <SelectTrigger className="w-[220px]"><SelectValue placeholder="Todos os cargos" /></SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Todos os cargos</SelectItem>
+              {cargoOptions.map((c) => <SelectItem key={c} value={c}>{c}</SelectItem>)}
+            </SelectContent>
+          </Select>
+        </div>
+        <div className="grid gap-1.5">
+          <Label className="text-xs">Filtrar por candidato</Label>
+          <Select value={filterCandidato} onValueChange={setFilterCandidato}>
+            <SelectTrigger className="w-[240px]"><SelectValue placeholder="Todos os candidatos" /></SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Todos os candidatos</SelectItem>
+              {candidatoOptions.map((n) => <SelectItem key={n} value={n}>{n}</SelectItem>)}
+            </SelectContent>
+          </Select>
+        </div>
+        {(filterCargo !== "all" || filterCandidato !== "all") && (
+          <Button size="sm" variant="ghost" onClick={() => { setFilterCargo("all"); setFilterCandidato("all"); }}>Limpar filtros</Button>
+        )}
+      </CardContent></Card>
+
+      {report.cargos.length === 0 && (
+        <p className="text-sm text-muted-foreground">Nenhum resultado para os filtros selecionados.</p>
+      )}
+
       {report.cargos.map((c) => (
         <Card key={c.cargo}><CardContent className="space-y-3 py-4">
           <h3 className="font-semibold">{c.cargo} <span className="text-xs font-normal text-muted-foreground">({c.totalVotos} votos)</span></h3>
