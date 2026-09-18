@@ -219,11 +219,28 @@ export async function exportApuracaoPdf(d: ApuracaoReport) {
       headStyles: { fillColor: [120, 120, 120] },
       columnStyles: { 1: { halign: "right" }, 2: { halign: "right" } },
     });
-    y = (doc as unknown as { lastAutoTable: { finalY: number } }).lastAutoTable.finalY + 10;
+    y = (doc as unknown as { lastAutoTable: { finalY: number } }).lastAutoTable.finalY + 6;
+
+    const pie = renderPieDataUrl(c);
+    if (pie) {
+      if (y > 200) {
+        doc.addPage();
+        y = 20;
+      }
+      try {
+        doc.addImage(pie, "PNG", 14, y, 130, 75);
+        y += 80;
+      } catch {
+        /* ignore chart render issues */
+      }
+    }
+
+    y += 6;
     if (y > 250) {
       doc.addPage();
       y = 20;
     }
+
   }
 
   if (d.presidente) {
