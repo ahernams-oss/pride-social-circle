@@ -33,6 +33,7 @@ type Delegado = {
   codigo_acesso: string; credenciado: boolean; presente: boolean; habilitado_votar: boolean; ja_votou: boolean;
   associado_id: string | null;
   birth_date?: string | null;
+  avatar_url?: string | null;
 };
 type Comissao = { id: string; nome: string; funcao: "presidente" | "vice_presidente" | "membro" | "vogal" };
 type Apuracao = { cargo: string; candidatura_id: string | null; candidato: string; tipo: string; votos: number };
@@ -72,9 +73,13 @@ function Page() {
     const delegados = (d ?? []) as Delegado[];
     const assocIds = delegados.map((x) => x.associado_id).filter(Boolean) as string[];
     if (assocIds.length > 0) {
-      const { data: profs } = await supabase.from("profiles").select("id, birth_date").in("id", assocIds);
-      const map = new Map((profs ?? []).map((p: any) => [p.id, p.birth_date as string | null]));
-      for (const del of delegados) del.birth_date = del.associado_id ? map.get(del.associado_id) ?? null : null;
+      const { data: profs } = await supabase.from("profiles").select("id, birth_date, avatar_url").in("id", assocIds);
+      const map = new Map((profs ?? []).map((p: any) => [p.id, { birth_date: p.birth_date as string | null, avatar_url: p.avatar_url as string | null }]));
+      for (const del of delegados) {
+        const p = del.associado_id ? map.get(del.associado_id) : undefined;
+        del.birth_date = p?.birth_date ?? null;
+        del.avatar_url = p?.avatar_url ?? null;
+      }
     }
     setDels(delegados);
     setCom((m ?? []) as Comissao[]);
