@@ -82,7 +82,7 @@ function Page() {
     setApur((ap ?? []) as any);
     setLoading(false);
   }, [id]);
-  useEffect(() => { load(); }, [load]);
+  useEffect(() => { setLoading(true); load(); }, [load]);
 
   useEffect(() => {
     const ch = supabase.channel(`vf-${id}`)
