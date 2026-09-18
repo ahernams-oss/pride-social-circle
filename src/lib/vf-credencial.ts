@@ -14,6 +14,11 @@ export function codigoUrna(codigoAcesso: string, birthDate?: string | null): str
   return dia ? `${codigoAcesso}${dia}` : codigoAcesso;
 }
 
+/** Código exibido na credencial: apenas os 4 primeiros dígitos; os 2 últimos (dia do nascimento) viram XX. Ex.: 2522XX */
+export function codigoUrnaCredencial(codigoAcesso: string, birthDate?: string | null): string {
+  return diaNascimento(birthDate) ? `${codigoAcesso}XX` : codigoUrna(codigoAcesso, birthDate);
+}
+
 /** Assinatura eletrônica determinística exibida na credencial. */
 export function assinaturaEletronica(seed: string): string {
   let h = 0;

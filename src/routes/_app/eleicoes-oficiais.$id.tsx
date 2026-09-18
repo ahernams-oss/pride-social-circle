@@ -461,8 +461,8 @@ function printCredenciais(list: Delegado[], e: Eleicao, presidente: string | nul
         <div class="row"><span class="lbl">Nome</span><span class="val">${escapeHtml(d.nome)}</span></div>
         <div class="row"><span class="lbl">Clube</span><span class="val">${escapeHtml(d.clube ?? "—")}</span></div>
         <div class="row"><span class="lbl">Tipo</span><span class="val">${escapeHtml(d.tipo)}</span></div>
-        <div class="codebox"><div class="code">${escapeHtml(codigoUrna(d.codigo_acesso, d.birth_date))}</div></div>
-        <div class="hint">Código de acesso para votação na urna eletrônica</div>
+        <div class="codebox"><div class="code">${escapeHtml(codigoUrnaCredencial(d.codigo_acesso, d.birth_date))}</div></div>
+        <div class="hint">Código de acesso para votação na urna eletrônica — complete os XX com o dia do seu nascimento</div>
         <div class="sig">
           <div class="script">${escapeHtml(presidente ?? "Comissão Eleitoral")}</div>
           <div class="sline"></div>
