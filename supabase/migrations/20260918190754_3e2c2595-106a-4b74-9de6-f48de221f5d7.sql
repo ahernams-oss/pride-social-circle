@@ -1,0 +1,2 @@
+CREATE POLICY "Public can read avatars" ON storage.objects FOR SELECT TO anon, authenticated USING (bucket_id = 'avatars');
+CREATE POLICY "Users can update own avatar objects auth" ON storage.objects FOR UPDATE TO authenticated USING (bucket_id = 'avatars' AND (auth.uid())::text = (storage.foldername(name))[1]) WITH CHECK (bucket_id = 'avatars' AND (auth.uid())::text = (storage.foldername(name))[1]);
