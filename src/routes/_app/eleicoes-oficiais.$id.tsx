@@ -623,6 +623,8 @@ function CargoPie({ cargo }: { cargo: ApuracaoCargoReport }) {
 function ApuracaoView({ items, status, eleicao, cands, presidente }: {
   items: Apuracao[]; status: Status; eleicao: Eleicao; cands: Candidatura[]; presidente: string | null;
 }) {
+  const [filterCargo, setFilterCargo] = useState("all");
+  const [filterCandidato, setFilterCandidato] = useState("all");
   if (status !== "votacao_encerrada" && status !== "apurada") {
     return (
       <Card><CardContent className="flex items-center gap-3 py-6">
@@ -632,7 +634,22 @@ function ApuracaoView({ items, status, eleicao, cands, presidente }: {
     );
   }
   if (items.length === 0) return <p className="text-sm text-muted-foreground">Nenhum voto registrado.</p>;
-  const report = buildApuracaoReport(items, eleicao, cands, presidente);
+  const fullReport = buildApuracaoReport(items, eleicao, cands, presidente);
+  const cargoOptions = fullReport.cargos.map((c) => c.cargo);
+  const candidatoOptions = Array.from(new Set(
+    fullReport.cargos
+      .filter((c) => filterCargo === "all" || c.cargo === filterCargo)
+      .flatMap((c) => c.candidatos.map((k) => k.nome)),
+  ));
+  const report: ApuracaoReport = {
+    ...fullReport,
+    cargos: fullReport.cargos
+      .filter((c) => filterCargo === "all" || c.cargo === filterCargo)
+      .map((c) => filterCandidato === "all" ? c : { ...c, candidatos: c.candidatos.filter((k) => k.nome === filterCandidato) }),
+    totalGeral: fullReport.cargos
+      .filter((c) => filterCargo === "all" || c.cargo === filterCargo)
+      .reduce((s, c) => s + c.totalVotos, 0),
+  };
   return (
     <div className="space-y-4">
       <Card><CardContent className="flex flex-wrap items-center justify-between gap-3 py-4">
@@ -652,6 +669,36 @@ function ApuracaoView({ items, status, eleicao, cands, presidente }: {
           </Button>
         </div>
       </CardContent></Card>
+
+      <Card><CardContent className="flex flex-wrap items-end gap-3 py-4">
+        <div className="grid gap-1.5">
+          <Label className="text-xs">Filtrar por cargo</Label>
+          <Select value={filterCargo} onValueChange={(v) => { setFilterCargo(v); setFilterCandidato("all"); }}>
+            <SelectTrigger className="w-[220px]"><SelectValue placeholder="Todos os cargos" /></SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Todos os cargos</SelectItem>
+              {cargoOptions.map((c) => <SelectItem key={c} value={c}>{c}</SelectItem>)}
+            </SelectContent>
+          </Select>
+        </div>
+        <div className="grid gap-1.5">
+          <Label className="text-xs">Filtrar por candidato</Label>
+          <Select value={filterCandidato} onValueChange={setFilterCandidato}>
+            <SelectTrigger className="w-[240px]"><SelectValue placeholder="Todos os candidatos" /></SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Todos os candidatos</SelectItem>
+              {candidatoOptions.map((n) => <SelectItem key={n} value={n}>{n}</SelectItem>)}
+            </SelectContent>
+          </Select>
+        </div>
+        {(filterCargo !== "all" || filterCandidato !== "all") && (
+          <Button size="sm" variant="ghost" onClick={() => { setFilterCargo("all"); setFilterCandidato("all"); }}>Limpar filtros</Button>
+        )}
+      </CardContent></Card>
+
+      {report.cargos.length === 0 && (
+        <p className="text-sm text-muted-foreground">Nenhum resultado para os filtros selecionados.</p>
+      )}
 
       {report.cargos.map((c) => (
         <Card key={c.cargo}><CardContent className="space-y-3 py-4">
