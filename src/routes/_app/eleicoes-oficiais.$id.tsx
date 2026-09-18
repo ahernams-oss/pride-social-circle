@@ -610,30 +610,63 @@ function ApuracaoView({ items, status, eleicao, cands, presidente }: {
     );
   }
   if (items.length === 0) return <p className="text-sm text-muted-foreground">Nenhum voto registrado.</p>;
-  const grouped = new Map<string, Apuracao[]>();
-  items.forEach((i) => { const a = grouped.get(i.cargo) ?? []; a.push(i); grouped.set(i.cargo, a); });
+  const report = buildApuracaoReport(items, eleicao, cands, presidente);
   return (
     <div className="space-y-4">
-      {Array.from(grouped.entries()).map(([cargo, list]) => {
-        const total = list.reduce((s, x) => s + Number(x.votos), 0);
-        return (
-          <Card key={cargo}><CardContent className="space-y-3 py-4">
-            <h3 className="font-semibold">{cargo} <span className="text-xs font-normal text-muted-foreground">({total} votos)</span></h3>
-            {list.map((x, idx) => {
-              const pct = total ? (Number(x.votos) / total) * 100 : 0;
-              return (
-                <div key={idx} className="space-y-1">
-                  <div className="flex items-center justify-between text-sm">
-                    <span>{x.candidato}</span>
-                    <span className="text-muted-foreground">{x.votos} · {pct.toFixed(1)}%</span>
+      <Card><CardContent className="flex flex-wrap items-center justify-between gap-3 py-4">
+        <div>
+          <p className="text-sm font-semibold">Relatório de apuração</p>
+          <p className="text-xs text-muted-foreground">{report.totalGeral} voto(s) apurado(s) no total</p>
+        </div>
+        <div className="flex flex-wrap gap-2">
+          <Button size="sm" variant="outline" onClick={() => exportApuracaoPdf(report).catch(() => toast.error("Erro ao gerar PDF"))}>
+            <FileText className="mr-2 h-4 w-4" /> PDF
+          </Button>
+          <Button size="sm" variant="outline" onClick={() => exportApuracaoWord(report).catch(() => toast.error("Erro ao gerar Word"))}>
+            <FileType2 className="mr-2 h-4 w-4" /> Word
+          </Button>
+          <Button size="sm" variant="outline" onClick={() => exportApuracaoExcel(report)}>
+            <SheetIcon className="mr-2 h-4 w-4" /> Excel
+          </Button>
+        </div>
+      </CardContent></Card>
+
+      {report.cargos.map((c) => (
+        <Card key={c.cargo}><CardContent className="space-y-3 py-4">
+          <h3 className="font-semibold">{c.cargo} <span className="text-xs font-normal text-muted-foreground">({c.totalVotos} votos)</span></h3>
+          {c.candidatos.map((k, idx) => (
+            <div key={idx} className="space-y-1">
+              <div className="flex items-center gap-3">
+                <Avatar className="h-10 w-10">
+                  {k.fotoUrl ? <AvatarImage src={k.fotoUrl} alt={k.nome} className="object-cover" /> : null}
+                  <AvatarFallback>{k.nome.slice(0, 2).toUpperCase()}</AvatarFallback>
+                </Avatar>
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-center justify-between gap-2 text-sm">
+                    <span className="truncate">{k.nome}{k.numero ? ` (nº ${k.numero})` : ""}</span>
+                    <span className="shrink-0 text-muted-foreground">{k.votos} · {k.pct.toFixed(1)}%</span>
                   </div>
-                  <Progress value={pct} />
+                  <Progress value={k.pct} className="mt-1" />
                 </div>
-              );
-            })}
-          </CardContent></Card>
-        );
-      })}
+              </div>
+            </div>
+          ))}
+          <div className="grid gap-2 pt-2 text-sm sm:grid-cols-3">
+            <div className="rounded-md border p-2">
+              <div className="text-xs text-muted-foreground">Favoráveis (Sim)</div>
+              <div className="font-semibold">{c.favoraveis} · {c.favoraveisPct.toFixed(1)}%</div>
+            </div>
+            <div className="rounded-md border p-2">
+              <div className="text-xs text-muted-foreground">Contrários (Não)</div>
+              <div className="font-semibold">{c.contrarios} · {c.contrariosPct.toFixed(1)}%</div>
+            </div>
+            <div className="rounded-md border p-2">
+              <div className="text-xs text-muted-foreground">Nulos</div>
+              <div className="font-semibold">{c.nulos} · {c.nulosPct.toFixed(1)}%</div>
+            </div>
+          </div>
+        </CardContent></Card>
+      ))}
     </div>
   );
 }
