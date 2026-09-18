@@ -48,6 +48,83 @@ function download(blob: Blob, filename: string) {
 
 const pct = (n: number) => `${n.toFixed(1)}%`;
 
+export const PIE_COLORS = [
+  "#0a2d69", "#c8a227", "#2f7d4f", "#8e44ad", "#d35400",
+  "#1f78b4", "#b03a2e", "#16a085", "#7f8c8d", "#2c3e50",
+];
+
+export type PieSlice = { label: string; value: number; color: string };
+
+export function cargoSlices(c: ApuracaoCargoReport): PieSlice[] {
+  const slices: PieSlice[] = c.candidatos.map((k, i) => ({
+    label: k.numero ? `${k.nome} (nº ${k.numero})` : k.nome,
+    value: k.votos,
+    color: PIE_COLORS[i % PIE_COLORS.length],
+  }));
+  if (c.favoraveis > 0) slices.push({ label: "Favoráveis (Sim)", value: c.favoraveis, color: "#4caf50" });
+  if (c.contrarios > 0) slices.push({ label: "Contrários (Não)", value: c.contrarios, color: "#e53935" });
+  if (c.nulos > 0) slices.push({ label: "Nulos", value: c.nulos, color: "#9e9e9e" });
+  return slices.filter((s) => s.value > 0);
+}
+
+/** Renders a pie chart (with legend) to a PNG data URL using canvas. */
+export function renderPieDataUrl(c: ApuracaoCargoReport, width = 520, height = 300): string | null {
+  const slices = cargoSlices(c);
+  const total = slices.reduce((a, s) => a + s.value, 0);
+  if (total <= 0) return null;
+  const canvas = document.createElement("canvas");
+  canvas.width = width;
+  canvas.height = height;
+  const ctx = canvas.getContext("2d");
+  if (!ctx) return null;
+  ctx.fillStyle = "#ffffff";
+  ctx.fillRect(0, 0, width, height);
+
+  const r = Math.min(height, width / 2) / 2 - 12;
+  const cx = r + 20;
+  const cy = height / 2;
+  let start = -Math.PI / 2;
+  for (const s of slices) {
+    const angle = (s.value / total) * Math.PI * 2;
+    ctx.beginPath();
+    ctx.moveTo(cx, cy);
+    ctx.arc(cx, cy, r, start, start + angle);
+    ctx.closePath();
+    ctx.fillStyle = s.color;
+    ctx.fill();
+    ctx.strokeStyle = "#ffffff";
+    ctx.lineWidth = 2;
+    ctx.stroke();
+    const mid = start + angle / 2;
+    const p = ((s.value / total) * 100).toFixed(1);
+    if (angle > 0.25) {
+      ctx.fillStyle = "#ffffff";
+      ctx.font = "bold 13px Arial";
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      ctx.fillText(`${p}%`, cx + Math.cos(mid) * r * 0.62, cy + Math.sin(mid) * r * 0.62);
+    }
+    start += angle;
+  }
+
+  let ly = 24;
+  const lx = cx + r + 24;
+  ctx.textAlign = "left";
+  ctx.textBaseline = "middle";
+  for (const s of slices) {
+    ctx.fillStyle = s.color;
+    ctx.fillRect(lx, ly - 6, 12, 12);
+    ctx.fillStyle = "#111111";
+    ctx.font = "12px Arial";
+    const label = `${s.label} — ${s.value} (${((s.value / total) * 100).toFixed(1)}%)`;
+    ctx.fillText(label.length > 44 ? `${label.slice(0, 43)}…` : label, lx + 18, ly);
+    ly += 20;
+    if (ly > height - 10) break;
+  }
+  return canvas.toDataURL("image/png");
+}
+
+
 async function toDataUrl(url: string): Promise<string | null> {
   try {
     const res = await fetch(url);
