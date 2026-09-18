@@ -13,7 +13,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Progress } from "@/components/ui/progress";
 import { Plus, Play, Square, CheckCircle2, Copy, ShieldAlert, Trash2, Gavel, Printer, Send, Mail, MessageCircle, FileText, FileType2, Sheet as SheetIcon } from "lucide-react";
-import { exportApuracaoPdf, exportApuracaoWord, exportApuracaoExcel, type ApuracaoReport } from "@/lib/vf-apuracao-report";
+import { exportApuracaoPdf, exportApuracaoWord, exportApuracaoExcel, cargoSlices, type ApuracaoReport, type ApuracaoCargoReport } from "@/lib/vf-apuracao-report";
+import { PieChart, Pie, Cell, Tooltip as RTooltip, Legend, ResponsiveContainer } from "recharts";
+
 import { toast } from "sonner";
 import { AssociadoCombobox, type Associado } from "@/components/AssociadoCombobox";
 import { CandidatoFotoUpload } from "@/components/CandidatoFotoUpload";
@@ -599,6 +601,25 @@ function buildApuracaoReport(
   };
 }
 
+function CargoPie({ cargo }: { cargo: ApuracaoCargoReport }) {
+  const data = cargoSlices(cargo);
+  if (data.length === 0) return null;
+  return (
+    <div className="h-64 w-full">
+      <ResponsiveContainer width="100%" height="100%">
+        <PieChart>
+          <Pie data={data} dataKey="value" nameKey="label" outerRadius="75%" label={(e: any) => `${((e.percent ?? 0) * 100).toFixed(1)}%`}>
+            {data.map((s, i) => <Cell key={i} fill={s.color} />)}
+          </Pie>
+          <RTooltip formatter={(v: any, n: any) => [`${v} voto(s)`, n]} />
+          <Legend verticalAlign="bottom" height={36} />
+        </PieChart>
+      </ResponsiveContainer>
+    </div>
+  );
+}
+
+
 function ApuracaoView({ items, status, eleicao, cands, presidente }: {
   items: Apuracao[]; status: Status; eleicao: Eleicao; cands: Candidatura[]; presidente: string | null;
 }) {
@@ -635,6 +656,8 @@ function ApuracaoView({ items, status, eleicao, cands, presidente }: {
       {report.cargos.map((c) => (
         <Card key={c.cargo}><CardContent className="space-y-3 py-4">
           <h3 className="font-semibold">{c.cargo} <span className="text-xs font-normal text-muted-foreground">({c.totalVotos} votos)</span></h3>
+          <CargoPie cargo={c} />
+
           {c.candidatos.map((k, idx) => (
             <div key={idx} className="space-y-1">
               <div className="flex items-center gap-3">
