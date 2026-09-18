@@ -635,6 +635,8 @@ function ApuracaoView({ items, status, eleicao, cands, presidente }: {
       {report.cargos.map((c) => (
         <Card key={c.cargo}><CardContent className="space-y-3 py-4">
           <h3 className="font-semibold">{c.cargo} <span className="text-xs font-normal text-muted-foreground">({c.totalVotos} votos)</span></h3>
+          <CargoPie cargo={c} />
+
           {c.candidatos.map((k, idx) => (
             <div key={idx} className="space-y-1">
               <div className="flex items-center gap-3">
