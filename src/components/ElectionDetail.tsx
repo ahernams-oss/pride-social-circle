@@ -277,9 +277,33 @@ export function ElectionDetail({
 
       {(election.status === "closed" || isAdmin) && (
         <Card>
-          <CardContent className="space-y-3 py-5">
+          <CardContent className="space-y-4 py-5">
             <h3 className="flex items-center gap-2 font-semibold"><BarChart3 className="h-4 w-4" /> Resultados {election.status !== "closed" && <Badge variant="outline">prévia (admin)</Badge>}</h3>
+            <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+              <Stat label="Votos registrados" value={String(totalBallots)} />
+              <Stat label="Tipo" value={TYPE_LABEL[election.type]} />
+              <Stat label="Cargos" value={String(election.type === "multi_position" ? positions.length : 1)} />
+              <Stat label={election.type === "multiple_choice" ? "Opções" : "Candidatos"} value={String(candidates.length)} />
+            </div>
             <Results rows={results} positions={positions} type={election.type} />
+            <Separator />
+            <div className="space-y-2">
+              <h4 className="text-sm font-semibold">Relatórios</h4>
+              <div className="flex flex-wrap gap-2">
+                <Button size="sm" variant="outline" onClick={() => downloadReport("pdf")}>
+                  <FileText className="mr-2 h-4 w-4" /> PDF
+                </Button>
+                <Button size="sm" variant="outline" onClick={() => downloadReport("word")}>
+                  <FileType2 className="mr-2 h-4 w-4" /> Word
+                </Button>
+                <Button size="sm" variant="outline" onClick={() => downloadReport("excel")}>
+                  <Sheet className="mr-2 h-4 w-4" /> Excel
+                </Button>
+                <Button size="sm" variant="outline" onClick={() => window.print()}>
+                  <Printer className="mr-2 h-4 w-4" /> Imprimir
+                </Button>
+              </div>
+            </div>
           </CardContent>
         </Card>
       )}
