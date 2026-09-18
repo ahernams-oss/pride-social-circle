@@ -13,7 +13,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Progress } from "@/components/ui/progress";
 import { Plus, Play, Square, CheckCircle2, Copy, ShieldAlert, Trash2, Gavel, Printer, Send, Mail, MessageCircle, FileText, FileType2, Sheet as SheetIcon } from "lucide-react";
-import { exportApuracaoPdf, exportApuracaoWord, exportApuracaoExcel, type ApuracaoReport } from "@/lib/vf-apuracao-report";
+import { exportApuracaoPdf, exportApuracaoWord, exportApuracaoExcel, cargoSlices, type ApuracaoReport, type ApuracaoCargoReport } from "@/lib/vf-apuracao-report";
+import { PieChart, Pie, Cell, Tooltip as RTooltip, Legend, ResponsiveContainer } from "recharts";
+
 import { toast } from "sonner";
 import { AssociadoCombobox, type Associado } from "@/components/AssociadoCombobox";
 import { CandidatoFotoUpload } from "@/components/CandidatoFotoUpload";
