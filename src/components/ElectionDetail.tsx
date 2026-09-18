@@ -124,6 +124,41 @@ export function ElectionDetail({
     return m;
   }, [candidates]);
 
+  const reportSections = useMemo<ReportSection[]>(
+    () => buildSections(results, positions, election?.type ?? "single").map((s) => {
+      const total = s.rows.reduce((acc, r) => acc + Number(r.votes), 0);
+      return {
+        name: s.name,
+        rows: s.rows
+          .slice()
+          .sort((a, b) => Number(b.votes) - Number(a.votes))
+          .map((r) => ({
+            label: r.candidate_name ?? (r.value === "sim" ? "Sim" : r.value === "nao" ? "Não" : "—"),
+            votes: Number(r.votes),
+            pct: total > 0 ? (Number(r.votes) / total) * 100 : 0,
+          })),
+      };
+    }),
+    [results, positions, election?.type],
+  );
+
+  const downloadReport = (fmt: "pdf" | "word" | "excel") => {
+    if (!election) return;
+    const data = {
+      title: election.title,
+      description: election.description,
+      typeLabel: TYPE_LABEL[election.type],
+      statusLabel: election.status === "closed" ? "Encerrada" : election.status === "open" ? "Aberta" : "Rascunho",
+      totalBallots,
+      generatedAt: new Date().toLocaleString("pt-BR"),
+      sections: reportSections,
+    };
+    if (fmt === "pdf") exportPdf(data).catch(() => toast.error("Erro ao gerar PDF"));
+    else if (fmt === "word") exportWord(data);
+    else exportExcel(data);
+  };
+
+
   if (loading) return <p className="text-sm text-muted-foreground">Carregando...</p>;
   if (!election) return <p className="text-sm text-muted-foreground">Eleição não encontrada.</p>;
 
