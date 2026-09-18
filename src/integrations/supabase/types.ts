@@ -653,21 +653,33 @@ export type Database = {
       }
       mission_completions: {
         Row: {
+          approved_at: string | null
+          approved_by: string | null
           created_at: string
           id: string
           mission_id: string
+          review_note: string | null
+          status: string
           user_id: string
         }
         Insert: {
+          approved_at?: string | null
+          approved_by?: string | null
           created_at?: string
           id?: string
           mission_id: string
+          review_note?: string | null
+          status?: string
           user_id: string
         }
         Update: {
+          approved_at?: string | null
+          approved_by?: string | null
           created_at?: string
           id?: string
           mission_id?: string
+          review_note?: string | null
+          status?: string
           user_id?: string
         }
         Relationships: [
@@ -1362,6 +1374,10 @@ export type Database = {
       }
       admin_set_user_active: {
         Args: { _active: boolean; _reason?: string; _user_id: string }
+        Returns: boolean
+      }
+      can_menu: {
+        Args: { _action: string; _menu: string; _user_id: string }
         Returns: boolean
       }
       current_access_level: { Args: { _user_id: string }; Returns: string }

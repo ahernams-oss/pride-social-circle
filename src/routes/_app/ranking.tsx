@@ -19,7 +19,7 @@ function RankingPage() {
     (async () => {
       const [{ data: profiles }, { data: completions }] = await Promise.all([
         supabase.from("profiles").select("id, full_name, avatar_url, club_name").eq("status", "approved"),
-        supabase.from("mission_completions").select("user_id, missions(points)"),
+        supabase.from("mission_completions").select("user_id, missions(points)").eq("status", "approved"),
       ]);
       const counts = new Map<string, number>();
       (completions ?? []).forEach((c: any) => {
