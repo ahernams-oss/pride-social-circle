@@ -623,6 +623,8 @@ function CargoPie({ cargo }: { cargo: ApuracaoCargoReport }) {
 function ApuracaoView({ items, status, eleicao, cands, presidente }: {
   items: Apuracao[]; status: Status; eleicao: Eleicao; cands: Candidatura[]; presidente: string | null;
 }) {
+  const [filterCargo, setFilterCargo] = useState("all");
+  const [filterCandidato, setFilterCandidato] = useState("all");
   if (status !== "votacao_encerrada" && status !== "apurada") {
     return (
       <Card><CardContent className="flex items-center gap-3 py-6">
