@@ -11,8 +11,9 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Separator } from "@/components/ui/separator";
-import { ArrowLeft, Plus, Trash2, BarChart3, CheckCircle2 } from "lucide-react";
+import { ArrowLeft, Plus, Trash2, BarChart3, CheckCircle2, FileText, FileType2, Sheet, Printer } from "lucide-react";
 import { toast } from "sonner";
+import { exportPdf, exportWord, exportExcel, type ReportSection } from "@/lib/election-report";
 
 type ElectionType = "single" | "yes_no" | "multiple_choice" | "multi_position";
 type Election = {
@@ -22,6 +23,25 @@ type Election = {
 type Position = { id: string; name: string; order_index: number };
 type Candidate = { id: string; name: string; description: string | null; position_id: string | null; order_index: number };
 type ResultRow = { position_id: string | null; position_name: string | null; candidate_id: string | null; candidate_name: string | null; value: string | null; votes: number };
+
+const TYPE_LABEL: Record<ElectionType, string> = {
+  single: "Cargo único",
+  yes_no: "Sim / Não",
+  multiple_choice: "Múltipla escolha",
+  multi_position: "Chapa (vários cargos)",
+};
+
+function buildSections(rows: ResultRow[], positions: Position[], type: ElectionType) {
+  const grouped = new Map<string | null, ResultRow[]>();
+  for (const r of rows) {
+    const k = r.position_id;
+    if (!grouped.has(k)) grouped.set(k, []);
+    grouped.get(k)!.push(r);
+  }
+  return type === "multi_position"
+    ? positions.map((p) => ({ key: p.id as string | null, name: p.name, rows: grouped.get(p.id) ?? [] }))
+    : [{ key: null as string | null, name: "", rows: grouped.get(null) ?? [] }];
+}
 
 export function ElectionDetail({
   electionId, isAdmin, voterId, client, onVoted,
@@ -37,6 +57,7 @@ export function ElectionDetail({
   const [candidates, setCandidates] = useState<Candidate[]>([]);
   const [hasVoted, setHasVoted] = useState(false);
   const [results, setResults] = useState<ResultRow[]>([]);
+  const [totalBallots, setTotalBallots] = useState(0);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
 
@@ -62,6 +83,11 @@ export function ElectionDetail({
     }
     const { data: res } = await client.rpc("election_results", { _election_id: electionId });
     setResults((res ?? []) as ResultRow[]);
+    const { count } = await client
+      .from("election_ballots")
+      .select("id", { count: "exact", head: true })
+      .eq("election_id", electionId);
+    setTotalBallots(count ?? 0);
     setLoading(false);
   }, [client, electionId, voterId]);
 
@@ -116,6 +142,41 @@ export function ElectionDetail({
     }
     return m;
   }, [candidates]);
+
+  const reportSections = useMemo<ReportSection[]>(
+    () => buildSections(results, positions, election?.type ?? "single").map((s) => {
+      const total = s.rows.reduce((acc, r) => acc + Number(r.votes), 0);
+      return {
+        name: s.name,
+        rows: s.rows
+          .slice()
+          .sort((a, b) => Number(b.votes) - Number(a.votes))
+          .map((r) => ({
+            label: r.candidate_name ?? (r.value === "sim" ? "Sim" : r.value === "nao" ? "Não" : "—"),
+            votes: Number(r.votes),
+            pct: total > 0 ? (Number(r.votes) / total) * 100 : 0,
+          })),
+      };
+    }),
+    [results, positions, election?.type],
+  );
+
+  const downloadReport = (fmt: "pdf" | "word" | "excel") => {
+    if (!election) return;
+    const data = {
+      title: election.title,
+      description: election.description,
+      typeLabel: TYPE_LABEL[election.type],
+      statusLabel: election.status === "closed" ? "Encerrada" : election.status === "open" ? "Aberta" : "Rascunho",
+      totalBallots,
+      generatedAt: new Date().toLocaleString("pt-BR"),
+      sections: reportSections,
+    };
+    if (fmt === "pdf") exportPdf(data).catch(() => toast.error("Erro ao gerar PDF"));
+    else if (fmt === "word") exportWord(data);
+    else exportExcel(data);
+  };
+
 
   if (loading) return <p className="text-sm text-muted-foreground">Carregando...</p>;
   if (!election) return <p className="text-sm text-muted-foreground">Eleição não encontrada.</p>;
@@ -216,9 +277,33 @@ export function ElectionDetail({
 
       {(election.status === "closed" || isAdmin) && (
         <Card>
-          <CardContent className="space-y-3 py-5">
+          <CardContent className="space-y-4 py-5">
             <h3 className="flex items-center gap-2 font-semibold"><BarChart3 className="h-4 w-4" /> Resultados {election.status !== "closed" && <Badge variant="outline">prévia (admin)</Badge>}</h3>
+            <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+              <Stat label="Votos registrados" value={String(totalBallots)} />
+              <Stat label="Tipo" value={TYPE_LABEL[election.type]} />
+              <Stat label="Cargos" value={String(election.type === "multi_position" ? positions.length : 1)} />
+              <Stat label={election.type === "multiple_choice" ? "Opções" : "Candidatos"} value={String(candidates.length)} />
+            </div>
             <Results rows={results} positions={positions} type={election.type} />
+            <Separator />
+            <div className="space-y-2">
+              <h4 className="text-sm font-semibold">Relatórios</h4>
+              <div className="flex flex-wrap gap-2">
+                <Button size="sm" variant="outline" onClick={() => downloadReport("pdf")}>
+                  <FileText className="mr-2 h-4 w-4" /> PDF
+                </Button>
+                <Button size="sm" variant="outline" onClick={() => downloadReport("word")}>
+                  <FileType2 className="mr-2 h-4 w-4" /> Word
+                </Button>
+                <Button size="sm" variant="outline" onClick={() => downloadReport("excel")}>
+                  <Sheet className="mr-2 h-4 w-4" /> Excel
+                </Button>
+                <Button size="sm" variant="outline" onClick={() => window.print()}>
+                  <Printer className="mr-2 h-4 w-4" /> Imprimir
+                </Button>
+              </div>
+            </div>
           </CardContent>
         </Card>
       )}
@@ -226,15 +311,18 @@ export function ElectionDetail({
   );
 }
 
+function Stat({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="rounded-md border p-3">
+      <div className="text-xs text-muted-foreground">{label}</div>
+      <div className="truncate text-sm font-semibold">{value}</div>
+    </div>
+  );
+}
+
 function Results({ rows, positions, type }: { rows: ResultRow[]; positions: Position[]; type: ElectionType }) {
   if (rows.length === 0) return <p className="text-sm text-muted-foreground">Sem votos ainda.</p>;
-  const grouped = new Map<string | null, ResultRow[]>();
-  for (const r of rows) {
-    const k = r.position_id;
-    if (!grouped.has(k)) grouped.set(k, []);
-    grouped.get(k)!.push(r);
-  }
-  const sections = type === "multi_position" ? positions.map((p) => ({ key: p.id, name: p.name, rows: grouped.get(p.id) ?? [] })) : [{ key: null, name: "", rows: grouped.get(null) ?? [] }];
+  const sections = buildSections(rows, positions, type);
   const total = (rs: ResultRow[]) => rs.reduce((s, r) => s + Number(r.votes), 0);
   return (
     <div className="space-y-4">
