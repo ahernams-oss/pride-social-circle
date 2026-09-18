@@ -159,7 +159,7 @@ function Page() {
         </TabsContent>
 
         <TabsContent value="apuracao" className="pt-4">
-          <ApuracaoView items={apur} status={eleicao.status} />
+          <ApuracaoView items={apur} status={eleicao.status} eleicao={eleicao} cands={cands} presidente={presidente} />
         </TabsContent>
       </Tabs>
     </div>
