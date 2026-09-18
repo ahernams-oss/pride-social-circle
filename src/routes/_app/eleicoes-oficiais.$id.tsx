@@ -12,7 +12,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Progress } from "@/components/ui/progress";
-import { Plus, Play, Square, CheckCircle2, Copy, ShieldAlert, Trash2, Gavel, Printer, Send, Mail, MessageCircle, FileText, FileType2, Sheet as SheetIcon } from "lucide-react";
+import { Plus, Play, Square, CheckCircle2, Copy, ShieldAlert, Trash2, Gavel, Printer, Send, Mail, MessageCircle, FileText, FileType2, Pencil, Sheet as SheetIcon } from "lucide-react";
 import { exportApuracaoPdf, exportApuracaoWord, exportApuracaoExcel, cargoSlices, type ApuracaoReport, type ApuracaoCargoReport } from "@/lib/vf-apuracao-report";
 import { PieChart, Pie, Cell, Tooltip as RTooltip, Legend, ResponsiveContainer } from "recharts";
 
@@ -542,24 +542,37 @@ function escapeHtml(s: string) {
   return s.replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]!));
 }
 
-function NewComissao({ eleicaoId, onCreated }: { eleicaoId: string; onCreated: () => void }) {
-  const [open, setOpen] = useState(false);
-  const [f, setF] = useState({ nome: "", funcao: "membro" as Comissao["funcao"] });
+function NewComissao({ eleicaoId, onCreated, membro, open: openProp, onOpenChange }: {
+  eleicaoId: string;
+  onCreated: () => void;
+  membro?: Comissao;
+  open?: boolean;
+  onOpenChange?: (o: boolean) => void;
+}) {
+  const [openState, setOpenState] = useState(false);
+  const open = openProp ?? openState;
+  const setOpen = onOpenChange ?? setOpenState;
+  const [f, setF] = useState({ nome: membro?.nome ?? "", funcao: (membro?.funcao ?? "membro") as Comissao["funcao"] });
+  useEffect(() => {
+    if (open && membro) setF({ nome: membro.nome, funcao: membro.funcao });
+  }, [open, membro]);
   const save = async () => {
     if (!f.nome) return toast.error("Nome é obrigatório");
-    const { error } = await supabase.from("vf_comissao").insert({
-      eleicao_id: eleicaoId, nome: f.nome, funcao: f.funcao,
-    } as any);
+    const { error } = membro
+      ? await supabase.from("vf_comissao").update({ nome: f.nome, funcao: f.funcao } as any).eq("id", membro.id)
+      : await supabase.from("vf_comissao").insert({
+          eleicao_id: eleicaoId, nome: f.nome, funcao: f.funcao,
+        } as any);
     if (error) return toast.error(error.message);
-    toast.success("Membro adicionado");
-    setF({ nome: "", funcao: "membro" });
+    toast.success(membro ? "Membro atualizado" : "Membro adicionado");
+    if (!membro) setF({ nome: "", funcao: "membro" });
     setOpen(false); onCreated();
   };
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild><Button size="sm"><Plus className="mr-2 h-4 w-4" /> Membro</Button></DialogTrigger>
+      {!membro && <DialogTrigger asChild><Button size="sm"><Plus className="mr-2 h-4 w-4" /> Membro</Button></DialogTrigger>}
       <DialogContent>
-        <DialogHeader><DialogTitle>Membro da comissão</DialogTitle></DialogHeader>
+        <DialogHeader><DialogTitle>{membro ? "Editar membro da comissão" : "Membro da comissão"}</DialogTitle></DialogHeader>
         <div className="space-y-3">
           <div><Label>Nome</Label><Input value={f.nome} onChange={(e) => setF({ ...f, nome: e.target.value })} /></div>
           <div><Label>Função</Label>
@@ -581,6 +594,7 @@ function NewComissao({ eleicaoId, onCreated }: { eleicaoId: string; onCreated: (
 }
 
 function ComissaoList({ items, isAdmin, onChanged }: { items: Comissao[]; isAdmin: boolean; onChanged: () => void }) {
+  const [editing, setEditing] = useState<Comissao | null>(null);
   const remove = async (id: string) => {
     if (!confirm("Remover?")) return;
     const { error } = await supabase.from("vf_comissao").delete().eq("id", id);
@@ -593,9 +607,24 @@ function ComissaoList({ items, isAdmin, onChanged }: { items: Comissao[]; isAdmi
       {items.map((m) => (
         <Card key={m.id}><CardContent className="flex items-center justify-between py-3">
           <div><div className="font-medium">{m.nome}</div><div className="text-xs text-muted-foreground capitalize">{m.funcao.replace("_", " ")}</div></div>
-          {isAdmin && <Button size="icon" variant="ghost" onClick={() => remove(m.id)}><Trash2 className="h-4 w-4" /></Button>}
+          {isAdmin && (
+            <div className="flex items-center gap-1">
+              <Button size="icon" variant="ghost" title="Editar membro" onClick={() => setEditing(m)}><Pencil className="h-4 w-4" /></Button>
+              <Button size="icon" variant="ghost" title="Remover membro" onClick={() => remove(m.id)}><Trash2 className="h-4 w-4" /></Button>
+            </div>
+          )}
         </CardContent></Card>
       ))}
+      {editing && (
+        <NewComissao
+          key={editing.id}
+          eleicaoId=""
+          membro={editing}
+          open
+          onOpenChange={(o) => { if (!o) setEditing(null); }}
+          onCreated={onChanged}
+        />
+      )}
     </div>
   );
 }
