@@ -22,6 +22,7 @@ import { CandidatoFotoUpload } from "@/components/CandidatoFotoUpload";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { assinaturaEletronica, codigoUrna, codigoUrnaCredencial } from "@/lib/vf-credencial";
 import lciEmblem from "@/assets/lci-emblem.png.asset.json";
+import distritoLogo from "@/assets/distrito-lc11-logo.png.asset.json";
 
 export const Route = createFileRoute("/_app/eleicoes-oficiais/$id")({ component: Page });
 
@@ -437,9 +438,34 @@ function SendCredencialDialog({ delegado, eleicao, onClose }: { delegado: Delega
   );
 }
 
-function printCredenciais(list: Delegado[], e: Eleicao, presidente: string | null) {
+async function assetDataUrl(path: string): Promise<string> {
+  const absoluteUrl = new URL(path, window.location.origin).href;
+  try {
+    const response = await fetch(absoluteUrl);
+    if (!response.ok) return absoluteUrl;
+    const blob = await response.blob();
+    return await new Promise<string>((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(typeof reader.result === "string" ? reader.result : absoluteUrl);
+      reader.onerror = () => reject(reader.error);
+      reader.readAsDataURL(blob);
+    });
+  } catch {
+    return absoluteUrl;
+  }
+}
+
+async function printCredenciais(list: Delegado[], e: Eleicao, presidente: string | null) {
+  const w = window.open("", "_blank", "width=1000,height=760");
+  if (!w) { toast.error("Permita pop-ups para imprimir"); return; }
+  w.document.write('<!doctype html><html><body style="font-family:Arial,sans-serif;padding:24px">Preparando credenciais…</body></html>');
+  w.document.close();
+
   const dateStr = new Date(e.data_eleicao).toLocaleDateString("pt-BR");
-  const emblem = window.location.origin + lciEmblem.url;
+  const [emblem, district] = await Promise.all([
+    assetDataUrl(lciEmblem.url),
+    assetDataUrl(distritoLogo.url),
+  ]);
   const dist = e.distrito || "Distrito LC-11";
   const cards = list.map((d) => {
     const initials = d.nome.split(/\s+/).filter(Boolean).slice(0, 2).map((part) => part[0]?.toUpperCase() ?? "").join("");
@@ -458,6 +484,7 @@ function printCredenciais(list: Delegado[], e: Eleicao, presidente: string | nul
         <img class="emblem" src="${emblem}" alt="Lions International">
         <div class="vsep"></div>
         <div class="mid">
+           <img class="district-logo" src="${district}" alt="Distrito LC-11">
           <div class="org">LIONS INTERNATIONAL</div>
           <div class="dist">${escapeHtml(dist)}</div>
           <div class="gold-hr"></div>
@@ -510,6 +537,7 @@ function printCredenciais(list: Delegado[], e: Eleicao, presidente: string | nul
       .emblem{width:86px;height:86px;object-fit:contain;flex:none}
       .vsep{width:3px;background:#d3a625;flex:none;border-radius:2px}
       .mid{flex:1;text-align:center;min-width:0}
+       .district-logo{display:block;width:150px;height:38px;object-fit:contain;margin:0 auto 3px}
       .org{font-family:Georgia,"Times New Roman",serif;font-weight:700;font-size:17px;color:#14346e;letter-spacing:.5px;white-space:nowrap}
       .dist{font-family:Georgia,"Times New Roman",serif;font-size:14px;color:#14346e}
       .gold-hr{height:2px;background:#d3a625;margin:6px 14px}
@@ -556,8 +584,7 @@ function printCredenciais(list: Delegado[], e: Eleicao, presidente: string | nul
       </div>
       <div class="grid">${cards}</div>
     </body></html>`;
-  const w = window.open("", "_blank", "width=1000,height=760");
-  if (!w) { toast.error("Permita pop-ups para imprimir"); return; }
+  w.document.open();
   w.document.write(html);
   w.document.close();
 }
