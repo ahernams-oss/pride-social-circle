@@ -601,6 +601,25 @@ function buildApuracaoReport(
   };
 }
 
+function CargoPie({ cargo }: { cargo: ApuracaoCargoReport }) {
+  const data = cargoSlices(cargo);
+  if (data.length === 0) return null;
+  return (
+    <div className="h-64 w-full">
+      <ResponsiveContainer width="100%" height="100%">
+        <PieChart>
+          <Pie data={data} dataKey="value" nameKey="label" outerRadius="75%" label={(e: any) => `${((e.percent ?? 0) * 100).toFixed(1)}%`}>
+            {data.map((s, i) => <Cell key={i} fill={s.color} />)}
+          </Pie>
+          <RTooltip formatter={(v: any, n: any) => [`${v} voto(s)`, n]} />
+          <Legend verticalAlign="bottom" height={36} />
+        </PieChart>
+      </ResponsiveContainer>
+    </div>
+  );
+}
+
+
 function ApuracaoView({ items, status, eleicao, cands, presidente }: {
   items: Apuracao[]; status: Status; eleicao: Eleicao; cands: Candidatura[]; presidente: string | null;
 }) {
