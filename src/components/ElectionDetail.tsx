@@ -38,6 +38,7 @@ export function ElectionDetail({
   const [candidates, setCandidates] = useState<Candidate[]>([]);
   const [hasVoted, setHasVoted] = useState(false);
   const [results, setResults] = useState<ResultRow[]>([]);
+  const [totalBallots, setTotalBallots] = useState(0);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
 
