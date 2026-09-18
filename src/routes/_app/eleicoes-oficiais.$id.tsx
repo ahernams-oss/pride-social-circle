@@ -20,7 +20,7 @@ import { toast } from "sonner";
 import { AssociadoCombobox, type Associado } from "@/components/AssociadoCombobox";
 import { CandidatoFotoUpload } from "@/components/CandidatoFotoUpload";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { assinaturaEletronica, codigoUrna } from "@/lib/vf-credencial";
+import { assinaturaEletronica, codigoUrna, codigoUrnaCredencial } from "@/lib/vf-credencial";
 import lciEmblem from "@/assets/lci-emblem.png.asset.json";
 
 export const Route = createFileRoute("/_app/eleicoes-oficiais/$id")({ component: Page });
