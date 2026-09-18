@@ -548,7 +548,59 @@ function ComissaoList({ items, isAdmin, onChanged }: { items: Comissao[]; isAdmi
   );
 }
 
-function ApuracaoView({ items, status }: { items: Apuracao[]; status: Status }) {
+function buildApuracaoReport(
+  items: Apuracao[],
+  eleicao: Eleicao,
+  cands: Candidatura[],
+  presidente: string | null,
+): ApuracaoReport {
+  const byId = new Map(cands.map((c) => [c.id, c]));
+  const grouped = new Map<string, Apuracao[]>();
+  items.forEach((i) => { const a = grouped.get(i.cargo) ?? []; a.push(i); grouped.set(i.cargo, a); });
+  const cargos = Array.from(grouped.entries()).map(([cargo, list]) => {
+    const total = list.reduce((s, x) => s + Number(x.votos), 0);
+    const p = (n: number) => (total ? (n / total) * 100 : 0);
+    const sum = (tipo: string) => list.filter((x) => x.tipo === tipo).reduce((s, x) => s + Number(x.votos), 0);
+    const nulos = sum("nulo");
+    const contrarios = sum("nao");
+    const favoraveis = sum("sim");
+    return {
+      cargo,
+      totalVotos: total,
+      candidatos: list
+        .filter((x) => x.tipo === "candidato" || x.candidatura_id)
+        .sort((a, b) => Number(b.votos) - Number(a.votos))
+        .map((x) => {
+          const c = x.candidatura_id ? byId.get(x.candidatura_id) : undefined;
+          return {
+            nome: x.candidato || c?.nome || "—",
+            numero: c?.numero ?? null,
+            fotoUrl: c?.foto_url ?? null,
+            votos: Number(x.votos),
+            pct: p(Number(x.votos)),
+          };
+        }),
+      favoraveis, favoraveisPct: p(favoraveis),
+      contrarios, contrariosPct: p(contrarios),
+      nulos, nulosPct: p(nulos),
+    };
+  });
+  return {
+    titulo: eleicao.titulo,
+    descricao: eleicao.descricao,
+    distrito: eleicao.distrito,
+    dataEleicao: new Date(eleicao.data_eleicao).toLocaleDateString("pt-BR"),
+    statusLabel: STATUS_LABEL[eleicao.status],
+    presidente,
+    geradoEm: new Date().toLocaleString("pt-BR"),
+    totalGeral: cargos.reduce((s, c) => s + c.totalVotos, 0),
+    cargos,
+  };
+}
+
+function ApuracaoView({ items, status, eleicao, cands, presidente }: {
+  items: Apuracao[]; status: Status; eleicao: Eleicao; cands: Candidatura[]; presidente: string | null;
+}) {
   if (status !== "votacao_encerrada" && status !== "apurada") {
     return (
       <Card><CardContent className="flex items-center gap-3 py-6">
