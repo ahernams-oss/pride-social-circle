@@ -631,8 +631,25 @@ function ApuracaoView({ items, status, eleicao, cands, presidente }: {
       </CardContent></Card>
     );
   }
+  const [filterCargo, setFilterCargo] = useState("all");
+  const [filterCandidato, setFilterCandidato] = useState("all");
   if (items.length === 0) return <p className="text-sm text-muted-foreground">Nenhum voto registrado.</p>;
-  const report = buildApuracaoReport(items, eleicao, cands, presidente);
+  const fullReport = buildApuracaoReport(items, eleicao, cands, presidente);
+  const cargoOptions = fullReport.cargos.map((c) => c.cargo);
+  const candidatoOptions = Array.from(new Set(
+    fullReport.cargos
+      .filter((c) => filterCargo === "all" || c.cargo === filterCargo)
+      .flatMap((c) => c.candidatos.map((k) => k.nome)),
+  ));
+  const report: ApuracaoReport = {
+    ...fullReport,
+    cargos: fullReport.cargos
+      .filter((c) => filterCargo === "all" || c.cargo === filterCargo)
+      .map((c) => filterCandidato === "all" ? c : { ...c, candidatos: c.candidatos.filter((k) => k.nome === filterCandidato) }),
+    totalGeral: fullReport.cargos
+      .filter((c) => filterCargo === "all" || c.cargo === filterCargo)
+      .reduce((s, c) => s + c.totalVotos, 0),
+  };
   return (
     <div className="space-y-4">
       <Card><CardContent className="flex flex-wrap items-center justify-between gap-3 py-4">
