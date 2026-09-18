@@ -488,7 +488,8 @@ function printCredenciais(list: Delegado[], e: Eleicao, presidente: string | nul
         <div class="foot"><span class="fd"></span>LIDERANÇA&nbsp;•&nbsp;COMPANHEIRISMO&nbsp;•&nbsp;SERVIÇO<span class="fd"></span></div>
       </div>
     </div></div>
-  `).join("");
+  `;
+  }).join("");
   const html = `<!doctype html><html><head><meta charset="utf-8"/><title>Credenciais — ${escapeHtml(e.titulo)}</title>
     <style>
       *{box-sizing:border-box;-webkit-print-color-adjust:exact;print-color-adjust:exact}
@@ -516,6 +517,9 @@ function printCredenciais(list: Delegado[], e: Eleicao, presidente: string | nul
       .we2{font-size:8.5px;letter-spacing:1.5px;color:#14346e;line-height:1.5}
       .band{height:10px;background:#14346e}
       .bd{position:relative;padding:8px 20px 30px}
+      .idrows{display:flex;align-items:center;gap:14px}
+      .dphoto{width:64px;height:64px;flex:none;border-radius:50%;object-fit:cover;border:2px solid #d3a625;box-shadow:0 0 0 2px #14346e}
+      .rows-wrap{flex:1;min-width:0}
       .row{display:flex;justify-content:space-between;align-items:baseline;gap:10px;padding:8px 0 5px;border-bottom:1.5px dashed #c9d2e3}
       .lbl{font-size:12px;letter-spacing:1px;color:#5a6b85;text-transform:uppercase}
       .val{font-size:15px;font-weight:700;color:#14346e;text-align:right}
