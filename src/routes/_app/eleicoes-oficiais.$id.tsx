@@ -21,6 +21,7 @@ import { AssociadoCombobox, type Associado } from "@/components/AssociadoCombobo
 import { CandidatoFotoUpload } from "@/components/CandidatoFotoUpload";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { assinaturaEletronica, codigoUrna } from "@/lib/vf-credencial";
+import lciEmblem from "@/assets/lci-emblem.png.asset.json";
 
 export const Route = createFileRoute("/_app/eleicoes-oficiais/$id")({ component: Page });
 
@@ -431,50 +432,96 @@ function SendCredencialDialog({ delegado, eleicao, onClose }: { delegado: Delega
 
 function printCredenciais(list: Delegado[], e: Eleicao, presidente: string | null) {
   const dateStr = new Date(e.data_eleicao).toLocaleDateString("pt-BR");
+  const emblem = window.location.origin + lciEmblem.url;
+  const dist = e.distrito || "Distrito LC-11";
   const cards = list.map((d) => `
-    <div class="cred">
-      <div class="head">
-        <div class="title">CREDENCIAL DE DELEGADO</div>
-        <div class="sub">${escapeHtml(e.titulo)}${e.distrito ? " · " + escapeHtml(e.distrito) : ""}</div>
-        <div class="sub">${dateStr}</div>
+    <div class="cred"><div class="in">
+      <div class="wm"><img src="${emblem}" alt=""></div>
+      <div class="corner l"><div class="n"></div><div class="g"></div></div>
+      <div class="corner r"><div class="n"></div><div class="g"></div></div>
+      <div class="hd">
+        <img class="emblem" src="${emblem}" alt="Lions International">
+        <div class="vsep"></div>
+        <div class="mid">
+          <div class="org">LIONS INTERNATIONAL</div>
+          <div class="dist">${escapeHtml(dist)}</div>
+          <div class="gold-hr"></div>
+          <div class="ct">CREDENCIAL DE DELEGADO</div>
+          <div class="sub">${escapeHtml(e.titulo)}</div>
+          <div class="sub">${dateStr}</div>
+        </div>
+        <div class="we">
+          <div class="we1">NÓS<br>SERVIMOS</div>
+          <div class="we-hr"></div>
+          <div class="we2">SERVICE<br>MAKES A<br>DIFFERENCE</div>
+        </div>
       </div>
-      <div class="body">
+      <div class="band"></div>
+      <div class="bd">
         <div class="row"><span class="lbl">Nome</span><span class="val">${escapeHtml(d.nome)}</span></div>
         <div class="row"><span class="lbl">Clube</span><span class="val">${escapeHtml(d.clube ?? "—")}</span></div>
         <div class="row"><span class="lbl">Tipo</span><span class="val">${escapeHtml(d.tipo)}</span></div>
-        <div class="code">${escapeHtml(codigoUrna(d.codigo_acesso, d.birth_date))}</div>
+        <div class="codebox"><div class="code">${escapeHtml(codigoUrna(d.codigo_acesso, d.birth_date))}</div></div>
         <div class="hint">Código de acesso para votação na urna eletrônica</div>
+        <div class="sig">
+          <div class="script">${escapeHtml(presidente ?? "Comissão Eleitoral")}</div>
+          <div class="sline"></div>
+          <div class="swho">${escapeHtml(presidente ?? "Comissão Eleitoral")} — Presidente da Comissão Eleitoral</div>
+          <div class="esig">Assinado eletronicamente · cód. ${assinaturaEletronica(`${e.id}:${d.id}:${presidente ?? ""}`)}</div>
+        </div>
+        <div class="foot"><span class="fd"></span>LIDERANÇA&nbsp;•&nbsp;COMPANHEIRISMO&nbsp;•&nbsp;SERVIÇO<span class="fd"></span></div>
       </div>
-      <div class="sig">
-        <div class="sign">${escapeHtml(presidente ?? "Comissão Eleitoral")}</div>
-        <div class="line"></div>
-        <div class="sub">${escapeHtml(presidente ?? "Comissão Eleitoral")} — Presidente da Comissão Eleitoral</div>
-        <div class="esig">Assinado eletronicamente · cód. ${assinaturaEletronica(`${e.id}:${d.id}:${presidente ?? ""}`)}</div>
-      </div>
-    </div>
+    </div></div>
   `).join("");
   const html = `<!doctype html><html><head><meta charset="utf-8"/><title>Credenciais — ${escapeHtml(e.titulo)}</title>
     <style>
-      *{box-sizing:border-box;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif}
-      body{margin:0;padding:16px;background:#f3f4f6}
+      *{box-sizing:border-box;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+      body{margin:0;padding:16px;background:#eef1f5;font-family:"Segoe UI",Roboto,Arial,sans-serif}
       .toolbar{display:flex;gap:8px;margin-bottom:16px}
-      .toolbar button{padding:8px 14px;border:1px solid #1e3a8a;background:#1e3a8a;color:#fff;border-radius:6px;cursor:pointer}
-      .toolbar button.sec{background:#fff;color:#1e3a8a}
-      .grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
-      .cred{border:2px solid #1e3a8a;border-radius:10px;padding:16px;background:#fff;page-break-inside:avoid}
-      .head{border-bottom:2px solid #1e3a8a;padding-bottom:8px;margin-bottom:10px;text-align:center}
-      .title{font-weight:800;color:#1e3a8a;letter-spacing:1px}
-      .sub{font-size:12px;color:#555}
-      .row{display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px dashed #ddd;font-size:13px}
-      .lbl{color:#666;text-transform:uppercase;font-size:11px}
-      .val{font-weight:600}
-      .code{margin:14px 0 4px;text-align:center;font-family:ui-monospace,Menlo,monospace;font-size:34px;font-weight:800;letter-spacing:6px;color:#1e3a8a;background:#eef2ff;border-radius:6px;padding:8px}
-      .hint{text-align:center;font-size:11px;color:#666}
-      .sig{margin-top:18px;text-align:center}
-      .sign{font-family:"Segoe Script","Brush Script MT",cursive;font-size:22px;color:#1e3a8a}
-      .esig{font-size:10px;color:#888;margin-top:2px}
-      .line{margin:0 auto 4px;width:80%;border-top:1px solid #333}
-      @media print{.toolbar{display:none}body{background:#fff;padding:0}.grid{gap:8px}}
+      .toolbar button{padding:8px 14px;border:1px solid #14346e;background:#14346e;color:#fff;border-radius:6px;cursor:pointer}
+      .toolbar button.sec{background:#fff;color:#14346e}
+      .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(440px,1fr));gap:16px}
+      .cred{width:460px;max-width:100%;margin:0 auto;border:2px solid #d3a625;border-radius:16px;padding:4px;background:#fff;page-break-inside:avoid}
+      .in{position:relative;overflow:hidden;border:2px solid #14346e;border-radius:12px;background:#fff}
+      .wm{position:absolute;right:-40px;bottom:60px;width:320px;opacity:.06;pointer-events:none}
+      .wm img{width:100%}
+      .hd{position:relative;display:flex;align-items:stretch;gap:10px;padding:14px 12px 10px}
+      .emblem{width:86px;height:86px;object-fit:contain;flex:none}
+      .vsep{width:3px;background:#d3a625;flex:none;border-radius:2px}
+      .mid{flex:1;text-align:center;min-width:0}
+      .org{font-family:Georgia,"Times New Roman",serif;font-weight:700;font-size:17px;color:#14346e;letter-spacing:.5px;white-space:nowrap}
+      .dist{font-family:Georgia,"Times New Roman",serif;font-size:14px;color:#14346e}
+      .gold-hr{height:2px;background:#d3a625;margin:6px 14px}
+      .ct{font-size:14px;font-weight:800;color:#1a4a8f;letter-spacing:.4px;white-space:nowrap}
+      .sub{font-size:11.5px;color:#1a4a8f;white-space:nowrap}
+      .we{flex:none;width:88px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;text-align:center}
+      .we1{font-weight:800;font-size:13px;color:#14346e;line-height:1.15}
+      .we-hr{width:60%;height:2px;background:#d3a625}
+      .we2{font-size:8.5px;letter-spacing:1.5px;color:#14346e;line-height:1.5}
+      .band{height:10px;background:#14346e}
+      .bd{position:relative;padding:8px 20px 30px}
+      .row{display:flex;justify-content:space-between;align-items:baseline;gap:10px;padding:8px 0 5px;border-bottom:1.5px dashed #c9d2e3}
+      .lbl{font-size:12px;letter-spacing:1px;color:#5a6b85;text-transform:uppercase}
+      .val{font-size:15px;font-weight:700;color:#14346e;text-align:right}
+      .codebox{margin:14px 8px 4px;border:2px solid #d3a625;border-radius:12px;background:linear-gradient(180deg,#eef4ff,#d9e6fb);padding:10px 8px 8px;text-align:center}
+      .code{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:46px;font-weight:800;letter-spacing:14px;text-indent:14px;color:#14346e;line-height:1.1}
+      .hint{margin-top:8px;text-align:center;font-size:13.5px;color:#2f6fd6}
+      .sig{margin-top:16px;text-align:center}
+      .script{font-family:"Segoe Script","Brush Script MT","Comic Sans MS",cursive;font-size:26px;color:#14346e}
+      .sline{width:72%;margin:0 auto 5px;border-top:1.5px solid #14346e}
+      .swho{font-size:12.5px;color:#14346e}
+      .esig{font-size:10.5px;color:#7a8aa3;margin-top:3px}
+      .foot{margin-top:14px;text-align:center;font-size:10px;font-weight:700;letter-spacing:2px;color:#14346e;white-space:nowrap}
+      .fd{display:inline-block;width:34px;height:2px;background:#d3a625;vertical-align:middle;margin:0 8px}
+      .corner{position:absolute;bottom:0;width:74px;height:74px;pointer-events:none}
+      .corner.l{left:0}.corner.r{right:0}
+      .corner .n{position:absolute;inset:0;background:#14346e}
+      .corner .g{position:absolute;inset:0;background:#d3a625}
+      .corner.l .n{clip-path:polygon(0 100%,0 0,100% 100%)}
+      .corner.r .n{clip-path:polygon(100% 100%,100% 0,0 100%)}
+      .corner.l .g{clip-path:polygon(0 100%,0 32%,68% 100%)}
+      .corner.r .g{clip-path:polygon(100% 100%,100% 32%,32% 100%)}
+      @media print{.toolbar{display:none}body{background:#fff;padding:0}.grid{gap:10px}}
     </style></head>
     <body>
       <div class="toolbar">
@@ -483,7 +530,7 @@ function printCredenciais(list: Delegado[], e: Eleicao, presidente: string | nul
       </div>
       <div class="grid">${cards}</div>
     </body></html>`;
-  const w = window.open("", "_blank", "width=900,height=700");
+  const w = window.open("", "_blank", "width=1000,height=760");
   if (!w) { toast.error("Permita pop-ups para imprimir"); return; }
   w.document.write(html);
   w.document.close();
