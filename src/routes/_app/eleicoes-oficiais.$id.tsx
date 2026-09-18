@@ -489,11 +489,11 @@ function printCredenciais(list: Delegado[], e: Eleicao, presidente: string | nul
       .emblem{width:86px;height:86px;object-fit:contain;flex:none}
       .vsep{width:3px;background:#d3a625;flex:none;border-radius:2px}
       .mid{flex:1;text-align:center;min-width:0}
-      .org{font-family:Georgia,"Times New Roman",serif;font-weight:700;font-size:20px;color:#14346e;letter-spacing:.5px}
-      .dist{font-family:Georgia,"Times New Roman",serif;font-size:15px;color:#14346e}
-      .gold-hr{height:2px;background:#d3a625;margin:6px 16px}
-      .ct{font-size:16px;font-weight:800;color:#1a4a8f;letter-spacing:.4px}
-      .sub{font-size:12.5px;color:#1a4a8f}
+      .org{font-family:Georgia,"Times New Roman",serif;font-weight:700;font-size:17px;color:#14346e;letter-spacing:.5px;white-space:nowrap}
+      .dist{font-family:Georgia,"Times New Roman",serif;font-size:14px;color:#14346e}
+      .gold-hr{height:2px;background:#d3a625;margin:6px 14px}
+      .ct{font-size:14px;font-weight:800;color:#1a4a8f;letter-spacing:.4px;white-space:nowrap}
+      .sub{font-size:11.5px;color:#1a4a8f;white-space:nowrap}
       .we{flex:none;width:88px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;text-align:center}
       .we1{font-weight:800;font-size:13px;color:#14346e;line-height:1.15}
       .we-hr{width:60%;height:2px;background:#d3a625}
@@ -507,7 +507,7 @@ function printCredenciais(list: Delegado[], e: Eleicao, presidente: string | nul
       .code{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:46px;font-weight:800;letter-spacing:14px;text-indent:14px;color:#14346e;line-height:1.1}
       .hint{margin-top:8px;text-align:center;font-size:13.5px;color:#2f6fd6}
       .sig{margin-top:16px;text-align:center}
-      .script{font-family:"Segoe Script","Brush Script MT",cursive;font-size:26px;color:#14346e}
+      .script{font-family:"Segoe Script","Brush Script MT","Comic Sans MS",cursive;font-size:26px;color:#14346e}
       .sline{width:72%;margin:0 auto 5px;border-top:1.5px solid #14346e}
       .swho{font-size:12.5px;color:#14346e}
       .esig{font-size:10.5px;color:#7a8aa3;margin-top:3px}
