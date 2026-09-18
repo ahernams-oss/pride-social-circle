@@ -441,7 +441,11 @@ function printCredenciais(list: Delegado[], e: Eleicao, presidente: string | nul
   const dateStr = new Date(e.data_eleicao).toLocaleDateString("pt-BR");
   const emblem = window.location.origin + lciEmblem.url;
   const dist = e.distrito || "Distrito LC-11";
-  const cards = list.map((d) => `
+  const cards = list.map((d) => {
+    const foto = d.avatar_url
+      ? `<img class="dphoto" src="${escapeHtml(d.avatar_url.startsWith("http") ? d.avatar_url : window.location.origin + d.avatar_url)}" alt="">`
+      : "";
+    return `
     <div class="cred"><div class="in">
       <div class="wm"><img src="${emblem}" alt=""></div>
       <div class="corner l"><div class="n"></div><div class="g"></div></div>
@@ -465,9 +469,14 @@ function printCredenciais(list: Delegado[], e: Eleicao, presidente: string | nul
       </div>
       <div class="band"></div>
       <div class="bd">
-        <div class="row"><span class="lbl">Nome</span><span class="val">${escapeHtml(d.nome)}</span></div>
-        <div class="row"><span class="lbl">Clube</span><span class="val">${escapeHtml(d.clube ?? "—")}</span></div>
-        <div class="row"><span class="lbl">Tipo</span><span class="val">${escapeHtml(d.tipo)}</span></div>
+        <div class="idrows">
+          ${foto}
+          <div class="rows-wrap">
+            <div class="row"><span class="lbl">Nome</span><span class="val">${escapeHtml(d.nome)}</span></div>
+            <div class="row"><span class="lbl">Clube</span><span class="val">${escapeHtml(d.clube ?? "—")}</span></div>
+            <div class="row"><span class="lbl">Tipo</span><span class="val">${escapeHtml(d.tipo)}</span></div>
+          </div>
+        </div>
         <div class="codebox"><div class="code">${escapeHtml(codigoUrnaCredencial(d.codigo_acesso, d.birth_date))}</div></div>
         <div class="hint">Código de acesso para votação na urna eletrônica — complete os XX com o dia do seu nascimento</div>
         <div class="sig">
