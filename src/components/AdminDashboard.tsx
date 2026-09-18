@@ -166,6 +166,20 @@ export function AdminDashboard() {
     return months;
   }, [profiles]);
 
+  const groupSeries = useMemo(() => {
+    const m = new Map<string, number>();
+    profiles.forEach((p) => {
+      const name = (p.club_name || "").trim();
+      if (!name) return;
+      m.set(name, (m.get(name) ?? 0) + 1);
+    });
+    return [...m.entries()]
+      .map(([name, total]) => ({ name, total }))
+      .sort((a, b) => b.total - a.total);
+  }, [profiles]);
+
+  const groupMax = useMemo(() => Math.max(1, ...groupSeries.map((g) => g.total)), [groupSeries]);
+
   const levelSeries = useMemo(() => {
     const m = new Map<string, number>();
     profiles.forEach((p) => {
