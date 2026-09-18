@@ -594,6 +594,7 @@ function NewComissao({ eleicaoId, onCreated, membro, open: openProp, onOpenChang
 }
 
 function ComissaoList({ items, isAdmin, onChanged }: { items: Comissao[]; isAdmin: boolean; onChanged: () => void }) {
+  const [editing, setEditing] = useState<Comissao | null>(null);
   const remove = async (id: string) => {
     if (!confirm("Remover?")) return;
     const { error } = await supabase.from("vf_comissao").delete().eq("id", id);
@@ -606,9 +607,24 @@ function ComissaoList({ items, isAdmin, onChanged }: { items: Comissao[]; isAdmi
       {items.map((m) => (
         <Card key={m.id}><CardContent className="flex items-center justify-between py-3">
           <div><div className="font-medium">{m.nome}</div><div className="text-xs text-muted-foreground capitalize">{m.funcao.replace("_", " ")}</div></div>
-          {isAdmin && <Button size="icon" variant="ghost" onClick={() => remove(m.id)}><Trash2 className="h-4 w-4" /></Button>}
+          {isAdmin && (
+            <div className="flex items-center gap-1">
+              <Button size="icon" variant="ghost" title="Editar membro" onClick={() => setEditing(m)}><Pencil className="h-4 w-4" /></Button>
+              <Button size="icon" variant="ghost" title="Remover membro" onClick={() => remove(m.id)}><Trash2 className="h-4 w-4" /></Button>
+            </div>
+          )}
         </CardContent></Card>
       ))}
+      {editing && (
+        <NewComissao
+          key={editing.id}
+          eleicaoId=""
+          membro={editing}
+          open
+          onOpenChange={(o) => { if (!o) setEditing(null); }}
+          onCreated={onChanged}
+        />
+      )}
     </div>
   );
 }
