@@ -64,6 +64,11 @@ export function ElectionDetail({
     }
     const { data: res } = await client.rpc("election_results", { _election_id: electionId });
     setResults((res ?? []) as ResultRow[]);
+    const { count } = await client
+      .from("election_ballots")
+      .select("id", { count: "exact", head: true })
+      .eq("election_id", electionId);
+    setTotalBallots(count ?? 0);
     setLoading(false);
   }, [client, electionId, voterId]);
 
