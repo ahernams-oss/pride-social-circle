@@ -281,7 +281,13 @@ export async function exportApuracaoWord(d: ApuracaoReport) {
       <tr><td>Votos contrários (Não)</td><td align="right">${c.contrarios}</td><td align="right">${pct(c.contrariosPct)}</td></tr>
       <tr><td>Votos nulos</td><td align="right">${c.nulos}</td><td align="right">${pct(c.nulosPct)}</td></tr>
       <tr><td><strong>Total de votos</strong></td><td align="right"><strong>${c.totalVotos}</strong></td><td align="right">100,0%</td></tr>
-    </table>`,
+    </table>${(() => {
+      const pie = renderPieDataUrl(c);
+      return pie
+        ? `<p style="margin-top:10px"><img src="${pie}" width="520" height="300" style="width:520px;height:300px" /></p>`
+        : "";
+    })()}`,
+
     )
     .join("");
 
