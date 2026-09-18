@@ -58,7 +58,9 @@ function Page() {
   const [loading, setLoading] = useState(true);
 
   const load = useCallback(async () => {
-    setLoading(true);
+    // Recarga em segundo plano: não ativa o loading global, pois desmontaria
+    // a página (e as guias) a cada toggle/entrada de voto, voltando à guia inicial.
+
     const [{ data: el }, { data: c }, { data: d }, { data: m }] = await Promise.all([
       supabase.from("vf_eleicoes").select("*").eq("id", id).maybeSingle(),
       supabase.from("vf_candidaturas").select("*").eq("eleicao_id", id).order("cargo"),
@@ -80,7 +82,7 @@ function Page() {
     setApur((ap ?? []) as any);
     setLoading(false);
   }, [id]);
-  useEffect(() => { load(); }, [load]);
+  useEffect(() => { setLoading(true); load(); }, [load]);
 
   useEffect(() => {
     const ch = supabase.channel(`vf-${id}`)
