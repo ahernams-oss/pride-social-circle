@@ -24,6 +24,25 @@ type Position = { id: string; name: string; order_index: number };
 type Candidate = { id: string; name: string; description: string | null; position_id: string | null; order_index: number };
 type ResultRow = { position_id: string | null; position_name: string | null; candidate_id: string | null; candidate_name: string | null; value: string | null; votes: number };
 
+const TYPE_LABEL: Record<ElectionType, string> = {
+  single: "Cargo único",
+  yes_no: "Sim / Não",
+  multiple_choice: "Múltipla escolha",
+  multi_position: "Chapa (vários cargos)",
+};
+
+function buildSections(rows: ResultRow[], positions: Position[], type: ElectionType) {
+  const grouped = new Map<string | null, ResultRow[]>();
+  for (const r of rows) {
+    const k = r.position_id;
+    if (!grouped.has(k)) grouped.set(k, []);
+    grouped.get(k)!.push(r);
+  }
+  return type === "multi_position"
+    ? positions.map((p) => ({ key: p.id as string | null, name: p.name, rows: grouped.get(p.id) ?? [] }))
+    : [{ key: null as string | null, name: "", rows: grouped.get(null) ?? [] }];
+}
+
 export function ElectionDetail({
   electionId, isAdmin, voterId, client, onVoted,
 }: {
