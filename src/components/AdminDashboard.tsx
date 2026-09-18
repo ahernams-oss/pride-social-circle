@@ -16,6 +16,7 @@ import {
 } from "recharts";
 import {
   Activity,
+  Building2,
   CalendarDays,
   CheckCircle2,
   Clock,
@@ -166,6 +167,20 @@ export function AdminDashboard() {
     return months;
   }, [profiles]);
 
+  const groupSeries = useMemo(() => {
+    const m = new Map<string, number>();
+    profiles.forEach((p) => {
+      const name = (p.club_name || "").trim();
+      if (!name) return;
+      m.set(name, (m.get(name) ?? 0) + 1);
+    });
+    return [...m.entries()]
+      .map(([name, total]) => ({ name, total }))
+      .sort((a, b) => b.total - a.total);
+  }, [profiles]);
+
+  const groupMax = useMemo(() => Math.max(1, ...groupSeries.map((g) => g.total)), [groupSeries]);
+
   const levelSeries = useMemo(() => {
     const m = new Map<string, number>();
     profiles.forEach((p) => {
@@ -260,7 +275,39 @@ export function AdminDashboard() {
         </div>
       </div>
 
-      <div className="grid gap-4 lg:grid-cols-2">
+      <div className="grid gap-4 lg:grid-cols-3">
+        <div className="rounded-xl border bg-card p-4 shadow-sm">
+          <div className="mb-3 flex items-center gap-2">
+            <Building2 className="h-4 w-4 text-primary" />
+            <h2 className="text-sm font-semibold">Associados por grupo</h2>
+          </div>
+          {groupSeries.length === 0 ? (
+            <p className="text-sm text-muted-foreground">Nenhum associado com clube informado.</p>
+          ) : (
+            <div className="space-y-2.5">
+              {groupSeries.map((g, i) => (
+                <div key={g.name}>
+                  <div className="mb-1 flex items-center justify-between gap-2 text-xs">
+                    <span className="truncate font-medium">{g.name}</span>
+                    <span className="shrink-0 text-muted-foreground">
+                      {g.total} ({((g.total / stats.total) * 100).toFixed(1)}%)
+                    </span>
+                  </div>
+                  <div className="h-2 overflow-hidden rounded-full bg-muted">
+                    <div
+                      className="h-full rounded-full"
+                      style={{
+                        width: `${(g.total / groupMax) * 100}%`,
+                        background: pieColors[i % pieColors.length],
+                      }}
+                    />
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
         <div className="rounded-xl border bg-card p-4 shadow-sm">
           <h2 className="mb-3 text-sm font-semibold">Últimos cadastros</h2>
           <div className="space-y-3">
