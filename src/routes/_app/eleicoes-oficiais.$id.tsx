@@ -12,7 +12,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Progress } from "@/components/ui/progress";
-import { Plus, Play, Square, CheckCircle2, Copy, ShieldAlert, Trash2, Gavel, Printer, Send, Mail, MessageCircle } from "lucide-react";
+import { Plus, Play, Square, CheckCircle2, Copy, ShieldAlert, Trash2, Gavel, Printer, Send, Mail, MessageCircle, FileText, FileType2, Sheet as SheetIcon } from "lucide-react";
+import { exportApuracaoPdf, exportApuracaoWord, exportApuracaoExcel, type ApuracaoReport } from "@/lib/vf-apuracao-report";
 import { toast } from "sonner";
 import { AssociadoCombobox, type Associado } from "@/components/AssociadoCombobox";
 import { CandidatoFotoUpload } from "@/components/CandidatoFotoUpload";
@@ -159,7 +160,7 @@ function Page() {
         </TabsContent>
 
         <TabsContent value="apuracao" className="pt-4">
-          <ApuracaoView items={apur} status={eleicao.status} />
+          <ApuracaoView items={apur} status={eleicao.status} eleicao={eleicao} cands={cands} presidente={presidente} />
         </TabsContent>
       </Tabs>
     </div>
@@ -548,7 +549,59 @@ function ComissaoList({ items, isAdmin, onChanged }: { items: Comissao[]; isAdmi
   );
 }
 
-function ApuracaoView({ items, status }: { items: Apuracao[]; status: Status }) {
+function buildApuracaoReport(
+  items: Apuracao[],
+  eleicao: Eleicao,
+  cands: Candidatura[],
+  presidente: string | null,
+): ApuracaoReport {
+  const byId = new Map(cands.map((c) => [c.id, c]));
+  const grouped = new Map<string, Apuracao[]>();
+  items.forEach((i) => { const a = grouped.get(i.cargo) ?? []; a.push(i); grouped.set(i.cargo, a); });
+  const cargos = Array.from(grouped.entries()).map(([cargo, list]) => {
+    const total = list.reduce((s, x) => s + Number(x.votos), 0);
+    const p = (n: number) => (total ? (n / total) * 100 : 0);
+    const sum = (tipo: string) => list.filter((x) => x.tipo === tipo).reduce((s, x) => s + Number(x.votos), 0);
+    const nulos = sum("nulo");
+    const contrarios = sum("nao");
+    const favoraveis = sum("sim");
+    return {
+      cargo,
+      totalVotos: total,
+      candidatos: list
+        .filter((x) => x.tipo === "candidato" || x.candidatura_id)
+        .sort((a, b) => Number(b.votos) - Number(a.votos))
+        .map((x) => {
+          const c = x.candidatura_id ? byId.get(x.candidatura_id) : undefined;
+          return {
+            nome: x.candidato || c?.nome || "—",
+            numero: c?.numero ?? null,
+            fotoUrl: c?.foto_url ?? null,
+            votos: Number(x.votos),
+            pct: p(Number(x.votos)),
+          };
+        }),
+      favoraveis, favoraveisPct: p(favoraveis),
+      contrarios, contrariosPct: p(contrarios),
+      nulos, nulosPct: p(nulos),
+    };
+  });
+  return {
+    titulo: eleicao.titulo,
+    descricao: eleicao.descricao,
+    distrito: eleicao.distrito,
+    dataEleicao: new Date(eleicao.data_eleicao).toLocaleDateString("pt-BR"),
+    statusLabel: STATUS_LABEL[eleicao.status],
+    presidente,
+    geradoEm: new Date().toLocaleString("pt-BR"),
+    totalGeral: cargos.reduce((s, c) => s + c.totalVotos, 0),
+    cargos,
+  };
+}
+
+function ApuracaoView({ items, status, eleicao, cands, presidente }: {
+  items: Apuracao[]; status: Status; eleicao: Eleicao; cands: Candidatura[]; presidente: string | null;
+}) {
   if (status !== "votacao_encerrada" && status !== "apurada") {
     return (
       <Card><CardContent className="flex items-center gap-3 py-6">
@@ -558,30 +611,63 @@ function ApuracaoView({ items, status }: { items: Apuracao[]; status: Status }) 
     );
   }
   if (items.length === 0) return <p className="text-sm text-muted-foreground">Nenhum voto registrado.</p>;
-  const grouped = new Map<string, Apuracao[]>();
-  items.forEach((i) => { const a = grouped.get(i.cargo) ?? []; a.push(i); grouped.set(i.cargo, a); });
+  const report = buildApuracaoReport(items, eleicao, cands, presidente);
   return (
     <div className="space-y-4">
-      {Array.from(grouped.entries()).map(([cargo, list]) => {
-        const total = list.reduce((s, x) => s + Number(x.votos), 0);
-        return (
-          <Card key={cargo}><CardContent className="space-y-3 py-4">
-            <h3 className="font-semibold">{cargo} <span className="text-xs font-normal text-muted-foreground">({total} votos)</span></h3>
-            {list.map((x, idx) => {
-              const pct = total ? (Number(x.votos) / total) * 100 : 0;
-              return (
-                <div key={idx} className="space-y-1">
-                  <div className="flex items-center justify-between text-sm">
-                    <span>{x.candidato}</span>
-                    <span className="text-muted-foreground">{x.votos} · {pct.toFixed(1)}%</span>
+      <Card><CardContent className="flex flex-wrap items-center justify-between gap-3 py-4">
+        <div>
+          <p className="text-sm font-semibold">Relatório de apuração</p>
+          <p className="text-xs text-muted-foreground">{report.totalGeral} voto(s) apurado(s) no total</p>
+        </div>
+        <div className="flex flex-wrap gap-2">
+          <Button size="sm" variant="outline" onClick={() => exportApuracaoPdf(report).catch(() => toast.error("Erro ao gerar PDF"))}>
+            <FileText className="mr-2 h-4 w-4" /> PDF
+          </Button>
+          <Button size="sm" variant="outline" onClick={() => exportApuracaoWord(report).catch(() => toast.error("Erro ao gerar Word"))}>
+            <FileType2 className="mr-2 h-4 w-4" /> Word
+          </Button>
+          <Button size="sm" variant="outline" onClick={() => exportApuracaoExcel(report)}>
+            <SheetIcon className="mr-2 h-4 w-4" /> Excel
+          </Button>
+        </div>
+      </CardContent></Card>
+
+      {report.cargos.map((c) => (
+        <Card key={c.cargo}><CardContent className="space-y-3 py-4">
+          <h3 className="font-semibold">{c.cargo} <span className="text-xs font-normal text-muted-foreground">({c.totalVotos} votos)</span></h3>
+          {c.candidatos.map((k, idx) => (
+            <div key={idx} className="space-y-1">
+              <div className="flex items-center gap-3">
+                <Avatar className="h-10 w-10">
+                  {k.fotoUrl ? <AvatarImage src={k.fotoUrl} alt={k.nome} className="object-cover" /> : null}
+                  <AvatarFallback>{k.nome.slice(0, 2).toUpperCase()}</AvatarFallback>
+                </Avatar>
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-center justify-between gap-2 text-sm">
+                    <span className="truncate">{k.nome}{k.numero ? ` (nº ${k.numero})` : ""}</span>
+                    <span className="shrink-0 text-muted-foreground">{k.votos} · {k.pct.toFixed(1)}%</span>
                   </div>
-                  <Progress value={pct} />
+                  <Progress value={k.pct} className="mt-1" />
                 </div>
-              );
-            })}
-          </CardContent></Card>
-        );
-      })}
+              </div>
+            </div>
+          ))}
+          <div className="grid gap-2 pt-2 text-sm sm:grid-cols-3">
+            <div className="rounded-md border p-2">
+              <div className="text-xs text-muted-foreground">Favoráveis (Sim)</div>
+              <div className="font-semibold">{c.favoraveis} · {c.favoraveisPct.toFixed(1)}%</div>
+            </div>
+            <div className="rounded-md border p-2">
+              <div className="text-xs text-muted-foreground">Contrários (Não)</div>
+              <div className="font-semibold">{c.contrarios} · {c.contrariosPct.toFixed(1)}%</div>
+            </div>
+            <div className="rounded-md border p-2">
+              <div className="text-xs text-muted-foreground">Nulos</div>
+              <div className="font-semibold">{c.nulos} · {c.nulosPct.toFixed(1)}%</div>
+            </div>
+          </div>
+        </CardContent></Card>
+      ))}
     </div>
   );
 }
