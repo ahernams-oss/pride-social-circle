@@ -311,15 +311,18 @@ export function ElectionDetail({
   );
 }
 
+function Stat({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="rounded-md border p-3">
+      <div className="text-xs text-muted-foreground">{label}</div>
+      <div className="truncate text-sm font-semibold">{value}</div>
+    </div>
+  );
+}
+
 function Results({ rows, positions, type }: { rows: ResultRow[]; positions: Position[]; type: ElectionType }) {
   if (rows.length === 0) return <p className="text-sm text-muted-foreground">Sem votos ainda.</p>;
-  const grouped = new Map<string | null, ResultRow[]>();
-  for (const r of rows) {
-    const k = r.position_id;
-    if (!grouped.has(k)) grouped.set(k, []);
-    grouped.get(k)!.push(r);
-  }
-  const sections = type === "multi_position" ? positions.map((p) => ({ key: p.id, name: p.name, rows: grouped.get(p.id) ?? [] })) : [{ key: null, name: "", rows: grouped.get(null) ?? [] }];
+  const sections = buildSections(rows, positions, type);
   const total = (rs: ResultRow[]) => rs.reduce((s, r) => s + Number(r.votes), 0);
   return (
     <div className="space-y-4">
