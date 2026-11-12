@@ -95,7 +95,7 @@ export function AttendButton({ eventId, userId, onChange }: { eventId: string; u
   );
 }
 
-type Row = { nome: string; email: string; telefone: string; clube: string; cidade: string; estado: string; acompanhantes: { name: string; age: number; is_lion: boolean }[]; data: string };
+type Row = { nome: string; email: string; telefone: string; clube: string; cidade: string; estado: string; acompanhantes: { name: string; age: number; is_lion: boolean }[]; data: string; desistencia: string | null };
 
 function group(rows: Row[], key: "clube" | "estado") {
   const m = new Map<string, { participantes: number; acompanhantes: number; lions: number }>();
@@ -114,7 +114,7 @@ export function EventReport({ eventId, title, open, onOpenChange }: { eventId: s
     if (!open) return;
     (async () => {
       const { data, error } = await supabase.from("event_attendances")
-        .select("user_id, created_at, event_companions(name, age, is_lion)").eq("event_id", eventId).order("created_at");
+        .select("user_id, created_at, canceled_at, event_companions(name, age, is_lion)").eq("event_id", eventId).order("created_at");
       if (error) return toast.error(error.message);
       const ids = (data ?? []).map((d) => d.user_id);
       const { data: profs } = ids.length
@@ -123,7 +123,8 @@ export function EventReport({ eventId, title, open, onOpenChange }: { eventId: s
       setRows((data ?? []).map((d) => {
         const p = (profs ?? []).find((x) => x.id === d.user_id);
         return { nome: p?.full_name ?? "—", email: p?.email ?? "", telefone: p?.phone ?? "", clube: p?.club_name ?? "", cidade: p?.city ?? "", estado: p?.estado ?? "",
-          acompanhantes: d.event_companions ?? [], data: new Date(d.created_at).toLocaleString("pt-BR") };
+          acompanhantes: d.event_companions ?? [], data: new Date(d.created_at).toLocaleString("pt-BR"),
+          desistencia: d.canceled_at ? new Date(d.canceled_at).toLocaleString("pt-BR") : null };
       }));
     })();
   }, [open, eventId]);
