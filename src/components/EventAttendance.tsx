@@ -20,7 +20,7 @@ export function AttendButton({ eventId, userId, onChange }: { eventId: string; u
 
   const load = useCallback(async () => {
     const { data } = await supabase.from("event_attendances").select("id, event_companions(id)")
-      .eq("event_id", eventId).eq("user_id", userId).maybeSingle();
+      .eq("event_id", eventId).eq("user_id", userId).is("canceled_at", null).maybeSingle();
     setAtt(data ? { id: data.id, count: (data.event_companions ?? []).length } : null);
   }, [eventId, userId]);
   useEffect(() => { load(); }, [load]);
@@ -46,7 +46,7 @@ export function AttendButton({ eventId, userId, onChange }: { eventId: string; u
 
   const cancel = async () => {
     if (!att) return;
-    const { error } = await supabase.from("event_attendances").delete().eq("id", att.id);
+    const { error } = await supabase.from("event_attendances").update({ canceled_at: new Date().toISOString() }).eq("id", att.id);
     if (error) return toast.error(error.message);
     toast.success("Presença cancelada"); await load(); onChange?.();
   };
