@@ -9,6 +9,9 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { CheckCircle2, FileSpreadsheet, Plus, Trash2, Users, BarChart3, FileText } from "lucide-react";
 import { toast } from "sonner";
+import { useServerFn } from "@tanstack/react-start";
+import { generateEventInsights } from "@/lib/event-insights.functions";
+import { Sparkles } from "lucide-react";
 
 type Companion = { name: string; age: string; is_lion: boolean };
 
@@ -110,8 +113,12 @@ function group(rows: Row[], key: "clube" | "estado") {
 
 export function EventReport({ eventId, title, open, onOpenChange }: { eventId: string; title: string; open: boolean; onOpenChange: (v: boolean) => void }) {
   const [rows, setRows] = useState<Row[]>([]);
+  const [insights, setInsights] = useState("");
+  const [aiBusy, setAiBusy] = useState(false);
+  const runInsights = useServerFn(generateEventInsights);
   useEffect(() => {
     if (!open) return;
+    setInsights("");
     (async () => {
       const { data, error } = await supabase.from("event_attendances")
         .select("user_id, created_at, canceled_at, event_companions(name, age, is_lion)").eq("event_id", eventId).order("created_at");
@@ -133,6 +140,15 @@ export function EventReport({ eventId, title, open, onOpenChange }: { eventId: s
   const desistentes = rows.filter((r) => r.desistencia);
   const clubes = group(confirmados, "clube"), estados = group(confirmados, "estado");
   const totalComp = confirmados.reduce((s, r) => s + r.acompanhantes.length, 0);
+
+  const genInsights = async () => {
+    setAiBusy(true);
+    try {
+      const r = await runInsights({ data: { title, participantes: confirmados.length, acompanhantes: totalComp, desistencias: desistentes.length, clubes, estados } });
+      setInsights(r.text);
+    } catch (e) { toast.error(e instanceof Error ? e.message : "Falha ao gerar resumo"); }
+    finally { setAiBusy(false); }
+  };
 
   const exportXlsx = () => {
     const wb = XLSX.utils.book_new();
@@ -192,7 +208,8 @@ export function EventReport({ eventId, title, open, onOpenChange }: { eventId: s
             <div key={l as string} className="rounded-lg border bg-muted/40 p-3"><p className="text-xs text-muted-foreground">{l}</p><p className="text-2xl font-bold">{v}</p></div>
           ))}
         </div>
-        <div className="flex justify-end gap-2"><Button size="sm" variant="outline" onClick={exportPdf} disabled={!rows.length}><FileText className="mr-1 h-4 w-4" />Exportar PDF</Button><Button size="sm" variant="outline" onClick={exportXlsx} disabled={!rows.length}><FileSpreadsheet className="mr-1 h-4 w-4" />Exportar Excel</Button></div>
+        <div className="flex justify-end gap-2"><Button size="sm" onClick={genInsights} disabled={!rows.length || aiBusy}><Sparkles className="mr-1 h-4 w-4" />{aiBusy ? "Gerando…" : "Resumo executivo (IA)"}</Button><Button size="sm" variant="outline" onClick={exportPdf} disabled={!rows.length}><FileText className="mr-1 h-4 w-4" />Exportar PDF</Button><Button size="sm" variant="outline" onClick={exportXlsx} disabled={!rows.length}><FileSpreadsheet className="mr-1 h-4 w-4" />Exportar Excel</Button></div>
+        {insights && <div className="whitespace-pre-wrap rounded-lg border bg-muted/40 p-4 text-sm"><p className="mb-2 flex items-center gap-1 font-semibold"><Sparkles className="h-4 w-4" />Resumo executivo</p>{insights.replace(/\*\*/g, "")}</div>}
         <Tabs defaultValue="users">
           <TabsList><TabsTrigger value="users">Participantes</TabsTrigger><TabsTrigger value="desistencias">Desistências</TabsTrigger><TabsTrigger value="clube">Por clube</TabsTrigger><TabsTrigger value="estado">Por estado</TabsTrigger></TabsList>
           <TabsContent value="users" className="space-y-2">
