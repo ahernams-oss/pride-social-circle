@@ -9,49 +9,43 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as SignupRouteImport } from './routes/signup'
-import { Route as PendingRouteImport } from './routes/pending'
-import { Route as OnboardingRouteImport } from './routes/onboarding'
-import { Route as LoginRouteImport } from './routes/login'
-import { Route as AppRouteImport } from './routes/_app'
 import { Route as IndexRouteImport } from './routes/index'
-import { Route as AppVotarEleicaoRouteImport } from './routes/_app/votar-eleicao'
-import { Route as AppRankingRouteImport } from './routes/_app/ranking'
-import { Route as AppNotificationsRouteImport } from './routes/_app/notifications'
-import { Route as AppMissionsRouteImport } from './routes/_app/missions'
-import { Route as AppMessagesRouteImport } from './routes/_app/messages'
-import { Route as AppKioskRouteImport } from './routes/_app/kiosk'
-import { Route as AppGroupsRouteImport } from './routes/_app/groups'
-import { Route as AppFriendsRouteImport } from './routes/_app/friends'
-import { Route as AppFeedRouteImport } from './routes/_app/feed'
-import { Route as AppEventsRouteImport } from './routes/_app/events'
-import { Route as AppEleicoesOficiaisRouteImport } from './routes/_app/eleicoes-oficiais'
-import { Route as AppElectionsRouteImport } from './routes/_app/elections'
-import { Route as AppDocumentsRouteImport } from './routes/_app/documents'
-import { Route as AppDistritoRouteImport } from './routes/_app/distrito'
-import { Route as AppDistrictRolesRouteImport } from './routes/_app/district-roles'
-import { Route as AppClubsRouteImport } from './routes/_app/clubs'
-import { Route as AppClubRolesRouteImport } from './routes/_app/club-roles'
+import { Route as AppRouteImport } from './routes/_app'
+import { Route as LoginRouteImport } from './routes/login'
+import { Route as OnboardingRouteImport } from './routes/onboarding'
+import { Route as PendingRouteImport } from './routes/pending'
+import { Route as SignupRouteImport } from './routes/signup'
 import { Route as AppAdminRouteImport } from './routes/_app/admin'
-import { Route as AppEleicoesOficiaisIndexRouteImport } from './routes/_app/eleicoes-oficiais.index'
-import { Route as ApiPublicElectionsRouteImport } from './routes/api/public/elections'
-import { Route as AppProfileIdRouteImport } from './routes/_app/profile.$id'
-import { Route as AppEleicoesOficiaisIdRouteImport } from './routes/_app/eleicoes-oficiais.$id'
+import { Route as AppClubRolesRouteImport } from './routes/_app/club-roles'
+import { Route as AppClubsRouteImport } from './routes/_app/clubs'
+import { Route as AppDistrictRolesRouteImport } from './routes/_app/district-roles'
+import { Route as AppDistritoRouteImport } from './routes/_app/distrito'
+import { Route as AppDocumentsRouteImport } from './routes/_app/documents'
+import { Route as AppElectionsRouteImport } from './routes/_app/elections'
+import { Route as AppEleicoesOficiaisRouteImport } from './routes/_app/eleicoes-oficiais'
+import { Route as AppEventsRouteImport } from './routes/_app/events'
+import { Route as AppFeedRouteImport } from './routes/_app/feed'
+import { Route as AppFriendsRouteImport } from './routes/_app/friends'
+import { Route as AppGroupsRouteImport } from './routes/_app/groups'
+import { Route as AppKioskRouteImport } from './routes/_app/kiosk'
+import { Route as AppMessagesRouteImport } from './routes/_app/messages'
+import { Route as AppMissionsRouteImport } from './routes/_app/missions'
+import { Route as AppNotificationsRouteImport } from './routes/_app/notifications'
+import { Route as AppRankingRouteImport } from './routes/_app/ranking'
+import { Route as AppVotarEleicaoRouteImport } from './routes/_app/votar-eleicao'
 import { Route as AppElectionsIdRouteImport } from './routes/_app/elections.$id'
+import { Route as AppEleicoesOficiaisIndexRouteImport } from './routes/_app/eleicoes-oficiais.index'
+import { Route as AppEleicoesOficiaisIdRouteImport } from './routes/_app/eleicoes-oficiais.$id'
+import { Route as AppProfileIdRouteImport } from './routes/_app/profile.$id'
+import { Route as ApiPublicElectionsRouteImport } from './routes/api/public/elections'
 
-const SignupRoute = SignupRouteImport.update({
-  id: '/signup',
-  path: '/signup',
+const IndexRoute = IndexRouteImport.update({
+  id: '/',
+  path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const PendingRoute = PendingRouteImport.update({
-  id: '/pending',
-  path: '/pending',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const OnboardingRoute = OnboardingRouteImport.update({
-  id: '/onboarding',
-  path: '/onboarding',
+const AppRoute = AppRouteImport.update({
+  id: '/_app',
   getParentRoute: () => rootRouteImport,
 } as any)
 const LoginRoute = LoginRouteImport.update({
@@ -59,93 +53,24 @@ const LoginRoute = LoginRouteImport.update({
   path: '/login',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AppRoute = AppRouteImport.update({
-  id: '/_app',
+const OnboardingRoute = OnboardingRouteImport.update({
+  id: '/onboarding',
+  path: '/onboarding',
   getParentRoute: () => rootRouteImport,
 } as any)
-const IndexRoute = IndexRouteImport.update({
-  id: '/',
-  path: '/',
+const PendingRoute = PendingRouteImport.update({
+  id: '/pending',
+  path: '/pending',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AppVotarEleicaoRoute = AppVotarEleicaoRouteImport.update({
-  id: '/votar-eleicao',
-  path: '/votar-eleicao',
-  getParentRoute: () => AppRoute,
+const SignupRoute = SignupRouteImport.update({
+  id: '/signup',
+  path: '/signup',
+  getParentRoute: () => rootRouteImport,
 } as any)
-const AppRankingRoute = AppRankingRouteImport.update({
-  id: '/ranking',
-  path: '/ranking',
-  getParentRoute: () => AppRoute,
-} as any)
-const AppNotificationsRoute = AppNotificationsRouteImport.update({
-  id: '/notifications',
-  path: '/notifications',
-  getParentRoute: () => AppRoute,
-} as any)
-const AppMissionsRoute = AppMissionsRouteImport.update({
-  id: '/missions',
-  path: '/missions',
-  getParentRoute: () => AppRoute,
-} as any)
-const AppMessagesRoute = AppMessagesRouteImport.update({
-  id: '/messages',
-  path: '/messages',
-  getParentRoute: () => AppRoute,
-} as any)
-const AppKioskRoute = AppKioskRouteImport.update({
-  id: '/kiosk',
-  path: '/kiosk',
-  getParentRoute: () => AppRoute,
-} as any)
-const AppGroupsRoute = AppGroupsRouteImport.update({
-  id: '/groups',
-  path: '/groups',
-  getParentRoute: () => AppRoute,
-} as any)
-const AppFriendsRoute = AppFriendsRouteImport.update({
-  id: '/friends',
-  path: '/friends',
-  getParentRoute: () => AppRoute,
-} as any)
-const AppFeedRoute = AppFeedRouteImport.update({
-  id: '/feed',
-  path: '/feed',
-  getParentRoute: () => AppRoute,
-} as any)
-const AppEventsRoute = AppEventsRouteImport.update({
-  id: '/events',
-  path: '/events',
-  getParentRoute: () => AppRoute,
-} as any)
-const AppEleicoesOficiaisRoute = AppEleicoesOficiaisRouteImport.update({
-  id: '/eleicoes-oficiais',
-  path: '/eleicoes-oficiais',
-  getParentRoute: () => AppRoute,
-} as any)
-const AppElectionsRoute = AppElectionsRouteImport.update({
-  id: '/elections',
-  path: '/elections',
-  getParentRoute: () => AppRoute,
-} as any)
-const AppDocumentsRoute = AppDocumentsRouteImport.update({
-  id: '/documents',
-  path: '/documents',
-  getParentRoute: () => AppRoute,
-} as any)
-const AppDistritoRoute = AppDistritoRouteImport.update({
-  id: '/distrito',
-  path: '/distrito',
-  getParentRoute: () => AppRoute,
-} as any)
-const AppDistrictRolesRoute = AppDistrictRolesRouteImport.update({
-  id: '/district-roles',
-  path: '/district-roles',
-  getParentRoute: () => AppRoute,
-} as any)
-const AppClubsRoute = AppClubsRouteImport.update({
-  id: '/clubs',
-  path: '/clubs',
+const AppAdminRoute = AppAdminRouteImport.update({
+  id: '/admin',
+  path: '/admin',
   getParentRoute: () => AppRoute,
 } as any)
 const AppClubRolesRoute = AppClubRolesRouteImport.update({
@@ -153,10 +78,90 @@ const AppClubRolesRoute = AppClubRolesRouteImport.update({
   path: '/club-roles',
   getParentRoute: () => AppRoute,
 } as any)
-const AppAdminRoute = AppAdminRouteImport.update({
-  id: '/admin',
-  path: '/admin',
+const AppClubsRoute = AppClubsRouteImport.update({
+  id: '/clubs',
+  path: '/clubs',
   getParentRoute: () => AppRoute,
+} as any)
+const AppDistrictRolesRoute = AppDistrictRolesRouteImport.update({
+  id: '/district-roles',
+  path: '/district-roles',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppDistritoRoute = AppDistritoRouteImport.update({
+  id: '/distrito',
+  path: '/distrito',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppDocumentsRoute = AppDocumentsRouteImport.update({
+  id: '/documents',
+  path: '/documents',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppElectionsRoute = AppElectionsRouteImport.update({
+  id: '/elections',
+  path: '/elections',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppEleicoesOficiaisRoute = AppEleicoesOficiaisRouteImport.update({
+  id: '/eleicoes-oficiais',
+  path: '/eleicoes-oficiais',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppEventsRoute = AppEventsRouteImport.update({
+  id: '/events',
+  path: '/events',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppFeedRoute = AppFeedRouteImport.update({
+  id: '/feed',
+  path: '/feed',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppFriendsRoute = AppFriendsRouteImport.update({
+  id: '/friends',
+  path: '/friends',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppGroupsRoute = AppGroupsRouteImport.update({
+  id: '/groups',
+  path: '/groups',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppKioskRoute = AppKioskRouteImport.update({
+  id: '/kiosk',
+  path: '/kiosk',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppMessagesRoute = AppMessagesRouteImport.update({
+  id: '/messages',
+  path: '/messages',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppMissionsRoute = AppMissionsRouteImport.update({
+  id: '/missions',
+  path: '/missions',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppNotificationsRoute = AppNotificationsRouteImport.update({
+  id: '/notifications',
+  path: '/notifications',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppRankingRoute = AppRankingRouteImport.update({
+  id: '/ranking',
+  path: '/ranking',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppVotarEleicaoRoute = AppVotarEleicaoRouteImport.update({
+  id: '/votar-eleicao',
+  path: '/votar-eleicao',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppElectionsIdRoute = AppElectionsIdRouteImport.update({
+  id: '/$id',
+  path: '/$id',
+  getParentRoute: () => AppElectionsRoute,
 } as any)
 const AppEleicoesOficiaisIndexRoute =
   AppEleicoesOficiaisIndexRouteImport.update({
@@ -164,25 +169,20 @@ const AppEleicoesOficiaisIndexRoute =
     path: '/',
     getParentRoute: () => AppEleicoesOficiaisRoute,
   } as any)
-const ApiPublicElectionsRoute = ApiPublicElectionsRouteImport.update({
-  id: '/api/public/elections',
-  path: '/api/public/elections',
-  getParentRoute: () => rootRouteImport,
+const AppEleicoesOficiaisIdRoute = AppEleicoesOficiaisIdRouteImport.update({
+  id: '/$id',
+  path: '/$id',
+  getParentRoute: () => AppEleicoesOficiaisRoute,
 } as any)
 const AppProfileIdRoute = AppProfileIdRouteImport.update({
   id: '/profile/$id',
   path: '/profile/$id',
   getParentRoute: () => AppRoute,
 } as any)
-const AppEleicoesOficiaisIdRoute = AppEleicoesOficiaisIdRouteImport.update({
-  id: '/$id',
-  path: '/$id',
-  getParentRoute: () => AppEleicoesOficiaisRoute,
-} as any)
-const AppElectionsIdRoute = AppElectionsIdRouteImport.update({
-  id: '/$id',
-  path: '/$id',
-  getParentRoute: () => AppElectionsRoute,
+const ApiPublicElectionsRoute = ApiPublicElectionsRouteImport.update({
+  id: '/api/public/elections',
+  path: '/api/public/elections',
+  getParentRoute: () => rootRouteImport,
 } as any)
 
 export interface FileRoutesByFullPath {
@@ -381,32 +381,11 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/signup': {
-      id: '/signup'
-      path: '/signup'
-      fullPath: '/signup'
-      preLoaderRoute: typeof SignupRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/pending': {
-      id: '/pending'
-      path: '/pending'
-      fullPath: '/pending'
-      preLoaderRoute: typeof PendingRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/onboarding': {
-      id: '/onboarding'
-      path: '/onboarding'
-      fullPath: '/onboarding'
-      preLoaderRoute: typeof OnboardingRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/login': {
-      id: '/login'
-      path: '/login'
-      fullPath: '/login'
-      preLoaderRoute: typeof LoginRouteImport
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_app': {
@@ -416,123 +395,39 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/': {
-      id: '/'
-      path: '/'
-      fullPath: '/'
-      preLoaderRoute: typeof IndexRouteImport
+    '/login': {
+      id: '/login'
+      path: '/login'
+      fullPath: '/login'
+      preLoaderRoute: typeof LoginRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/_app/votar-eleicao': {
-      id: '/_app/votar-eleicao'
-      path: '/votar-eleicao'
-      fullPath: '/votar-eleicao'
-      preLoaderRoute: typeof AppVotarEleicaoRouteImport
-      parentRoute: typeof AppRoute
+    '/onboarding': {
+      id: '/onboarding'
+      path: '/onboarding'
+      fullPath: '/onboarding'
+      preLoaderRoute: typeof OnboardingRouteImport
+      parentRoute: typeof rootRouteImport
     }
-    '/_app/ranking': {
-      id: '/_app/ranking'
-      path: '/ranking'
-      fullPath: '/ranking'
-      preLoaderRoute: typeof AppRankingRouteImport
-      parentRoute: typeof AppRoute
+    '/pending': {
+      id: '/pending'
+      path: '/pending'
+      fullPath: '/pending'
+      preLoaderRoute: typeof PendingRouteImport
+      parentRoute: typeof rootRouteImport
     }
-    '/_app/notifications': {
-      id: '/_app/notifications'
-      path: '/notifications'
-      fullPath: '/notifications'
-      preLoaderRoute: typeof AppNotificationsRouteImport
-      parentRoute: typeof AppRoute
+    '/signup': {
+      id: '/signup'
+      path: '/signup'
+      fullPath: '/signup'
+      preLoaderRoute: typeof SignupRouteImport
+      parentRoute: typeof rootRouteImport
     }
-    '/_app/missions': {
-      id: '/_app/missions'
-      path: '/missions'
-      fullPath: '/missions'
-      preLoaderRoute: typeof AppMissionsRouteImport
-      parentRoute: typeof AppRoute
-    }
-    '/_app/messages': {
-      id: '/_app/messages'
-      path: '/messages'
-      fullPath: '/messages'
-      preLoaderRoute: typeof AppMessagesRouteImport
-      parentRoute: typeof AppRoute
-    }
-    '/_app/kiosk': {
-      id: '/_app/kiosk'
-      path: '/kiosk'
-      fullPath: '/kiosk'
-      preLoaderRoute: typeof AppKioskRouteImport
-      parentRoute: typeof AppRoute
-    }
-    '/_app/groups': {
-      id: '/_app/groups'
-      path: '/groups'
-      fullPath: '/groups'
-      preLoaderRoute: typeof AppGroupsRouteImport
-      parentRoute: typeof AppRoute
-    }
-    '/_app/friends': {
-      id: '/_app/friends'
-      path: '/friends'
-      fullPath: '/friends'
-      preLoaderRoute: typeof AppFriendsRouteImport
-      parentRoute: typeof AppRoute
-    }
-    '/_app/feed': {
-      id: '/_app/feed'
-      path: '/feed'
-      fullPath: '/feed'
-      preLoaderRoute: typeof AppFeedRouteImport
-      parentRoute: typeof AppRoute
-    }
-    '/_app/events': {
-      id: '/_app/events'
-      path: '/events'
-      fullPath: '/events'
-      preLoaderRoute: typeof AppEventsRouteImport
-      parentRoute: typeof AppRoute
-    }
-    '/_app/eleicoes-oficiais': {
-      id: '/_app/eleicoes-oficiais'
-      path: '/eleicoes-oficiais'
-      fullPath: '/eleicoes-oficiais'
-      preLoaderRoute: typeof AppEleicoesOficiaisRouteImport
-      parentRoute: typeof AppRoute
-    }
-    '/_app/elections': {
-      id: '/_app/elections'
-      path: '/elections'
-      fullPath: '/elections'
-      preLoaderRoute: typeof AppElectionsRouteImport
-      parentRoute: typeof AppRoute
-    }
-    '/_app/documents': {
-      id: '/_app/documents'
-      path: '/documents'
-      fullPath: '/documents'
-      preLoaderRoute: typeof AppDocumentsRouteImport
-      parentRoute: typeof AppRoute
-    }
-    '/_app/distrito': {
-      id: '/_app/distrito'
-      path: '/distrito'
-      fullPath: '/distrito'
-      preLoaderRoute: typeof AppDistritoRouteImport
-      parentRoute: typeof AppRoute
-    }
-    '/_app/district-roles': {
-      id: '/_app/district-roles'
-      path: '/district-roles'
-      fullPath: '/district-roles'
-      preLoaderRoute: typeof AppDistrictRolesRouteImport
-      parentRoute: typeof AppRoute
-    }
-    '/_app/clubs': {
-      id: '/_app/clubs'
-      path: '/clubs'
-      fullPath: '/clubs'
-      preLoaderRoute: typeof AppClubsRouteImport
+    '/_app/admin': {
+      id: '/_app/admin'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof AppAdminRouteImport
       parentRoute: typeof AppRoute
     }
     '/_app/club-roles': {
@@ -542,12 +437,124 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppClubRolesRouteImport
       parentRoute: typeof AppRoute
     }
-    '/_app/admin': {
-      id: '/_app/admin'
-      path: '/admin'
-      fullPath: '/admin'
-      preLoaderRoute: typeof AppAdminRouteImport
+    '/_app/clubs': {
+      id: '/_app/clubs'
+      path: '/clubs'
+      fullPath: '/clubs'
+      preLoaderRoute: typeof AppClubsRouteImport
       parentRoute: typeof AppRoute
+    }
+    '/_app/district-roles': {
+      id: '/_app/district-roles'
+      path: '/district-roles'
+      fullPath: '/district-roles'
+      preLoaderRoute: typeof AppDistrictRolesRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/distrito': {
+      id: '/_app/distrito'
+      path: '/distrito'
+      fullPath: '/distrito'
+      preLoaderRoute: typeof AppDistritoRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/documents': {
+      id: '/_app/documents'
+      path: '/documents'
+      fullPath: '/documents'
+      preLoaderRoute: typeof AppDocumentsRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/elections': {
+      id: '/_app/elections'
+      path: '/elections'
+      fullPath: '/elections'
+      preLoaderRoute: typeof AppElectionsRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/eleicoes-oficiais': {
+      id: '/_app/eleicoes-oficiais'
+      path: '/eleicoes-oficiais'
+      fullPath: '/eleicoes-oficiais'
+      preLoaderRoute: typeof AppEleicoesOficiaisRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/events': {
+      id: '/_app/events'
+      path: '/events'
+      fullPath: '/events'
+      preLoaderRoute: typeof AppEventsRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/feed': {
+      id: '/_app/feed'
+      path: '/feed'
+      fullPath: '/feed'
+      preLoaderRoute: typeof AppFeedRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/friends': {
+      id: '/_app/friends'
+      path: '/friends'
+      fullPath: '/friends'
+      preLoaderRoute: typeof AppFriendsRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/groups': {
+      id: '/_app/groups'
+      path: '/groups'
+      fullPath: '/groups'
+      preLoaderRoute: typeof AppGroupsRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/kiosk': {
+      id: '/_app/kiosk'
+      path: '/kiosk'
+      fullPath: '/kiosk'
+      preLoaderRoute: typeof AppKioskRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/messages': {
+      id: '/_app/messages'
+      path: '/messages'
+      fullPath: '/messages'
+      preLoaderRoute: typeof AppMessagesRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/missions': {
+      id: '/_app/missions'
+      path: '/missions'
+      fullPath: '/missions'
+      preLoaderRoute: typeof AppMissionsRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/notifications': {
+      id: '/_app/notifications'
+      path: '/notifications'
+      fullPath: '/notifications'
+      preLoaderRoute: typeof AppNotificationsRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/ranking': {
+      id: '/_app/ranking'
+      path: '/ranking'
+      fullPath: '/ranking'
+      preLoaderRoute: typeof AppRankingRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/votar-eleicao': {
+      id: '/_app/votar-eleicao'
+      path: '/votar-eleicao'
+      fullPath: '/votar-eleicao'
+      preLoaderRoute: typeof AppVotarEleicaoRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/elections/$id': {
+      id: '/_app/elections/$id'
+      path: '/$id'
+      fullPath: '/elections/$id'
+      preLoaderRoute: typeof AppElectionsIdRouteImport
+      parentRoute: typeof AppElectionsRoute
     }
     '/_app/eleicoes-oficiais/': {
       id: '/_app/eleicoes-oficiais/'
@@ -556,12 +563,12 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppEleicoesOficiaisIndexRouteImport
       parentRoute: typeof AppEleicoesOficiaisRoute
     }
-    '/api/public/elections': {
-      id: '/api/public/elections'
-      path: '/api/public/elections'
-      fullPath: '/api/public/elections'
-      preLoaderRoute: typeof ApiPublicElectionsRouteImport
-      parentRoute: typeof rootRouteImport
+    '/_app/eleicoes-oficiais/$id': {
+      id: '/_app/eleicoes-oficiais/$id'
+      path: '/$id'
+      fullPath: '/eleicoes-oficiais/$id'
+      preLoaderRoute: typeof AppEleicoesOficiaisIdRouteImport
+      parentRoute: typeof AppEleicoesOficiaisRoute
     }
     '/_app/profile/$id': {
       id: '/_app/profile/$id'
@@ -570,19 +577,12 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppProfileIdRouteImport
       parentRoute: typeof AppRoute
     }
-    '/_app/eleicoes-oficiais/$id': {
-      id: '/_app/eleicoes-oficiais/$id'
-      path: '/$id'
-      fullPath: '/eleicoes-oficiais/$id'
-      preLoaderRoute: typeof AppEleicoesOficiaisIdRouteImport
-      parentRoute: typeof AppEleicoesOficiaisRoute
-    }
-    '/_app/elections/$id': {
-      id: '/_app/elections/$id'
-      path: '/$id'
-      fullPath: '/elections/$id'
-      preLoaderRoute: typeof AppElectionsIdRouteImport
-      parentRoute: typeof AppElectionsRoute
+    '/api/public/elections': {
+      id: '/api/public/elections'
+      path: '/api/public/elections'
+      fullPath: '/api/public/elections'
+      preLoaderRoute: typeof ApiPublicElectionsRouteImport
+      parentRoute: typeof rootRouteImport
     }
   }
 }
