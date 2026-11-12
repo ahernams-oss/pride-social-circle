@@ -7,7 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { CheckCircle2, FileSpreadsheet, Plus, Trash2, Users, BarChart3 } from "lucide-react";
+import { CheckCircle2, FileSpreadsheet, Plus, Trash2, Users, BarChart3, FileText } from "lucide-react";
 import { toast } from "sonner";
 
 type Companion = { name: string; age: string; is_lion: boolean };
@@ -141,6 +141,35 @@ export function EventReport({ eventId, title, open, onOpenChange }: { eventId: s
     XLSX.writeFile(wb, `participantes-${title.replace(/[^\w]+/g, "-")}.xlsx`);
   };
 
+  const exportPdf = async () => {
+    const { jsPDF } = await import("jspdf");
+    const autoTable = (await import("jspdf-autotable")).default;
+    const doc = new jsPDF();
+    const navy: [number, number, number] = [20, 40, 100];
+    doc.setFillColor(...navy); doc.rect(0, 0, 210, 24, "F");
+    doc.setTextColor(255, 255, 255); doc.setFontSize(14); doc.text("Distrito LC-11 · Relatório de participantes", 14, 11);
+    doc.setFontSize(10); doc.text(title, 14, 18);
+    doc.setTextColor(0, 0, 0); doc.setFontSize(10);
+    doc.text(`Participantes: ${rows.length}   Acompanhantes: ${totalComp}   Total de pessoas: ${rows.length + totalComp}`, 14, 32);
+    doc.text(`Gerado em ${new Date().toLocaleString("pt-BR")}`, 14, 38);
+    const head = { fillColor: navy };
+    autoTable(doc, { startY: 44, headStyles: head, styles: { fontSize: 8 },
+      head: [["Nome", "Clube", "Cidade/UF", "Contato", "Acomp.", "Confirmado em"]],
+      body: rows.map((r) => [r.nome, r.clube, [r.cidade, r.estado].filter(Boolean).join(" - "), [r.email, r.telefone].filter(Boolean).join("\n"), r.acompanhantes.length, r.data]) });
+    const comp = rows.flatMap((r) => r.acompanhantes.map((a) => [a.name, a.age, a.is_lion ? "Sim" : "Não", r.nome, r.clube]));
+    const next = () => ((doc as unknown as { lastAutoTable: { finalY: number } }).lastAutoTable.finalY + 10);
+    const section = (t: string, headRow: string[], body: (string | number)[][]) => {
+      let y = next(); if (y > 260) { doc.addPage(); y = 20; }
+      doc.setFontSize(11); doc.text(t, 14, y);
+      autoTable(doc, { startY: y + 3, headStyles: head, styles: { fontSize: 8 }, head: [headRow], body: body.length ? body : [["Sem registros"]] });
+    };
+    section("Acompanhantes", ["Nome", "Idade", "Lions", "Acompanha", "Clube"], comp);
+    const g = (x: ReturnType<typeof group>) => x.map((v) => [v.nome, v.participantes, v.acompanhantes, v.lions, v.total]);
+    section("Por clube", ["Clube", "Participantes", "Acompanhantes", "Lions", "Total"], g(clubes));
+    section("Por estado", ["Estado", "Participantes", "Acompanhantes", "Lions", "Total"], g(estados));
+    doc.save(`participantes-${title.replace(/[^\w]+/g, "-")}.pdf`);
+  };
+
   const GroupTable = ({ g, label }: { g: ReturnType<typeof group>; label: string }) => (
     <table className="w-full text-sm">
       <thead><tr className="border-b text-left text-muted-foreground"><th className="py-1">{label}</th><th>Participantes</th><th>Acompanhantes</th><th>Lions</th><th>Total</th></tr></thead>
@@ -157,7 +186,7 @@ export function EventReport({ eventId, title, open, onOpenChange }: { eventId: s
             <div key={l as string} className="rounded-lg border bg-muted/40 p-3"><p className="text-xs text-muted-foreground">{l}</p><p className="text-2xl font-bold">{v}</p></div>
           ))}
         </div>
-        <div className="flex justify-end"><Button size="sm" variant="outline" onClick={exportXlsx} disabled={!rows.length}><FileSpreadsheet className="mr-1 h-4 w-4" />Exportar Excel</Button></div>
+        <div className="flex justify-end gap-2"><Button size="sm" variant="outline" onClick={exportPdf} disabled={!rows.length}><FileText className="mr-1 h-4 w-4" />Exportar PDF</Button><Button size="sm" variant="outline" onClick={exportXlsx} disabled={!rows.length}><FileSpreadsheet className="mr-1 h-4 w-4" />Exportar Excel</Button></div>
         <Tabs defaultValue="users">
           <TabsList><TabsTrigger value="users">Participantes</TabsTrigger><TabsTrigger value="clube">Por clube</TabsTrigger><TabsTrigger value="estado">Por estado</TabsTrigger></TabsList>
           <TabsContent value="users" className="space-y-2">
