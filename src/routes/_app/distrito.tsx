@@ -8,6 +8,33 @@ import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { fetchDistrito, type Governador, type Projeto, type Evento } from "@/lib/distrito-api";
 import { Calendar, MapPin } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+
+const VICES = [
+  { label: "1º Vice Governador", match: (r: string) => /1º?\s*vice|primeiro\s*vice/i.test(r) },
+  { label: "2º Vice Governador", match: (r: string) => /2º?\s*vice|segundo\s*vice/i.test(r) },
+];
+
+async function fetchVices(): Promise<Governador[]> {
+  const { data: rows } = await supabase.from("district_roles").select("id,name,assigned_user_id");
+  const ids = (rows ?? []).map((r) => r.assigned_user_id).filter((v): v is string => !!v);
+  const { data: profs } = ids.length
+    ? await supabase.from("profiles").select("id,full_name,avatar_url,club_name,bio").in("id", ids)
+    : { data: [] as { id: string; full_name: string; avatar_url: string | null; club_name: string; bio: string }[] };
+  return VICES.map((v) => {
+    const row = (rows ?? []).find((r) => v.match(r.name));
+    const p = (profs ?? []).find((x) => x.id === row?.assigned_user_id);
+    return {
+      id: p?.id ?? v.label,
+      name: p?.full_name ?? "Não informado",
+      role: v.label,
+      year_label: "",
+      motto: "",
+      bio: p ? [p.club_name, p.bio].filter(Boolean).join(" — ") : "Defina este cargo em Cargos do Distrito (Admin).",
+      photo_url: p?.avatar_url ?? "",
+    };
+  });
+}
 
 export const Route = createFileRoute("/_app/distrito")({ component: DistritoPage });
 
@@ -28,7 +55,13 @@ function Empty({ msg }: { msg: string }) {
 function GovernadoresTab() {
   const { data, isLoading } = useQuery({
     queryKey: ["distrito", "governadores"],
-    queryFn: () => fetchDistrito<Governador[]>("/api/public/governadores"),
+    queryFn: async () => {
+      const [govs, vices] = await Promise.all([
+        fetchDistrito<Governador[]>("/api/public/governadores").catch(() => []),
+        fetchVices(),
+      ]);
+      return [...govs, ...vices];
+    },
   });
   if (isLoading) return <LoadingGrid />;
   if (!data?.length) return <Empty msg="Nenhum governador encontrado." />;
