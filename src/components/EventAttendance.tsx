@@ -187,17 +187,17 @@ export function EventReport({ eventId, title, open, onOpenChange }: { eventId: s
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-h-[85vh] max-w-4xl overflow-y-auto">
         <DialogHeader><DialogTitle>Relatório de participantes — {title}</DialogTitle></DialogHeader>
-        <div className="grid grid-cols-3 gap-3">
-          {[["Participantes", rows.length], ["Acompanhantes", totalComp], ["Total de pessoas", rows.length + totalComp]].map(([l, v]) => (
+        <div className="grid grid-cols-4 gap-3">
+          {[["Participantes", confirmados.length], ["Acompanhantes", totalComp], ["Total de pessoas", confirmados.length + totalComp], ["Desistências", desistentes.length]].map(([l, v]) => (
             <div key={l as string} className="rounded-lg border bg-muted/40 p-3"><p className="text-xs text-muted-foreground">{l}</p><p className="text-2xl font-bold">{v}</p></div>
           ))}
         </div>
         <div className="flex justify-end gap-2"><Button size="sm" variant="outline" onClick={exportPdf} disabled={!rows.length}><FileText className="mr-1 h-4 w-4" />Exportar PDF</Button><Button size="sm" variant="outline" onClick={exportXlsx} disabled={!rows.length}><FileSpreadsheet className="mr-1 h-4 w-4" />Exportar Excel</Button></div>
         <Tabs defaultValue="users">
-          <TabsList><TabsTrigger value="users">Participantes</TabsTrigger><TabsTrigger value="clube">Por clube</TabsTrigger><TabsTrigger value="estado">Por estado</TabsTrigger></TabsList>
+          <TabsList><TabsTrigger value="users">Participantes</TabsTrigger><TabsTrigger value="desistencias">Desistências</TabsTrigger><TabsTrigger value="clube">Por clube</TabsTrigger><TabsTrigger value="estado">Por estado</TabsTrigger></TabsList>
           <TabsContent value="users" className="space-y-2">
-            {rows.length === 0 && <p className="py-6 text-center text-sm text-muted-foreground">Nenhuma confirmação ainda.</p>}
-            {rows.map((r, i) => (
+            {confirmados.length === 0 && <p className="py-6 text-center text-sm text-muted-foreground">Nenhuma confirmação ainda.</p>}
+            {confirmados.map((r, i) => (
               <div key={i} className="rounded-lg border p-3 text-sm">
                 <div className="flex flex-wrap justify-between gap-2"><span className="font-semibold">{r.nome}</span><span className="text-xs text-muted-foreground">{r.data}</span></div>
                 <p className="text-muted-foreground">{[r.clube, [r.cidade, r.estado].filter(Boolean).join(" - "), r.email, r.telefone].filter(Boolean).join(" · ")}</p>
@@ -206,6 +206,16 @@ export function EventReport({ eventId, title, open, onOpenChange }: { eventId: s
                     {r.acompanhantes.map((a, j) => <li key={j}><Users className="mr-1 inline h-3 w-3" />{a.name}, {a.age} anos{a.is_lion ? " · Lions" : ""}</li>)}
                   </ul>
                 )}
+              </div>
+            ))}
+          </TabsContent>
+          <TabsContent value="desistencias" className="space-y-2">
+            {desistentes.length === 0 && <p className="py-6 text-center text-sm text-muted-foreground">Nenhuma desistência registrada.</p>}
+            {desistentes.map((r, i) => (
+              <div key={i} className="rounded-lg border p-3 text-sm">
+                <div className="flex flex-wrap justify-between gap-2"><span className="font-semibold">{r.nome}</span><span className="text-xs font-medium text-destructive">Desistiu em {r.desistencia}</span></div>
+                <p className="text-muted-foreground">{[r.clube, [r.cidade, r.estado].filter(Boolean).join(" - "), r.email, r.telefone].filter(Boolean).join(" · ")}</p>
+                <p className="text-xs text-muted-foreground">Confirmado em {r.data}</p>
               </div>
             ))}
           </TabsContent>
