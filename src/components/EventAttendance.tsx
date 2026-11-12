@@ -20,7 +20,7 @@ export function AttendButton({ eventId, userId, onChange }: { eventId: string; u
 
   const load = useCallback(async () => {
     const { data } = await supabase.from("event_attendances").select("id, event_companions(id)")
-      .eq("event_id", eventId).eq("user_id", userId).maybeSingle();
+      .eq("event_id", eventId).eq("user_id", userId).is("canceled_at", null).maybeSingle();
     setAtt(data ? { id: data.id, count: (data.event_companions ?? []).length } : null);
   }, [eventId, userId]);
   useEffect(() => { load(); }, [load]);
@@ -46,7 +46,7 @@ export function AttendButton({ eventId, userId, onChange }: { eventId: string; u
 
   const cancel = async () => {
     if (!att) return;
-    const { error } = await supabase.from("event_attendances").delete().eq("id", att.id);
+    const { error } = await supabase.from("event_attendances").update({ canceled_at: new Date().toISOString() }).eq("id", att.id);
     if (error) return toast.error(error.message);
     toast.success("Presença cancelada"); await load(); onChange?.();
   };
@@ -95,7 +95,7 @@ export function AttendButton({ eventId, userId, onChange }: { eventId: string; u
   );
 }
 
-type Row = { nome: string; email: string; telefone: string; clube: string; cidade: string; estado: string; acompanhantes: { name: string; age: number; is_lion: boolean }[]; data: string };
+type Row = { nome: string; email: string; telefone: string; clube: string; cidade: string; estado: string; acompanhantes: { name: string; age: number; is_lion: boolean }[]; data: string; desistencia: string | null };
 
 function group(rows: Row[], key: "clube" | "estado") {
   const m = new Map<string, { participantes: number; acompanhantes: number; lions: number }>();
@@ -114,7 +114,7 @@ export function EventReport({ eventId, title, open, onOpenChange }: { eventId: s
     if (!open) return;
     (async () => {
       const { data, error } = await supabase.from("event_attendances")
-        .select("user_id, created_at, event_companions(name, age, is_lion)").eq("event_id", eventId).order("created_at");
+        .select("user_id, created_at, canceled_at, event_companions(name, age, is_lion)").eq("event_id", eventId).order("created_at");
       if (error) return toast.error(error.message);
       const ids = (data ?? []).map((d) => d.user_id);
       const { data: profs } = ids.length
@@ -123,18 +123,22 @@ export function EventReport({ eventId, title, open, onOpenChange }: { eventId: s
       setRows((data ?? []).map((d) => {
         const p = (profs ?? []).find((x) => x.id === d.user_id);
         return { nome: p?.full_name ?? "—", email: p?.email ?? "", telefone: p?.phone ?? "", clube: p?.club_name ?? "", cidade: p?.city ?? "", estado: p?.estado ?? "",
-          acompanhantes: d.event_companions ?? [], data: new Date(d.created_at).toLocaleString("pt-BR") };
+          acompanhantes: d.event_companions ?? [], data: new Date(d.created_at).toLocaleString("pt-BR"),
+          desistencia: d.canceled_at ? new Date(d.canceled_at).toLocaleString("pt-BR") : null };
       }));
     })();
   }, [open, eventId]);
 
-  const clubes = group(rows, "clube"), estados = group(rows, "estado");
-  const totalComp = rows.reduce((s, r) => s + r.acompanhantes.length, 0);
+  const confirmados = rows.filter((r) => !r.desistencia);
+  const desistentes = rows.filter((r) => r.desistencia);
+  const clubes = group(confirmados, "clube"), estados = group(confirmados, "estado");
+  const totalComp = confirmados.reduce((s, r) => s + r.acompanhantes.length, 0);
 
   const exportXlsx = () => {
     const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(rows.map((r) => ({ Nome: r.nome, "E-mail": r.email, Telefone: r.telefone, Clube: r.clube, Cidade: r.cidade, Estado: r.estado, Acompanhantes: r.acompanhantes.length, "Confirmado em": r.data }))), "Participantes");
-    XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(rows.flatMap((r) => r.acompanhantes.map((a) => ({ Acompanhante: a.name, Idade: a.age, Lions: a.is_lion ? "Sim" : "Não", "Acompanha": r.nome, Clube: r.clube, Estado: r.estado })))), "Acompanhantes");
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(confirmados.map((r) => ({ Nome: r.nome, "E-mail": r.email, Telefone: r.telefone, Clube: r.clube, Cidade: r.cidade, Estado: r.estado, Acompanhantes: r.acompanhantes.length, "Confirmado em": r.data }))), "Participantes");
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(confirmados.flatMap((r) => r.acompanhantes.map((a) => ({ Acompanhante: a.name, Idade: a.age, Lions: a.is_lion ? "Sim" : "Não", "Acompanha": r.nome, Clube: r.clube, Estado: r.estado })))), "Acompanhantes");
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(desistentes.map((r) => ({ Nome: r.nome, "E-mail": r.email, Telefone: r.telefone, Clube: r.clube, Cidade: r.cidade, Estado: r.estado, "Confirmado em": r.data, "Desistiu em": r.desistencia }))), "Desistências");
     const sheet = (g: ReturnType<typeof group>, l: string) => g.map((x) => ({ [l]: x.nome, Participantes: x.participantes, Acompanhantes: x.acompanhantes, "Acompanhantes Lions": x.lions, Total: x.total }));
     XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(sheet(clubes, "Clube")), "Por clube");
     XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(sheet(estados, "Estado")), "Por estado");
@@ -150,13 +154,13 @@ export function EventReport({ eventId, title, open, onOpenChange }: { eventId: s
     doc.setTextColor(255, 255, 255); doc.setFontSize(14); doc.text("Distrito LC-11 · Relatório de participantes", 14, 11);
     doc.setFontSize(10); doc.text(title, 14, 18);
     doc.setTextColor(0, 0, 0); doc.setFontSize(10);
-    doc.text(`Participantes: ${rows.length}   Acompanhantes: ${totalComp}   Total de pessoas: ${rows.length + totalComp}`, 14, 32);
+    doc.text(`Participantes: ${confirmados.length}   Acompanhantes: ${totalComp}   Total de pessoas: ${confirmados.length + totalComp}   Desistências: ${desistentes.length}`, 14, 32);
     doc.text(`Gerado em ${new Date().toLocaleString("pt-BR")}`, 14, 38);
     const head = { fillColor: navy };
     autoTable(doc, { startY: 44, headStyles: head, styles: { fontSize: 8 },
       head: [["Nome", "Clube", "Cidade/UF", "Contato", "Acomp.", "Confirmado em"]],
-      body: rows.map((r) => [r.nome, r.clube, [r.cidade, r.estado].filter(Boolean).join(" - "), [r.email, r.telefone].filter(Boolean).join("\n"), r.acompanhantes.length, r.data]) });
-    const comp = rows.flatMap((r) => r.acompanhantes.map((a) => [a.name, a.age, a.is_lion ? "Sim" : "Não", r.nome, r.clube]));
+      body: confirmados.map((r) => [r.nome, r.clube, [r.cidade, r.estado].filter(Boolean).join(" - "), [r.email, r.telefone].filter(Boolean).join("\n"), r.acompanhantes.length, r.data]) });
+    const comp = confirmados.flatMap((r) => r.acompanhantes.map((a) => [a.name, a.age, a.is_lion ? "Sim" : "Não", r.nome, r.clube]));
     const next = () => ((doc as unknown as { lastAutoTable: { finalY: number } }).lastAutoTable.finalY + 10);
     const section = (t: string, headRow: string[], body: (string | number)[][]) => {
       let y = next(); if (y > 260) { doc.addPage(); y = 20; }
@@ -164,6 +168,8 @@ export function EventReport({ eventId, title, open, onOpenChange }: { eventId: s
       autoTable(doc, { startY: y + 3, headStyles: head, styles: { fontSize: 8 }, head: [headRow], body: body.length ? body : [["Sem registros"]] });
     };
     section("Acompanhantes", ["Nome", "Idade", "Lions", "Acompanha", "Clube"], comp);
+    section("Desistências", ["Nome", "Clube", "Cidade/UF", "Confirmado em", "Desistiu em"],
+      desistentes.map((r) => [r.nome, r.clube, [r.cidade, r.estado].filter(Boolean).join(" - "), r.data, r.desistencia ?? ""]));
     const g = (x: ReturnType<typeof group>) => x.map((v) => [v.nome, v.participantes, v.acompanhantes, v.lions, v.total]);
     section("Por clube", ["Clube", "Participantes", "Acompanhantes", "Lions", "Total"], g(clubes));
     section("Por estado", ["Estado", "Participantes", "Acompanhantes", "Lions", "Total"], g(estados));
@@ -181,17 +187,17 @@ export function EventReport({ eventId, title, open, onOpenChange }: { eventId: s
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-h-[85vh] max-w-4xl overflow-y-auto">
         <DialogHeader><DialogTitle>Relatório de participantes — {title}</DialogTitle></DialogHeader>
-        <div className="grid grid-cols-3 gap-3">
-          {[["Participantes", rows.length], ["Acompanhantes", totalComp], ["Total de pessoas", rows.length + totalComp]].map(([l, v]) => (
+        <div className="grid grid-cols-4 gap-3">
+          {[["Participantes", confirmados.length], ["Acompanhantes", totalComp], ["Total de pessoas", confirmados.length + totalComp], ["Desistências", desistentes.length]].map(([l, v]) => (
             <div key={l as string} className="rounded-lg border bg-muted/40 p-3"><p className="text-xs text-muted-foreground">{l}</p><p className="text-2xl font-bold">{v}</p></div>
           ))}
         </div>
         <div className="flex justify-end gap-2"><Button size="sm" variant="outline" onClick={exportPdf} disabled={!rows.length}><FileText className="mr-1 h-4 w-4" />Exportar PDF</Button><Button size="sm" variant="outline" onClick={exportXlsx} disabled={!rows.length}><FileSpreadsheet className="mr-1 h-4 w-4" />Exportar Excel</Button></div>
         <Tabs defaultValue="users">
-          <TabsList><TabsTrigger value="users">Participantes</TabsTrigger><TabsTrigger value="clube">Por clube</TabsTrigger><TabsTrigger value="estado">Por estado</TabsTrigger></TabsList>
+          <TabsList><TabsTrigger value="users">Participantes</TabsTrigger><TabsTrigger value="desistencias">Desistências</TabsTrigger><TabsTrigger value="clube">Por clube</TabsTrigger><TabsTrigger value="estado">Por estado</TabsTrigger></TabsList>
           <TabsContent value="users" className="space-y-2">
-            {rows.length === 0 && <p className="py-6 text-center text-sm text-muted-foreground">Nenhuma confirmação ainda.</p>}
-            {rows.map((r, i) => (
+            {confirmados.length === 0 && <p className="py-6 text-center text-sm text-muted-foreground">Nenhuma confirmação ainda.</p>}
+            {confirmados.map((r, i) => (
               <div key={i} className="rounded-lg border p-3 text-sm">
                 <div className="flex flex-wrap justify-between gap-2"><span className="font-semibold">{r.nome}</span><span className="text-xs text-muted-foreground">{r.data}</span></div>
                 <p className="text-muted-foreground">{[r.clube, [r.cidade, r.estado].filter(Boolean).join(" - "), r.email, r.telefone].filter(Boolean).join(" · ")}</p>
@@ -200,6 +206,16 @@ export function EventReport({ eventId, title, open, onOpenChange }: { eventId: s
                     {r.acompanhantes.map((a, j) => <li key={j}><Users className="mr-1 inline h-3 w-3" />{a.name}, {a.age} anos{a.is_lion ? " · Lions" : ""}</li>)}
                   </ul>
                 )}
+              </div>
+            ))}
+          </TabsContent>
+          <TabsContent value="desistencias" className="space-y-2">
+            {desistentes.length === 0 && <p className="py-6 text-center text-sm text-muted-foreground">Nenhuma desistência registrada.</p>}
+            {desistentes.map((r, i) => (
+              <div key={i} className="rounded-lg border p-3 text-sm">
+                <div className="flex flex-wrap justify-between gap-2"><span className="font-semibold">{r.nome}</span><span className="text-xs font-medium text-destructive">Desistiu em {r.desistencia}</span></div>
+                <p className="text-muted-foreground">{[r.clube, [r.cidade, r.estado].filter(Boolean).join(" - "), r.email, r.telefone].filter(Boolean).join(" · ")}</p>
+                <p className="text-xs text-muted-foreground">Confirmado em {r.data}</p>
               </div>
             ))}
           </TabsContent>

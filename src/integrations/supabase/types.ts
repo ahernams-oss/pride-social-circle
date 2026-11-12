@@ -523,18 +523,21 @@ export type Database = {
       }
       event_attendances: {
         Row: {
+          canceled_at: string | null
           created_at: string
           event_id: string
           id: string
           user_id: string
         }
         Insert: {
+          canceled_at?: string | null
           created_at?: string
           event_id: string
           id?: string
           user_id: string
         }
         Update: {
+          canceled_at?: string | null
           created_at?: string
           event_id?: string
           id?: string
