@@ -9,6 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Calendar, MapPin, Plus, Trash2 } from "lucide-react";
 import { toast } from "sonner";
+import { AttendButton, EventReport, BarChart3 } from "@/components/EventAttendance";
 
 export const Route = createFileRoute("/_app/events")({ component: EventsPage });
 
@@ -25,6 +26,7 @@ function EventsPage() {
   const { user, isAdmin } = useAuth();
   const [events, setEvents] = useState<Event[]>([]);
   const [open, setOpen] = useState(false);
+  const [report, setReport] = useState<Event | null>(null);
   const [form, setForm] = useState({ title: "", description: "", location: "", starts_at: "" });
 
   const load = useCallback(async () => {
@@ -92,6 +94,10 @@ function EventsPage() {
                   {ev.location && <span className="flex items-center gap-1"><MapPin className="h-3.5 w-3.5" />{ev.location}</span>}
                 </div>
                 {ev.description && <p className="mt-2 whitespace-pre-wrap text-sm">{ev.description}</p>}
+                <div className="mt-3 flex flex-wrap items-center gap-2">
+                  {user && <AttendButton eventId={ev.id} userId={user.id} />}
+                  {isAdmin && <Button size="sm" variant="outline" onClick={() => setReport(ev)}><BarChart3 className="mr-1 h-4 w-4" />Relatório</Button>}
+                </div>
               </div>
               {(isAdmin || ev.created_by === user?.id) && (
                 <Button size="icon" variant="ghost" onClick={() => remove(ev.id)}>
@@ -105,6 +111,7 @@ function EventsPage() {
           <p className="rounded-xl border bg-card p-8 text-center text-muted-foreground">Nenhum evento agendado.</p>
         )}
       </div>
+      {report && <EventReport eventId={report.id} title={report.title} open={!!report} onOpenChange={(v) => !v && setReport(null)} />}
     </div>
   );
 }
