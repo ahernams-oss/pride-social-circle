@@ -129,13 +129,16 @@ export function EventReport({ eventId, title, open, onOpenChange }: { eventId: s
     })();
   }, [open, eventId]);
 
-  const clubes = group(rows, "clube"), estados = group(rows, "estado");
-  const totalComp = rows.reduce((s, r) => s + r.acompanhantes.length, 0);
+  const confirmados = rows.filter((r) => !r.desistencia);
+  const desistentes = rows.filter((r) => r.desistencia);
+  const clubes = group(confirmados, "clube"), estados = group(confirmados, "estado");
+  const totalComp = confirmados.reduce((s, r) => s + r.acompanhantes.length, 0);
 
   const exportXlsx = () => {
     const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(rows.map((r) => ({ Nome: r.nome, "E-mail": r.email, Telefone: r.telefone, Clube: r.clube, Cidade: r.cidade, Estado: r.estado, Acompanhantes: r.acompanhantes.length, "Confirmado em": r.data }))), "Participantes");
-    XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(rows.flatMap((r) => r.acompanhantes.map((a) => ({ Acompanhante: a.name, Idade: a.age, Lions: a.is_lion ? "Sim" : "Não", "Acompanha": r.nome, Clube: r.clube, Estado: r.estado })))), "Acompanhantes");
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(confirmados.map((r) => ({ Nome: r.nome, "E-mail": r.email, Telefone: r.telefone, Clube: r.clube, Cidade: r.cidade, Estado: r.estado, Acompanhantes: r.acompanhantes.length, "Confirmado em": r.data }))), "Participantes");
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(confirmados.flatMap((r) => r.acompanhantes.map((a) => ({ Acompanhante: a.name, Idade: a.age, Lions: a.is_lion ? "Sim" : "Não", "Acompanha": r.nome, Clube: r.clube, Estado: r.estado })))), "Acompanhantes");
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(desistentes.map((r) => ({ Nome: r.nome, "E-mail": r.email, Telefone: r.telefone, Clube: r.clube, Cidade: r.cidade, Estado: r.estado, "Confirmado em": r.data, "Desistiu em": r.desistencia }))), "Desistências");
     const sheet = (g: ReturnType<typeof group>, l: string) => g.map((x) => ({ [l]: x.nome, Participantes: x.participantes, Acompanhantes: x.acompanhantes, "Acompanhantes Lions": x.lions, Total: x.total }));
     XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(sheet(clubes, "Clube")), "Por clube");
     XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(sheet(estados, "Estado")), "Por estado");
