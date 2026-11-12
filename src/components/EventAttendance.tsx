@@ -154,13 +154,13 @@ export function EventReport({ eventId, title, open, onOpenChange }: { eventId: s
     doc.setTextColor(255, 255, 255); doc.setFontSize(14); doc.text("Distrito LC-11 · Relatório de participantes", 14, 11);
     doc.setFontSize(10); doc.text(title, 14, 18);
     doc.setTextColor(0, 0, 0); doc.setFontSize(10);
-    doc.text(`Participantes: ${rows.length}   Acompanhantes: ${totalComp}   Total de pessoas: ${rows.length + totalComp}`, 14, 32);
+    doc.text(`Participantes: ${confirmados.length}   Acompanhantes: ${totalComp}   Total de pessoas: ${confirmados.length + totalComp}   Desistências: ${desistentes.length}`, 14, 32);
     doc.text(`Gerado em ${new Date().toLocaleString("pt-BR")}`, 14, 38);
     const head = { fillColor: navy };
     autoTable(doc, { startY: 44, headStyles: head, styles: { fontSize: 8 },
       head: [["Nome", "Clube", "Cidade/UF", "Contato", "Acomp.", "Confirmado em"]],
-      body: rows.map((r) => [r.nome, r.clube, [r.cidade, r.estado].filter(Boolean).join(" - "), [r.email, r.telefone].filter(Boolean).join("\n"), r.acompanhantes.length, r.data]) });
-    const comp = rows.flatMap((r) => r.acompanhantes.map((a) => [a.name, a.age, a.is_lion ? "Sim" : "Não", r.nome, r.clube]));
+      body: confirmados.map((r) => [r.nome, r.clube, [r.cidade, r.estado].filter(Boolean).join(" - "), [r.email, r.telefone].filter(Boolean).join("\n"), r.acompanhantes.length, r.data]) });
+    const comp = confirmados.flatMap((r) => r.acompanhantes.map((a) => [a.name, a.age, a.is_lion ? "Sim" : "Não", r.nome, r.clube]));
     const next = () => ((doc as unknown as { lastAutoTable: { finalY: number } }).lastAutoTable.finalY + 10);
     const section = (t: string, headRow: string[], body: (string | number)[][]) => {
       let y = next(); if (y > 260) { doc.addPage(); y = 20; }
@@ -168,6 +168,8 @@ export function EventReport({ eventId, title, open, onOpenChange }: { eventId: s
       autoTable(doc, { startY: y + 3, headStyles: head, styles: { fontSize: 8 }, head: [headRow], body: body.length ? body : [["Sem registros"]] });
     };
     section("Acompanhantes", ["Nome", "Idade", "Lions", "Acompanha", "Clube"], comp);
+    section("Desistências", ["Nome", "Clube", "Cidade/UF", "Confirmado em", "Desistiu em"],
+      desistentes.map((r) => [r.nome, r.clube, [r.cidade, r.estado].filter(Boolean).join(" - "), r.data, r.desistencia ?? ""]));
     const g = (x: ReturnType<typeof group>) => x.map((v) => [v.nome, v.participantes, v.acompanhantes, v.lions, v.total]);
     section("Por clube", ["Clube", "Participantes", "Acompanhantes", "Lions", "Total"], g(clubes));
     section("Por estado", ["Estado", "Participantes", "Acompanhantes", "Lions", "Total"], g(estados));
