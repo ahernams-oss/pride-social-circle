@@ -11,7 +11,7 @@ import { queryOptions, useSuspenseQuery } from "@tanstack/react-query";
 import { listSignupClubs } from "@/lib/signup-clubs.functions";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
-import { Check, ChevronsUpDown } from "lucide-react";
+import { ArrowLeft, Check, ChevronsUpDown } from "lucide-react";
 
 const clubsQuery = queryOptions({ queryKey: ["signup-club-directory"], queryFn: () => listSignupClubs(), staleTime: 60_000 });
 
@@ -79,7 +79,12 @@ function SignupPage() {
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-lions-gradient p-4">
-      <div className="w-full max-w-md rounded-2xl bg-card p-8 shadow-2xl">
+      <div className="relative w-full max-w-md rounded-2xl bg-card p-8 shadow-2xl">
+        <Button asChild variant="ghost" size="icon" className="absolute left-3 top-3">
+          <Link to="/" aria-label="Voltar à página principal" title="Voltar à página principal">
+            <ArrowLeft className="h-5 w-5" />
+          </Link>
+        </Button>
         <div className="mb-6 text-center">
           <img src={lciEmblem.url} alt="Lions Clubs International" className="mx-auto mb-3 h-16 w-16 object-contain" />
           <h1 className="text-2xl font-bold text-card-foreground">Solicitar acesso</h1>
