@@ -1,5 +1,5 @@
 import { createFileRoute, useParams } from "@tanstack/react-router";
-import { useCallback, useEffect, useState } from "react";
+import { Suspense, useCallback, useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth-context";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -11,9 +11,20 @@ import { PostCard, type FeedPost } from "@/components/PostCard";
 import { MapPin, Building2, MessageCircle, Pencil } from "lucide-react";
 import { useNavigate } from "@tanstack/react-router";
 import { toast } from "sonner";
+import { LionsAwards } from "@/components/LionsAwards";
 
 
-export const Route = createFileRoute("/_app/profile/$id")({ component: ProfilePage });
+export const Route = createFileRoute("/_app/profile/$id")({
+  component: ProfilePage,
+  head: () => ({ meta: [
+    { title: "Perfil do companheiro | Lions Connecta" },
+    { name: "description", content: "Perfil, títulos do Lions, cursos e formações do companheiro no Lions Connecta." },
+    { property: "og:title", content: "Perfil do companheiro | Lions Connecta" },
+    { property: "og:description", content: "Conheça a trajetória, os títulos, cursos e formações do companheiro." },
+    { property: "og:type", content: "profile" },
+    { name: "twitter:card", content: "summary" },
+  ] }),
+});
 
 function initials(n?: string | null) {
   return (n ?? "L").split(" ").filter(Boolean).slice(0, 2).map((p) => p[0]?.toUpperCase()).join("");
@@ -375,8 +386,22 @@ function ProfilePage() {
         )}
       </div>
 
+      <section className="border-t px-1 py-4" aria-label="Títulos do Lions">
+        <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-muted-foreground">Títulos do Lions</h2>
+        <Suspense fallback={<p className="text-sm text-muted-foreground">Carregando títulos...</p>}>
+          <LionsAwards category="titulo" userId={id} compact />
+        </Suspense>
+      </section>
+
+      <section className="border-t px-1 py-4" aria-label="Cursos">
+        <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-muted-foreground">Cursos</h2>
+        <Suspense fallback={<p className="text-sm text-muted-foreground">Carregando cursos...</p>}>
+          <LionsAwards category="curso" userId={id} compact />
+        </Suspense>
+      </section>
+
       <div className="rounded-xl border bg-card p-4 shadow-sm">
-        <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-muted-foreground">Formação</h2>
+        <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-muted-foreground">Formações</h2>
         {educations.length === 0 ? (
           <p className="text-sm text-muted-foreground">Nenhuma formação registrada.</p>
         ) : (
