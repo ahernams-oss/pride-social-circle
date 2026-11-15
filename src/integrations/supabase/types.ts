@@ -656,6 +656,53 @@ export type Database = {
           },
         ]
       }
+      member_lions_awards: {
+        Row: {
+          awarded_on: string
+          category: string
+          created_at: string
+          description: string
+          document_url: string | null
+          granted_by: string
+          id: string
+          institution: string
+          title: string
+          user_id: string
+        }
+        Insert: {
+          awarded_on: string
+          category: string
+          created_at?: string
+          description?: string
+          document_url?: string | null
+          granted_by?: string
+          id?: string
+          institution?: string
+          title: string
+          user_id: string
+        }
+        Update: {
+          awarded_on?: string
+          category?: string
+          created_at?: string
+          description?: string
+          document_url?: string | null
+          granted_by?: string
+          id?: string
+          institution?: string
+          title?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "member_lions_awards_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       member_registry: {
         Row: {
           birth_date: string | null
