@@ -1,12 +1,13 @@
-import { describe, expect, test } from "bun:test";
+import { describe, test } from "node:test";
+import { strictEqual } from "node:assert";
 import { canGrantAward } from "./laurear-permissions";
 
 describe("authorized award grants", () => {
-  test("administrators may grant awards", () => expect(canGrantAward(true, false, false)).toBe(true));
+  test("administrators may grant awards", () => strictEqual(canGrantAward(true, false, false), true));
   test("authorized members need both view and create", () => {
-    expect(canGrantAward(false, true, true)).toBe(true);
-    expect(canGrantAward(false, true, false)).toBe(false);
-    expect(canGrantAward(false, false, true)).toBe(false);
-    expect(canGrantAward(false, false, false)).toBe(false);
+    strictEqual(canGrantAward(false, true, true), true);
+    strictEqual(canGrantAward(false, true, false), false);
+    strictEqual(canGrantAward(false, false, true), false);
+    strictEqual(canGrantAward(false, false, false), false);
   });
 });
