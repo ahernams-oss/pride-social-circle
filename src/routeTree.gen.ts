@@ -34,6 +34,7 @@ import { Route as AppMissionsRouteImport } from './routes/_app/missions'
 import { Route as AppNotificationsRouteImport } from './routes/_app/notifications'
 import { Route as AppRankingRouteImport } from './routes/_app/ranking'
 import { Route as AppVotarEleicaoRouteImport } from './routes/_app/votar-eleicao'
+import { Route as AppAdminLaurearRouteImport } from './routes/_app/admin_.laurear'
 import { Route as AppElectionsIdRouteImport } from './routes/_app/elections.$id'
 import { Route as AppEleicoesOficiaisIndexRouteImport } from './routes/_app/eleicoes-oficiais.index'
 import { Route as AppEleicoesOficiaisIdRouteImport } from './routes/_app/eleicoes-oficiais.$id'
@@ -167,6 +168,11 @@ const AppVotarEleicaoRoute = AppVotarEleicaoRouteImport.update({
   path: '/votar-eleicao',
   getParentRoute: () => AppRoute,
 } as any)
+const AppAdminLaurearRoute = AppAdminLaurearRouteImport.update({
+  id: '/admin_/laurear',
+  path: '/admin/laurear',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppElectionsIdRoute = AppElectionsIdRouteImport.update({
   id: '/$id',
   path: '/$id',
@@ -235,6 +241,7 @@ export interface FileRoutesByFullPath {
   '/notifications': typeof AppNotificationsRoute
   '/ranking': typeof AppRankingRoute
   '/votar-eleicao': typeof AppVotarEleicaoRoute
+  '/admin/laurear': typeof AppAdminLaurearRoute
   '/elections/$id': typeof AppElectionsIdRoute
   '/eleicoes-oficiais/$id': typeof AppEleicoesOficiaisIdRoute
   '/lions-history/certificados': typeof AppLionsHistoryCertificadosRoute
@@ -267,6 +274,7 @@ export interface FileRoutesByTo {
   '/notifications': typeof AppNotificationsRoute
   '/ranking': typeof AppRankingRoute
   '/votar-eleicao': typeof AppVotarEleicaoRoute
+  '/admin/laurear': typeof AppAdminLaurearRoute
   '/elections/$id': typeof AppElectionsIdRoute
   '/eleicoes-oficiais/$id': typeof AppEleicoesOficiaisIdRoute
   '/lions-history/certificados': typeof AppLionsHistoryCertificadosRoute
@@ -303,6 +311,7 @@ export interface FileRoutesById {
   '/_app/notifications': typeof AppNotificationsRoute
   '/_app/ranking': typeof AppRankingRoute
   '/_app/votar-eleicao': typeof AppVotarEleicaoRoute
+  '/_app/admin_/laurear': typeof AppAdminLaurearRoute
   '/_app/elections/$id': typeof AppElectionsIdRoute
   '/_app/eleicoes-oficiais/$id': typeof AppEleicoesOficiaisIdRoute
   '/_app/lions-history/certificados': typeof AppLionsHistoryCertificadosRoute
@@ -339,6 +348,7 @@ export interface FileRouteTypes {
     | '/notifications'
     | '/ranking'
     | '/votar-eleicao'
+    | '/admin/laurear'
     | '/elections/$id'
     | '/eleicoes-oficiais/$id'
     | '/lions-history/certificados'
@@ -371,6 +381,7 @@ export interface FileRouteTypes {
     | '/notifications'
     | '/ranking'
     | '/votar-eleicao'
+    | '/admin/laurear'
     | '/elections/$id'
     | '/eleicoes-oficiais/$id'
     | '/lions-history/certificados'
@@ -406,6 +417,7 @@ export interface FileRouteTypes {
     | '/_app/notifications'
     | '/_app/ranking'
     | '/_app/votar-eleicao'
+    | '/_app/admin_/laurear'
     | '/_app/elections/$id'
     | '/_app/eleicoes-oficiais/$id'
     | '/_app/lions-history/certificados'
@@ -603,6 +615,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppVotarEleicaoRouteImport
       parentRoute: typeof AppRoute
     }
+    '/_app/admin_/laurear': {
+      id: '/_app/admin_/laurear'
+      path: '/admin/laurear'
+      fullPath: '/admin/laurear'
+      preLoaderRoute: typeof AppAdminLaurearRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/_app/elections/$id': {
       id: '/_app/elections/$id'
       path: '/$id'
@@ -723,6 +742,7 @@ interface AppRouteChildren {
   AppNotificationsRoute: typeof AppNotificationsRoute
   AppRankingRoute: typeof AppRankingRoute
   AppVotarEleicaoRoute: typeof AppVotarEleicaoRoute
+  AppAdminLaurearRoute: typeof AppAdminLaurearRoute
   AppProfileIdRoute: typeof AppProfileIdRoute
 }
 
@@ -746,6 +766,7 @@ const AppRouteChildren: AppRouteChildren = {
   AppNotificationsRoute: AppNotificationsRoute,
   AppRankingRoute: AppRankingRoute,
   AppVotarEleicaoRoute: AppVotarEleicaoRoute,
+  AppAdminLaurearRoute: AppAdminLaurearRoute,
   AppProfileIdRoute: AppProfileIdRoute,
 }
 

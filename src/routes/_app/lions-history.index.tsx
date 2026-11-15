@@ -1,5 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { GraduationCap } from "lucide-react";
+import { Suspense } from "react";
+import { LionsAwards } from "@/components/LionsAwards";
 
 export const Route = createFileRoute("/_app/lions-history/")({
   component: CoursesPage,
@@ -16,9 +18,6 @@ export const Route = createFileRoute("/_app/lions-history/")({
 function CoursesPage() {
   return <section className="space-y-4">
     <h2 className="text-lg font-semibold">Cursos realizados</h2>
-    <div className="border-t py-12 text-center text-muted-foreground">
-      <GraduationCap className="mx-auto mb-3 h-8 w-8" />
-      <p>Nenhum curso registrado.</p>
-    </div>
+    <Suspense fallback={<p>Carregando cursos...</p>}><LionsAwards category="curso" /></Suspense>
   </section>;
 }

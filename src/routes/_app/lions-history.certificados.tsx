@@ -1,5 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { ScrollText } from "lucide-react";
+import { Suspense } from "react";
+import { LionsAwards } from "@/components/LionsAwards";
 
 export const Route = createFileRoute("/_app/lions-history/certificados")({
   component: CertificatesPage,
@@ -16,9 +18,6 @@ export const Route = createFileRoute("/_app/lions-history/certificados")({
 function CertificatesPage() {
   return <section className="space-y-4">
     <h2 className="text-lg font-semibold">Certificados recebidos</h2>
-    <div className="border-t py-12 text-center text-muted-foreground">
-      <ScrollText className="mx-auto mb-3 h-8 w-8" />
-      <p>Nenhum certificado registrado.</p>
-    </div>
+    <Suspense fallback={<p>Carregando certificados...</p>}><LionsAwards category="certificado" /></Suspense>
   </section>;
 }

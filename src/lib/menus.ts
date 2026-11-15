@@ -53,6 +53,7 @@ export const MENUS: MenuDef[] = [
   { key: "eleicoes-oficiais", label: "Eleições Oficiais", path: "/eleicoes-oficiais", icon: "Gavel", sidebar: true, minLevel: "admin" },
   { key: "votar-eleicao", label: "Votar (delegado)", path: "/votar-eleicao", icon: "Vote", sidebar: true, minLevel: "approved" },
   { key: "admin", label: "Painel administrativo", path: "/admin", icon: "Shield", sidebar: false, minLevel: "moderator" },
+  { key: "laurear", label: "Laurear companheiros", path: "/admin/laurear", icon: "Award", sidebar: false, minLevel: "admin" },
 ];
 
 export const MENU_BY_KEY = new Map(MENUS.map((m) => [m.key, m]));

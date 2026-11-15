@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { RequireAccess } from "@/components/RequireAccess";
@@ -9,6 +9,7 @@ import { AdminUserLevels } from "@/components/AdminUserLevels";
 import { AdminMemberRegistry } from "@/components/AdminMemberRegistry";
 import { AdminAccessLevels } from "@/components/AdminAccessLevels";
 import { AdminDashboard } from "@/components/AdminDashboard";
+import { useAccess } from "@/lib/access-control";
 import { formatCpf, matchProfile, type RegistryEntry } from "@/lib/registry";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -38,6 +39,7 @@ function AdminPage() {
 }
 
 function AdminPanel() {
+  const { can } = useAccess();
   const [rows, setRows] = useState<Row[]>([]);
   const [registry, setRegistry] = useState<RegistryEntry[]>([]);
   const [section, setSection] = useState<"dashboard" | "cadastros" | "niveis" | "permissoes" | "base">("dashboard");
@@ -155,6 +157,7 @@ function AdminPanel() {
       </div>
 
       <div className="flex flex-wrap gap-2 border-b">
+        {can("laurear", "view") && <Button asChild variant="ghost"><Link to="/admin/laurear">Laurear companheiros</Link></Button>}
         {sections.map(([k, label]) => (
           <button
             key={k}
