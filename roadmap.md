@@ -1,4 +1,4 @@
 # Tasks
-- [ ] Add authorized administrative award registration and permissions.
-- [ ] Display each member's courses, certificates and titles in Lions history.
-- [ ] Verify registration and access controls.
+- [x] Add authorized administrative award registration and permissions.
+- [x] Display each member's courses, certificates and titles in Lions history.
+- [x] Verify registration and access controls.

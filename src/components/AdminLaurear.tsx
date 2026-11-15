@@ -2,7 +2,8 @@ import { useState } from "react";
 import { useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth-context";
-import { useAccess } from "@/lib/access-control";
+import { useAccess, useAccessMatrix } from "@/lib/access-control";
+import { canGrantAward } from "@/lib/laurear-permissions";
 import { AssociadoCombobox } from "@/components/AssociadoCombobox";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -14,8 +15,10 @@ import { Award, Plus } from "lucide-react";
 
 const labels = { curso: "Curso", certificado: "Certificado", titulo: "Título do Lions" };
 export function AdminLaurear() {
-  const { user } = useAuth();
-  const { can } = useAccess();
+  const { user, isAdmin } = useAuth();
+  const { can, levelKey } = useAccess();
+  const { perms } = useAccessMatrix();
+  const mayGrant = canGrantAward(isAdmin, can("laurear", "view"), perms.some((p) => p.level_key === levelKey && p.menu_key === "laurear" && p.can_create));
   const queryClient = useQueryClient();
   const [saving, setSaving] = useState(false);
   const [form, setForm] = useState({ user_id: "", category: "curso", title: "", institution: "", awarded_on: "", description: "", document_url: "" });
@@ -29,7 +32,7 @@ export function AdminLaurear() {
   } });
   const submit = async (event: React.FormEvent) => {
     event.preventDefault();
-    if (!user || !can("laurear", "create")) return;
+    if (!user || !mayGrant) return;
     if (!form.user_id) return toast.error("Selecione o companheiro.");
     setSaving(true);
     const { error } = await supabase.from("member_lions_awards").insert({ ...form, title: form.title.trim(), document_url: form.document_url.trim() || null, granted_by: user.id });
@@ -42,7 +45,7 @@ export function AdminLaurear() {
   };
   return <div className="space-y-6">
     <h1 className="flex items-center gap-2 text-xl font-bold"><Award className="h-6 w-6 text-primary" />Laurear companheiros</h1>
-    {can("laurear", "create") && <form onSubmit={submit} className="space-y-4 border-b pb-6">
+    {mayGrant && <form onSubmit={submit} className="space-y-4 border-b pb-6">
       <div><Label>Companheiro</Label><AssociadoCombobox items={data.members} value={form.user_id} onChange={(id) => setForm({ ...form, user_id: id })} placeholder="Selecionar companheiro..." /></div>
       <div className="grid gap-4 sm:grid-cols-2">
         <div><Label>Categoria</Label><Select value={form.category} onValueChange={(category) => setForm({ ...form, category })}><SelectTrigger aria-label="Categoria"><SelectValue /></SelectTrigger><SelectContent>{Object.entries(labels).map(([key, label]) => <SelectItem key={key} value={key}>{label}</SelectItem>)}</SelectContent></Select></div>
