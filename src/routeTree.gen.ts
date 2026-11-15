@@ -37,6 +37,9 @@ import { Route as AppVotarEleicaoRouteImport } from './routes/_app/votar-eleicao
 import { Route as AppElectionsIdRouteImport } from './routes/_app/elections.$id'
 import { Route as AppEleicoesOficiaisIndexRouteImport } from './routes/_app/eleicoes-oficiais.index'
 import { Route as AppEleicoesOficiaisIdRouteImport } from './routes/_app/eleicoes-oficiais.$id'
+import { Route as AppLionsHistoryIndexRouteImport } from './routes/_app/lions-history.index'
+import { Route as AppLionsHistoryCertificadosRouteImport } from './routes/_app/lions-history.certificados'
+import { Route as AppLionsHistoryTitulosRouteImport } from './routes/_app/lions-history.titulos'
 import { Route as AppProfileIdRouteImport } from './routes/_app/profile.$id'
 import { Route as ApiPublicElectionsRouteImport } from './routes/api/public/elections'
 
@@ -180,6 +183,22 @@ const AppEleicoesOficiaisIdRoute = AppEleicoesOficiaisIdRouteImport.update({
   path: '/$id',
   getParentRoute: () => AppEleicoesOficiaisRoute,
 } as any)
+const AppLionsHistoryIndexRoute = AppLionsHistoryIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AppLionsHistoryRoute,
+} as any)
+const AppLionsHistoryCertificadosRoute =
+  AppLionsHistoryCertificadosRouteImport.update({
+    id: '/certificados',
+    path: '/certificados',
+    getParentRoute: () => AppLionsHistoryRoute,
+  } as any)
+const AppLionsHistoryTitulosRoute = AppLionsHistoryTitulosRouteImport.update({
+  id: '/titulos',
+  path: '/titulos',
+  getParentRoute: () => AppLionsHistoryRoute,
+} as any)
 const AppProfileIdRoute = AppProfileIdRouteImport.update({
   id: '/profile/$id',
   path: '/profile/$id',
@@ -210,7 +229,7 @@ export interface FileRoutesByFullPath {
   '/friends': typeof AppFriendsRoute
   '/groups': typeof AppGroupsRoute
   '/kiosk': typeof AppKioskRoute
-  '/lions-history': typeof AppLionsHistoryRoute
+  '/lions-history': typeof AppLionsHistoryRouteWithChildren
   '/messages': typeof AppMessagesRoute
   '/missions': typeof AppMissionsRoute
   '/notifications': typeof AppNotificationsRoute
@@ -218,9 +237,12 @@ export interface FileRoutesByFullPath {
   '/votar-eleicao': typeof AppVotarEleicaoRoute
   '/elections/$id': typeof AppElectionsIdRoute
   '/eleicoes-oficiais/$id': typeof AppEleicoesOficiaisIdRoute
+  '/lions-history/certificados': typeof AppLionsHistoryCertificadosRoute
+  '/lions-history/titulos': typeof AppLionsHistoryTitulosRoute
   '/profile/$id': typeof AppProfileIdRoute
   '/api/public/elections': typeof ApiPublicElectionsRoute
   '/eleicoes-oficiais/': typeof AppEleicoesOficiaisIndexRoute
+  '/lions-history/': typeof AppLionsHistoryIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -240,7 +262,6 @@ export interface FileRoutesByTo {
   '/friends': typeof AppFriendsRoute
   '/groups': typeof AppGroupsRoute
   '/kiosk': typeof AppKioskRoute
-  '/lions-history': typeof AppLionsHistoryRoute
   '/messages': typeof AppMessagesRoute
   '/missions': typeof AppMissionsRoute
   '/notifications': typeof AppNotificationsRoute
@@ -248,9 +269,12 @@ export interface FileRoutesByTo {
   '/votar-eleicao': typeof AppVotarEleicaoRoute
   '/elections/$id': typeof AppElectionsIdRoute
   '/eleicoes-oficiais/$id': typeof AppEleicoesOficiaisIdRoute
+  '/lions-history/certificados': typeof AppLionsHistoryCertificadosRoute
+  '/lions-history/titulos': typeof AppLionsHistoryTitulosRoute
   '/profile/$id': typeof AppProfileIdRoute
   '/api/public/elections': typeof ApiPublicElectionsRoute
   '/eleicoes-oficiais': typeof AppEleicoesOficiaisIndexRoute
+  '/lions-history': typeof AppLionsHistoryIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -273,7 +297,7 @@ export interface FileRoutesById {
   '/_app/friends': typeof AppFriendsRoute
   '/_app/groups': typeof AppGroupsRoute
   '/_app/kiosk': typeof AppKioskRoute
-  '/_app/lions-history': typeof AppLionsHistoryRoute
+  '/_app/lions-history': typeof AppLionsHistoryRouteWithChildren
   '/_app/messages': typeof AppMessagesRoute
   '/_app/missions': typeof AppMissionsRoute
   '/_app/notifications': typeof AppNotificationsRoute
@@ -281,9 +305,12 @@ export interface FileRoutesById {
   '/_app/votar-eleicao': typeof AppVotarEleicaoRoute
   '/_app/elections/$id': typeof AppElectionsIdRoute
   '/_app/eleicoes-oficiais/$id': typeof AppEleicoesOficiaisIdRoute
+  '/_app/lions-history/certificados': typeof AppLionsHistoryCertificadosRoute
+  '/_app/lions-history/titulos': typeof AppLionsHistoryTitulosRoute
   '/_app/profile/$id': typeof AppProfileIdRoute
   '/api/public/elections': typeof ApiPublicElectionsRoute
   '/_app/eleicoes-oficiais/': typeof AppEleicoesOficiaisIndexRoute
+  '/_app/lions-history/': typeof AppLionsHistoryIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -314,9 +341,12 @@ export interface FileRouteTypes {
     | '/votar-eleicao'
     | '/elections/$id'
     | '/eleicoes-oficiais/$id'
+    | '/lions-history/certificados'
+    | '/lions-history/titulos'
     | '/profile/$id'
     | '/api/public/elections'
     | '/eleicoes-oficiais/'
+    | '/lions-history/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -336,7 +366,6 @@ export interface FileRouteTypes {
     | '/friends'
     | '/groups'
     | '/kiosk'
-    | '/lions-history'
     | '/messages'
     | '/missions'
     | '/notifications'
@@ -344,9 +373,12 @@ export interface FileRouteTypes {
     | '/votar-eleicao'
     | '/elections/$id'
     | '/eleicoes-oficiais/$id'
+    | '/lions-history/certificados'
+    | '/lions-history/titulos'
     | '/profile/$id'
     | '/api/public/elections'
     | '/eleicoes-oficiais'
+    | '/lions-history'
   id:
     | '__root__'
     | '/'
@@ -376,9 +408,12 @@ export interface FileRouteTypes {
     | '/_app/votar-eleicao'
     | '/_app/elections/$id'
     | '/_app/eleicoes-oficiais/$id'
+    | '/_app/lions-history/certificados'
+    | '/_app/lions-history/titulos'
     | '/_app/profile/$id'
     | '/api/public/elections'
     | '/_app/eleicoes-oficiais/'
+    | '/_app/lions-history/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -589,6 +624,27 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppEleicoesOficiaisIdRouteImport
       parentRoute: typeof AppEleicoesOficiaisRoute
     }
+    '/_app/lions-history/': {
+      id: '/_app/lions-history/'
+      path: '/'
+      fullPath: '/lions-history/'
+      preLoaderRoute: typeof AppLionsHistoryIndexRouteImport
+      parentRoute: typeof AppLionsHistoryRoute
+    }
+    '/_app/lions-history/certificados': {
+      id: '/_app/lions-history/certificados'
+      path: '/certificados'
+      fullPath: '/lions-history/certificados'
+      preLoaderRoute: typeof AppLionsHistoryCertificadosRouteImport
+      parentRoute: typeof AppLionsHistoryRoute
+    }
+    '/_app/lions-history/titulos': {
+      id: '/_app/lions-history/titulos'
+      path: '/titulos'
+      fullPath: '/lions-history/titulos'
+      preLoaderRoute: typeof AppLionsHistoryTitulosRouteImport
+      parentRoute: typeof AppLionsHistoryRoute
+    }
     '/_app/profile/$id': {
       id: '/_app/profile/$id'
       path: '/profile/$id'
@@ -631,6 +687,22 @@ const AppEleicoesOficiaisRouteChildren: AppEleicoesOficiaisRouteChildren = {
 const AppEleicoesOficiaisRouteWithChildren =
   AppEleicoesOficiaisRoute._addFileChildren(AppEleicoesOficiaisRouteChildren)
 
+interface AppLionsHistoryRouteChildren {
+  AppLionsHistoryCertificadosRoute: typeof AppLionsHistoryCertificadosRoute
+  AppLionsHistoryTitulosRoute: typeof AppLionsHistoryTitulosRoute
+  AppLionsHistoryIndexRoute: typeof AppLionsHistoryIndexRoute
+}
+
+const AppLionsHistoryRouteChildren: AppLionsHistoryRouteChildren = {
+  AppLionsHistoryCertificadosRoute: AppLionsHistoryCertificadosRoute,
+  AppLionsHistoryTitulosRoute: AppLionsHistoryTitulosRoute,
+  AppLionsHistoryIndexRoute: AppLionsHistoryIndexRoute,
+}
+
+const AppLionsHistoryRouteWithChildren = AppLionsHistoryRoute._addFileChildren(
+  AppLionsHistoryRouteChildren,
+)
+
 interface AppRouteChildren {
   AppAdminRoute: typeof AppAdminRoute
   AppClubRolesRoute: typeof AppClubRolesRoute
@@ -645,7 +717,7 @@ interface AppRouteChildren {
   AppFriendsRoute: typeof AppFriendsRoute
   AppGroupsRoute: typeof AppGroupsRoute
   AppKioskRoute: typeof AppKioskRoute
-  AppLionsHistoryRoute: typeof AppLionsHistoryRoute
+  AppLionsHistoryRoute: typeof AppLionsHistoryRouteWithChildren
   AppMessagesRoute: typeof AppMessagesRoute
   AppMissionsRoute: typeof AppMissionsRoute
   AppNotificationsRoute: typeof AppNotificationsRoute
@@ -668,7 +740,7 @@ const AppRouteChildren: AppRouteChildren = {
   AppFriendsRoute: AppFriendsRoute,
   AppGroupsRoute: AppGroupsRoute,
   AppKioskRoute: AppKioskRoute,
-  AppLionsHistoryRoute: AppLionsHistoryRoute,
+  AppLionsHistoryRoute: AppLionsHistoryRouteWithChildren,
   AppMessagesRoute: AppMessagesRoute,
   AppMissionsRoute: AppMissionsRoute,
   AppNotificationsRoute: AppNotificationsRoute,

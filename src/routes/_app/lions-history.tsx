@@ -1,5 +1,6 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link, Outlet, useLocation } from "@tanstack/react-router";
 import { BookOpen } from "lucide-react";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 export const Route = createFileRoute("/_app/lions-history")({
   component: LionsHistoryPage,
@@ -14,16 +15,22 @@ export const Route = createFileRoute("/_app/lions-history")({
 });
 
 function LionsHistoryPage() {
+  const { pathname } = useLocation();
+  const active = pathname.endsWith("/certificados") ? "certificados" : pathname.endsWith("/titulos") ? "titulos" : "cursos";
   return (
     <div className="space-y-6">
       <div className="flex items-center gap-2">
         <BookOpen className="h-5 w-5 text-primary" />
         <h1 className="text-xl font-bold">Lions history</h1>
       </div>
-      <div className="border-t py-12 text-center text-muted-foreground">
-        <BookOpen className="mx-auto mb-3 h-8 w-8" />
-        <p>Nenhuma história publicada ainda.</p>
-      </div>
+      <Tabs value={active}>
+        <TabsList className="grid h-auto w-full grid-cols-3">
+          <TabsTrigger value="cursos" asChild className="whitespace-normal text-center"><Link to="/lions-history">Cursos</Link></TabsTrigger>
+          <TabsTrigger value="certificados" asChild className="whitespace-normal text-center"><Link to="/lions-history/certificados">Certificados</Link></TabsTrigger>
+          <TabsTrigger value="titulos" asChild className="whitespace-normal text-center"><Link to="/lions-history/titulos">Títulos do Lions</Link></TabsTrigger>
+        </TabsList>
+      </Tabs>
+      <Outlet />
     </div>
   );
 }
