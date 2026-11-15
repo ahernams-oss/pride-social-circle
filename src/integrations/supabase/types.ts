@@ -1489,6 +1489,14 @@ export type Database = {
           name_ok: boolean
         }[]
       }
+      signup_club_directory: {
+        Args: never
+        Returns: {
+          city: string
+          id: string
+          name: string
+        }[]
+      }
       vf_apuracao: {
         Args: { _eleicao_id: string }
         Returns: {

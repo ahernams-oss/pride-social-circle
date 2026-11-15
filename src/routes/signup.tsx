@@ -7,11 +7,34 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { formatCpf, onlyDigits } from "@/lib/registry";
+import { queryOptions, useSuspenseQuery } from "@tanstack/react-query";
+import { listSignupClubs } from "@/lib/signup-clubs.functions";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
+import { Check, ChevronsUpDown } from "lucide-react";
 
-export const Route = createFileRoute("/signup")({ component: SignupPage });
+const clubsQuery = queryOptions({ queryKey: ["signup-club-directory"], queryFn: () => listSignupClubs(), staleTime: 60_000 });
+
+export const Route = createFileRoute("/signup")({
+  loader: ({ context }) => context.queryClient.ensureQueryData(clubsQuery),
+  component: SignupPage,
+  errorComponent: ({ reset }) => <div className="p-8 text-center"><p>Não foi possível carregar os clubes.</p><Button onClick={() => { window.location.reload(); reset(); }}>Tentar novamente</Button></div>,
+  notFoundComponent: () => <p>Solicitação de acesso não encontrada.</p>,
+  head: () => ({ meta: [
+    { title: "Solicitar acesso | Lions Connecta" },
+    { name: "description", content: "Solicite acesso ao Lions Connecta e selecione seu clube cadastrado no Distrito LC-11." },
+    { property: "og:title", content: "Solicitar acesso | Lions Connecta" },
+    { property: "og:description", content: "Cadastre-se no Lions Connecta com seu clube e cidade." },
+    { property: "og:type", content: "website" },
+    { name: "twitter:card", content: "summary" },
+  ] }),
+});
 
 function SignupPage() {
   const nav = useNavigate();
+  const { data: clubs } = useSuspenseQuery(clubsQuery);
+  const [clubOpen, setClubOpen] = useState(false);
+  const [selectedClubId, setSelectedClubId] = useState("");
   const [form, setForm] = useState({
     full_name: "",
     club_name: "",
@@ -29,6 +52,7 @@ function SignupPage() {
 
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!selectedClubId) return toast.error("Selecione seu clube.");
     if (form.password.length < 8) return toast.error("A senha deve ter ao menos 8 caracteres.");
     if (onlyDigits(form.cpf).length !== 11) return toast.error("Informe um CPF válido (11 dígitos).");
     setLoading(true);
@@ -94,10 +118,35 @@ function SignupPage() {
             <Label htmlFor="birth">Data de nascimento</Label>
             <Input id="birth" type="date" required value={form.birth_date} onChange={upd("birth_date")} />
           </div>
-          <div className="grid grid-cols-2 gap-3">
+          <div className="space-y-3">
             <div>
               <Label htmlFor="club">Clube</Label>
-              <Input id="club" required value={form.club_name} onChange={upd("club_name")} placeholder="Lions Clube..." />
+              <Popover open={clubOpen} onOpenChange={setClubOpen}>
+                <PopoverTrigger asChild>
+                  <Button id="club" type="button" variant="outline" role="combobox" aria-expanded={clubOpen} className="h-auto min-h-10 w-full justify-between text-left font-normal">
+                    <span className="min-w-0 whitespace-normal">{form.club_name || "Selecione seu clube"}</span>
+                    <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 text-muted-foreground" />
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-[var(--radix-popover-trigger-width)] p-0" align="start">
+                  <Command>
+                    <CommandInput placeholder="Buscar clube ou cidade..." />
+                    <CommandList>
+                      <CommandEmpty>Nenhum clube encontrado.</CommandEmpty>
+                      <CommandGroup>
+                        {clubs.map((club) => <CommandItem key={club.id} value={`${club.name} ${club.city} ${club.id}`} onSelect={() => {
+                          setSelectedClubId(club.id);
+                          setForm((f) => ({ ...f, club_name: club.name, city: club.city }));
+                          setClubOpen(false);
+                        }}>
+                          <div className="min-w-0 flex-1"><div className="whitespace-normal">{club.name}</div><div className="text-xs text-muted-foreground">{club.city || "Cidade não informada"}</div></div>
+                          {selectedClubId === club.id && <Check className="h-4 w-4 shrink-0" />}
+                        </CommandItem>)}
+                      </CommandGroup>
+                    </CommandList>
+                  </Command>
+                </PopoverContent>
+              </Popover>
             </div>
             <div>
               <Label htmlFor="city">Cidade</Label>
