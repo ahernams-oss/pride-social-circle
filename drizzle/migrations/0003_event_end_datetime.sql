@@ -1,0 +1,2 @@
+ALTER TABLE public.events ADD COLUMN ends_at timestamp with time zone;
+COMMENT ON COLUMN public.events.ends_at IS 'Data e hora de término do evento; eventos anteriores podem não ter término informado.';
