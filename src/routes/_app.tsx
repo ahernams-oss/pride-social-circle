@@ -127,6 +127,7 @@ function AppLayout() {
                 <Shield className="h-4 w-4" /> Admin
               </Link>
             )}
+            {can("laurear", "view") && <Button asChild variant="ghost" size="sm"><Link to="/admin/laurear"><Award className="mr-2 h-4 w-4" />Laurear companheiros</Link></Button>}
           </nav>
 
           <DropdownMenu>
@@ -155,6 +156,7 @@ function AppLayout() {
                   <Shield className="mr-2 h-4 w-4" /> Painel admin
                 </DropdownMenuItem>
               )}
+              {can("laurear", "view") && <DropdownMenuItem onClick={() => nav({ to: "/admin/laurear" })}><Award className="mr-2 h-4 w-4" />Laurear companheiros</DropdownMenuItem>}
               <DropdownMenuSeparator />
               <DropdownMenuItem onClick={async () => { await signOut(); nav({ to: "/" }); }}>
                 <LogOut className="mr-2 h-4 w-4" /> Sair
