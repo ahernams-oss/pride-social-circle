@@ -11,7 +11,17 @@ import { Calendar, MapPin, Plus, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { AttendButton, EventReport, BarChart3 } from "@/components/EventAttendance";
 
-export const Route = createFileRoute("/_app/events")({ component: EventsPage });
+export const Route = createFileRoute("/_app/events")({
+  component: EventsPage,
+  head: () => ({ meta: [
+    { title: "Eventos | Lions Connecta" },
+    { name: "description", content: "Agenda de eventos do Lions Connecta, com datas de início e fim e confirmação de participação." },
+    { property: "og:title", content: "Eventos | Lions Connecta" },
+    { property: "og:description", content: "Confira a agenda e participe dos eventos do Lions Connecta." },
+    { property: "og:type", content: "website" },
+    { name: "twitter:card", content: "summary" },
+  ] }),
+});
 
 type Event = {
   id: string;
@@ -19,6 +29,7 @@ type Event = {
   description: string;
   location: string;
   starts_at: string;
+  ends_at: string | null;
   created_by: string;
 };
 
@@ -27,7 +38,7 @@ function EventsPage() {
   const [events, setEvents] = useState<Event[]>([]);
   const [open, setOpen] = useState(false);
   const [report, setReport] = useState<Event | null>(null);
-  const [form, setForm] = useState({ title: "", description: "", location: "", starts_at: "" });
+  const [form, setForm] = useState({ title: "", description: "", location: "", starts_at: "", ends_at: "" });
 
   const load = useCallback(async () => {
     const { data } = await supabase.from("events").select("*").order("starts_at", { ascending: true });
@@ -41,12 +52,13 @@ function EventsPage() {
     if (!user) return;
     const { error } = await supabase.from("events").insert({
       title: form.title, description: form.description, location: form.location,
-      starts_at: form.starts_at, created_by: user.id,
+      starts_at: new Date(form.starts_at).toISOString(),
+      ends_at: new Date(form.ends_at).toISOString(), created_by: user.id,
     });
     if (error) return toast.error(error.message);
     toast.success("Evento criado");
     setOpen(false);
-    setForm({ title: "", description: "", location: "", starts_at: "" });
+    setForm({ title: "", description: "", location: "", starts_at: "", ends_at: "" });
     await load();
   };
 
@@ -71,7 +83,10 @@ function EventsPage() {
             <DialogHeader><DialogTitle>Criar evento</DialogTitle></DialogHeader>
             <form onSubmit={create} className="space-y-3">
               <div><Label>Título</Label><Input required value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} /></div>
-              <div><Label>Data e hora</Label><Input required type="datetime-local" value={form.starts_at} onChange={(e) => setForm({ ...form, starts_at: e.target.value })} /></div>
+              <div className="grid gap-3 sm:grid-cols-2">
+                <div className="min-w-0"><Label htmlFor="event-start">Data e hora de início</Label><Input id="event-start" required type="datetime-local" value={form.starts_at} onChange={(e) => setForm({ ...form, starts_at: e.target.value })} /></div>
+                <div className="min-w-0"><Label htmlFor="event-end">Data e hora de fim</Label><Input id="event-end" required type="datetime-local" value={form.ends_at} onChange={(e) => setForm({ ...form, ends_at: e.target.value })} /></div>
+              </div>
               <div><Label>Local</Label><Input value={form.location} onChange={(e) => setForm({ ...form, location: e.target.value })} /></div>
               <div><Label>Descrição</Label><Textarea value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} rows={3} /></div>
               <Button type="submit" className="w-full">Criar</Button>
@@ -89,7 +104,11 @@ function EventsPage() {
                 <div className="mt-1 flex flex-wrap gap-x-4 gap-y-1 text-sm text-muted-foreground">
                   <span className="flex items-center gap-1">
                     <Calendar className="h-3.5 w-3.5" />
-                    {new Date(ev.starts_at).toLocaleString("pt-BR", { dateStyle: "short", timeStyle: "short" })}
+                    Início: {new Date(ev.starts_at).toLocaleString("pt-BR", { dateStyle: "short", timeStyle: "short" })}
+                  </span>
+                  <span className="flex items-center gap-1">
+                    <Calendar className="h-3.5 w-3.5" />
+                    Fim: {ev.ends_at ? new Date(ev.ends_at).toLocaleString("pt-BR", { dateStyle: "short", timeStyle: "short" }) : "Não informado"}
                   </span>
                   {ev.location && <span className="flex items-center gap-1"><MapPin className="h-3.5 w-3.5" />{ev.location}</span>}
                 </div>
