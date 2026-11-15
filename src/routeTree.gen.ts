@@ -28,6 +28,7 @@ import { Route as AppFeedRouteImport } from './routes/_app/feed'
 import { Route as AppFriendsRouteImport } from './routes/_app/friends'
 import { Route as AppGroupsRouteImport } from './routes/_app/groups'
 import { Route as AppKioskRouteImport } from './routes/_app/kiosk'
+import { Route as AppLionsHistoryRouteImport } from './routes/_app/lions-history'
 import { Route as AppMessagesRouteImport } from './routes/_app/messages'
 import { Route as AppMissionsRouteImport } from './routes/_app/missions'
 import { Route as AppNotificationsRouteImport } from './routes/_app/notifications'
@@ -133,6 +134,11 @@ const AppKioskRoute = AppKioskRouteImport.update({
   path: '/kiosk',
   getParentRoute: () => AppRoute,
 } as any)
+const AppLionsHistoryRoute = AppLionsHistoryRouteImport.update({
+  id: '/lions-history',
+  path: '/lions-history',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppMessagesRoute = AppMessagesRouteImport.update({
   id: '/messages',
   path: '/messages',
@@ -204,6 +210,7 @@ export interface FileRoutesByFullPath {
   '/friends': typeof AppFriendsRoute
   '/groups': typeof AppGroupsRoute
   '/kiosk': typeof AppKioskRoute
+  '/lions-history': typeof AppLionsHistoryRoute
   '/messages': typeof AppMessagesRoute
   '/missions': typeof AppMissionsRoute
   '/notifications': typeof AppNotificationsRoute
@@ -233,6 +240,7 @@ export interface FileRoutesByTo {
   '/friends': typeof AppFriendsRoute
   '/groups': typeof AppGroupsRoute
   '/kiosk': typeof AppKioskRoute
+  '/lions-history': typeof AppLionsHistoryRoute
   '/messages': typeof AppMessagesRoute
   '/missions': typeof AppMissionsRoute
   '/notifications': typeof AppNotificationsRoute
@@ -265,6 +273,7 @@ export interface FileRoutesById {
   '/_app/friends': typeof AppFriendsRoute
   '/_app/groups': typeof AppGroupsRoute
   '/_app/kiosk': typeof AppKioskRoute
+  '/_app/lions-history': typeof AppLionsHistoryRoute
   '/_app/messages': typeof AppMessagesRoute
   '/_app/missions': typeof AppMissionsRoute
   '/_app/notifications': typeof AppNotificationsRoute
@@ -297,6 +306,7 @@ export interface FileRouteTypes {
     | '/friends'
     | '/groups'
     | '/kiosk'
+    | '/lions-history'
     | '/messages'
     | '/missions'
     | '/notifications'
@@ -326,6 +336,7 @@ export interface FileRouteTypes {
     | '/friends'
     | '/groups'
     | '/kiosk'
+    | '/lions-history'
     | '/messages'
     | '/missions'
     | '/notifications'
@@ -357,6 +368,7 @@ export interface FileRouteTypes {
     | '/_app/friends'
     | '/_app/groups'
     | '/_app/kiosk'
+    | '/_app/lions-history'
     | '/_app/messages'
     | '/_app/missions'
     | '/_app/notifications'
@@ -514,6 +526,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppKioskRouteImport
       parentRoute: typeof AppRoute
     }
+    '/_app/lions-history': {
+      id: '/_app/lions-history'
+      path: '/lions-history'
+      fullPath: '/lions-history'
+      preLoaderRoute: typeof AppLionsHistoryRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/_app/messages': {
       id: '/_app/messages'
       path: '/messages'
@@ -626,6 +645,7 @@ interface AppRouteChildren {
   AppFriendsRoute: typeof AppFriendsRoute
   AppGroupsRoute: typeof AppGroupsRoute
   AppKioskRoute: typeof AppKioskRoute
+  AppLionsHistoryRoute: typeof AppLionsHistoryRoute
   AppMessagesRoute: typeof AppMessagesRoute
   AppMissionsRoute: typeof AppMissionsRoute
   AppNotificationsRoute: typeof AppNotificationsRoute
@@ -648,6 +668,7 @@ const AppRouteChildren: AppRouteChildren = {
   AppFriendsRoute: AppFriendsRoute,
   AppGroupsRoute: AppGroupsRoute,
   AppKioskRoute: AppKioskRoute,
+  AppLionsHistoryRoute: AppLionsHistoryRoute,
   AppMessagesRoute: AppMessagesRoute,
   AppMissionsRoute: AppMissionsRoute,
   AppNotificationsRoute: AppNotificationsRoute,
