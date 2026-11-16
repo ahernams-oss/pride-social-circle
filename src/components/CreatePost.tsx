@@ -41,7 +41,7 @@ export function CreatePost({ onCreated }: { onCreated: () => void }) {
     if (!user || !content.trim()) return;
     setPosting(true);
 
-    let imageUrl: string | null = null;
+    let imagePath: string | null = null;
     if (file) {
       const ext = file.name.split(".").pop() ?? "jpg";
       const path = `${user.id}/${Date.now()}.${ext}`;
@@ -50,13 +50,13 @@ export function CreatePost({ onCreated }: { onCreated: () => void }) {
         setPosting(false);
         return toast.error(upErr.message);
       }
-      imageUrl = supabase.storage.from("feed-images").getPublicUrl(path).data.publicUrl;
+      imagePath = path;
     }
 
     const { error } = await supabase.from("posts").insert({
       author_id: user.id,
       content: content.trim(),
-      image_url: imageUrl,
+      image_url: imagePath,
     });
     if (error) {
       setPosting(false);
@@ -64,11 +64,11 @@ export function CreatePost({ onCreated }: { onCreated: () => void }) {
     }
 
     // Cópia silenciosa para o Google Drive do Distrito (endereço nunca exposto ao usuário).
-    if (imageUrl && file) {
+    if (imagePath && file) {
       try {
         await backupToDrive({
           data: {
-            imageUrl,
+            path: imagePath,
             fileName: `feed-${Date.now()}-${file.name}`,
             mimeType: file.type || "image/jpeg",
           },
