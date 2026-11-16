@@ -68,6 +68,7 @@ export function AdminUserLevels() {
   const [newLevel, setNewLevel] = useState<ManagedLevel>("approved");
   const [reason, setReason] = useState("");
   const [saving, setSaving] = useState(false);
+  const { user, isAdmin } = useAuth();
   const [toggling, setToggling] = useState<UserRow | null>(null);
   const [toggleReason, setToggleReason] = useState("");
 
