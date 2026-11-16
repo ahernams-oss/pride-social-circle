@@ -8,15 +8,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth-context";
 import { backupFeedImageToDrive } from "@/lib/drive-backup.functions";
 import { toast } from "sonner";
-
-const MAX_IMAGE_BYTES = 300 * 1024;
-const MAX_IMAGE_LABEL = "300 KB";
-
-function formatSize(bytes: number) {
-  return bytes >= 1024 * 1024
-    ? `${(bytes / (1024 * 1024)).toFixed(1)} MB`
-    : `${Math.round(bytes / 1024)} KB`;
-}
+import { MAX_IMAGE_BYTES, MAX_IMAGE_LABEL, imageLimitMessage, isWithinImageLimit } from "@/lib/feed-image-limit";
 
 function initials(n?: string | null) {
   return (n ?? "L").split(" ").filter(Boolean).slice(0, 2).map((p) => p[0]?.toUpperCase()).join("");
