@@ -13,6 +13,8 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { BarChart3, Plus, Trash2, X } from "lucide-react";
 import { toast } from "sonner";
+import { PollImagePicker } from "@/components/PollImagePicker";
+import { uploadPollImage } from "@/lib/poll-images";
 
 export const Route = createFileRoute("/_app/polls")({
   component: PollsPage,
@@ -26,8 +28,8 @@ export const Route = createFileRoute("/_app/polls")({
   ] }),
 });
 
-type QDraft = { text: string; allow_multiple: boolean; options: string[] };
-const emptyQ = (): QDraft => ({ text: "", allow_multiple: false, options: ["", ""] });
+type QDraft = { text: string; allow_multiple: boolean; options: string[]; image: File | null; optionImages: (File | null)[] };
+const emptyQ = (): QDraft => ({ text: "", allow_multiple: false, options: ["", ""], image: null, optionImages: [null, null] });
 
 function PollsPage() {
   const { can } = useAccess();
@@ -39,11 +41,12 @@ function PollsPage() {
   const [description, setDescription] = useState("");
   const [startsAt, setStartsAt] = useState("");
   const [endsAt, setEndsAt] = useState("");
+  const [titleImage, setTitleImage] = useState<File | null>(null);
   const [qs, setQs] = useState<QDraft[]>([emptyQ()]);
   const [saving, setSaving] = useState(false);
 
   const load = useCallback(async () => {
-    const { data } = await supabase.from("polls").select("id, title, description, starts_at, ends_at").order("starts_at", { ascending: false });
+    const { data } = await supabase.from("polls").select("id, title, description, starts_at, ends_at, image_url").order("starts_at", { ascending: false });
     setPolls(data ?? []);
     setLoading(false);
   }, []);
@@ -51,26 +54,33 @@ function PollsPage() {
 
   const updQ = (i: number, patch: Partial<QDraft>) => setQs((a) => a.map((q, j) => (j === i ? { ...q, ...patch } : q)));
 
-  const reset = () => { setTitle(""); setDescription(""); setStartsAt(""); setEndsAt(""); setQs([emptyQ()]); };
+  const reset = () => { setTitle(""); setDescription(""); setStartsAt(""); setEndsAt(""); setQs([emptyQ()]); setTitleImage(null); };
 
   const save = async () => {
     if (!title.trim()) return toast.error("Informe o título.");
     if (!validPollPeriod(startsAt, endsAt)) return toast.error("Informe início e fim; o fim deve ser depois do início.");
-    const clean = qs.map((q) => ({ ...q, text: q.text.trim(), options: q.options.map((o) => o.trim()).filter(Boolean) }));
+    const clean = qs.map((q) => {
+      const opts = q.options.map((o, k) => ({ text: o.trim(), image: q.optionImages[k] ?? null })).filter((o) => o.text);
+      return { ...q, text: q.text.trim(), options: opts };
+    });
     if (clean.some((q) => !q.text || q.options.length < 2)) return toast.error("Cada pergunta precisa de texto e ao menos 2 opções.");
     setSaving(true);
     try {
       const { data: poll, error } = await supabase.from("polls").insert({
         title: title.trim(), description: description.trim(),
+        image_url: titleImage ? await uploadPollImage(titleImage) : null,
         starts_at: new Date(startsAt).toISOString(), ends_at: new Date(endsAt).toISOString(), created_by: user!.id,
       }).select("id").single();
       if (error) throw error;
       for (const [i, q] of clean.entries()) {
         const { data: qrow, error: qe } = await supabase.from("poll_questions")
-          .insert({ poll_id: poll.id, text: q.text, allow_multiple: q.allow_multiple, order_index: i }).select("id").single();
+          .insert({ poll_id: poll.id, text: q.text, allow_multiple: q.allow_multiple, order_index: i, image_url: q.image ? await uploadPollImage(q.image) : null }).select("id").single();
         if (qe) throw qe;
-        const { error: oe } = await supabase.from("poll_options")
-          .insert(q.options.map((text, k) => ({ question_id: qrow.id, text, order_index: k })));
+        const optRows = [];
+        for (const [k, o] of q.options.entries()) {
+          optRows.push({ question_id: qrow.id, text: o.text, order_index: k, image_url: o.image ? await uploadPollImage(o.image) : null });
+        }
+        const { error: oe } = await supabase.from("poll_options").insert(optRows);
         if (oe) throw oe;
       }
       toast.success("Enquete criada!");
@@ -97,7 +107,7 @@ function PollsPage() {
         <DialogContent className="max-h-[90dvh] overflow-y-auto sm:max-w-2xl">
           <DialogHeader><DialogTitle>Nova enquete</DialogTitle></DialogHeader>
           <div className="space-y-4">
-            <div><Label>Título</Label><Input value={title} onChange={(e) => setTitle(e.target.value)} /></div>
+            <div><Label>Título</Label><Input value={title} onChange={(e) => setTitle(e.target.value)} /><div className="mt-2"><PollImagePicker file={titleImage} onChange={setTitleImage} label="Imagem do título" /></div></div>
             <div><Label>Descrição</Label><Textarea value={description} onChange={(e) => setDescription(e.target.value)} /></div>
             <div className="grid gap-3 sm:grid-cols-2">
               <div><Label>Data e hora de início</Label><Input type="datetime-local" value={startsAt} onChange={(e) => setStartsAt(e.target.value)} /></div>
@@ -110,16 +120,18 @@ function PollsPage() {
                   {qs.length > 1 && <Button size="icon" variant="ghost" onClick={() => setQs((a) => a.filter((_, j) => j !== i))} aria-label="Remover pergunta"><Trash2 className="h-4 w-4" /></Button>}
                 </div>
                 <Input value={q.text} onChange={(e) => updQ(i, { text: e.target.value })} placeholder="Texto da pergunta" />
+                <PollImagePicker file={q.image} onChange={(f) => updQ(i, { image: f })} label="Imagem da pergunta" />
                 <label className="flex items-center gap-2 text-sm">
                   <Checkbox checked={q.allow_multiple} onCheckedChange={(v) => updQ(i, { allow_multiple: !!v })} /> Permitir várias respostas
                 </label>
                 {q.options.map((o, k) => (
-                  <div key={k} className="flex gap-2">
-                    <Input value={o} placeholder={`Opção ${k + 1}`} onChange={(e) => updQ(i, { options: q.options.map((x, m) => (m === k ? e.target.value : x)) })} />
-                    {q.options.length > 2 && <Button size="icon" variant="ghost" onClick={() => updQ(i, { options: q.options.filter((_, m) => m !== k) })} aria-label="Remover opção"><X className="h-4 w-4" /></Button>}
+                  <div key={k} className="flex flex-wrap items-center gap-2">
+                    <Input value={o} placeholder={`Opção ${k + 1}`} onChange={(e) => updQ(i, { options: q.options.map((x, m) => (m === k ? e.target.value : x)) })} className="min-w-0 flex-1" />
+                    <PollImagePicker file={q.optionImages[k] ?? null} onChange={(f) => updQ(i, { optionImages: q.options.map((_, m) => (m === k ? f : q.optionImages[m] ?? null)) })} label="" />
+                    {q.options.length > 2 && <Button size="icon" variant="ghost" onClick={() => updQ(i, { options: q.options.filter((_, m) => m !== k), optionImages: q.optionImages.filter((_, m) => m !== k) })} aria-label="Remover opção"><X className="h-4 w-4" /></Button>}
                   </div>
                 ))}
-                <Button size="sm" variant="outline" onClick={() => updQ(i, { options: [...q.options, ""] })}><Plus className="mr-1 h-4 w-4" /> Opção</Button>
+                <Button size="sm" variant="outline" onClick={() => updQ(i, { options: [...q.options, ""], optionImages: [...q.optionImages, null] })}><Plus className="mr-1 h-4 w-4" /> Opção</Button>
               </div>
             ))}
             <Button variant="outline" onClick={() => setQs((a) => [...a, emptyQ()])}><Plus className="mr-1 h-4 w-4" /> Adicionar pergunta</Button>
