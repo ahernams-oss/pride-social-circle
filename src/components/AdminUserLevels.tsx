@@ -13,7 +13,10 @@ import {
 } from "@/components/ui/select";
 import { toast } from "sonner";
 import { useAccessMatrix } from "@/lib/access-control";
-import { History, Power, PowerOff, Search, UserCog } from "lucide-react";
+import { History, KeyRound, Power, PowerOff, Search, UserCog } from "lucide-react";
+import { useServerFn } from "@tanstack/react-start";
+import { adminResetPassword } from "@/lib/password-reset.functions";
+import { useAuth } from "@/lib/auth-context";
 import { LEVEL_LABEL, type AccessLevel } from "@/lib/permissions";
 
 type ManagedLevel = string;
@@ -154,6 +157,22 @@ export function AdminUserLevels() {
     load();
   };
 
+  const resetFn = useServerFn(adminResetPassword);
+  const [resetting, setResetting] = useState<{ id: string; full_name: string } | null>(null);
+  const confirmReset = async () => {
+    if (!resetting) return;
+    setSaving(true);
+    try {
+      await resetFn({ data: { userId: resetting.id } });
+      toast.success(`Senha de ${resetting.full_name} zerada`);
+      setResetting(null);
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Falha ao zerar senha");
+    } finally {
+      setSaving(false);
+    }
+  };
+
   const confirmToggle = async () => {
     if (!toggling) return;
     setSaving(true);
@@ -214,6 +233,11 @@ export function AdminUserLevels() {
                 <Button size="sm" variant="outline" onClick={() => openDialog(u)}>
                   Alterar nível
                 </Button>
+                {isAdmin && u.id !== user?.id && (
+                  <Button size="sm" variant="outline" onClick={() => setResetting(u)}>
+                    <KeyRound className="mr-1 h-4 w-4" /> Zerar senha
+                  </Button>
+                )}
                 <Button
                   size="sm"
                   variant={u.is_active ? "destructive" : "default"}
@@ -294,6 +318,22 @@ export function AdminUserLevels() {
           <DialogFooter>
             <Button variant="outline" onClick={() => setTarget(null)}>Cancelar</Button>
             <Button onClick={save} disabled={saving}>Salvar</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={!!resetting} onOpenChange={(o) => !o && setResetting(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Zerar senha</DialogTitle>
+            <DialogDescription>
+              A senha atual de {resetting?.full_name} deixará de funcionar. No próximo acesso, a pessoa informará
+              a data de nascimento completa e o clube, e então cadastrará uma nova senha.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setResetting(null)}>Cancelar</Button>
+            <Button variant="destructive" onClick={confirmReset} disabled={saving}>Zerar senha</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
