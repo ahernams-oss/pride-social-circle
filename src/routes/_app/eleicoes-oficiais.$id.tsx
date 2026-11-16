@@ -37,6 +37,7 @@ type Delegado = {
   avatar_url?: string | null;
 };
 type Comissao = { id: string; nome: string; associado_id?: string | null; funcao: "presidente" | "vice_presidente" | "membro" | "vogal" };
+type FiltroVoto = "todos" | "votou" | "nao_votou";
 type Apuracao = { cargo: string; candidatura_id: string | null; candidato: string; tipo: string; votos: number };
 
 
@@ -354,6 +355,7 @@ function NewDelegado({ eleicaoId, onCreated }: { eleicaoId: string; onCreated: (
 
 function DelegadosList({ items, isAdmin, onChanged, eleicao, presidente }: { items: Delegado[]; isAdmin: boolean; onChanged: () => void; eleicao: Eleicao; presidente: string | null }) {
   const [sendFor, setSendFor] = useState<Delegado | null>(null);
+  const [filtro, setFiltro] = useState<FiltroVoto>("todos");
   const toggle = async (id: string, field: "credenciado" | "presente" | "habilitado_votar", val: boolean) => {
     const { error } = await supabase.from("vf_delegados").update({ [field]: val } as any).eq("id", id);
     if (error) return toast.error(error.message);
