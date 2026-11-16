@@ -21,6 +21,7 @@ import { AssociadoCombobox, type Associado } from "@/components/AssociadoCombobo
 import { CandidatoFotoUpload } from "@/components/CandidatoFotoUpload";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { assinaturaEletronica, codigoUrna, codigoUrnaCredencial } from "@/lib/vf-credencial";
+import { cn } from "@/lib/utils";
 import lciEmblem from "@/assets/lci-emblem.png.asset.json";
 import distritoLogo from "@/assets/distrito-lc11-logo.png.asset.json";
 
