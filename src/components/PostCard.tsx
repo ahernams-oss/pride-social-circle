@@ -1,9 +1,10 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { canEditPost, EDIT_WINDOW_MS } from "@/lib/post-edit";
 import { Link } from "@tanstack/react-router";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { Heart, MessageCircle, Trash2 } from "lucide-react";
+import { Heart, MessageCircle, Pencil, Trash2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth-context";
 import { formatDistanceToNow } from "date-fns";
@@ -96,6 +97,29 @@ export function PostCard({ post, onChange }: { post: FeedPost; onChange: () => v
   };
 
   const canDelete = user?.id === post.author_id || isAdmin;
+  const [now, setNow] = useState(() => Date.now());
+  const isAuthor = user?.id === post.author_id;
+  const editable = isAuthor && canEditPost(post.created_at, now);
+  useEffect(() => {
+    if (!isAuthor) return;
+    const left = new Date(post.created_at).getTime() + EDIT_WINDOW_MS - Date.now();
+    if (left <= 0) return;
+    const t = setInterval(() => setNow(Date.now()), 1000);
+    return () => clearInterval(t);
+  }, [isAuthor, post.created_at]);
+  const [editing, setEditing] = useState(false);
+  const [draft, setDraft] = useState(post.content);
+  useEffect(() => { if (!editable) setEditing(false); }, [editable]);
+  const saveEdit = async () => {
+    if (!draft.trim()) return toast.error("A publicação não pode ficar vazia");
+    if (!canEditPost(post.created_at, Date.now())) { setEditing(false); return toast.error("O prazo de 3 minutos para editar terminou"); }
+    const { data, error } = await supabase.from("posts").update({ content: draft.trim() }).eq("id", post.id).select("id");
+    if (error) return toast.error(error.message);
+    if (!data?.length) { setEditing(false); return toast.error("O prazo de 3 minutos para editar terminou"); }
+    toast.success("Publicação atualizada");
+    setEditing(false); onChange();
+  };
+  const secsLeft = Math.max(0, Math.ceil((new Date(post.created_at).getTime() + EDIT_WINDOW_MS - now) / 1000));
 
   return (
     <article className="rounded-xl border bg-card shadow-sm">
@@ -112,15 +136,33 @@ export function PostCard({ post, onChange }: { post: FeedPost; onChange: () => v
             </div>
           </div>
         </Link>
+        <div className="flex items-center gap-1">
+        {editable && !editing && (
+          <Button variant="ghost" size="sm" onClick={() => { setDraft(post.content); setEditing(true); }} className="text-muted-foreground" title="Editar (disponível por 3 minutos)">
+            <Pencil className="mr-1 h-4 w-4" />
+            <span className="text-xs tabular-nums">{Math.floor(secsLeft / 60)}:{String(secsLeft % 60).padStart(2, "0")}</span>
+          </Button>
+        )}
         {canDelete && (
           <Button variant="ghost" size="icon" onClick={deletePost} className="text-muted-foreground hover:text-destructive">
             <Trash2 className="h-4 w-4" />
           </Button>
         )}
+        </div>
       </header>
 
       <div className="px-4 pb-3">
-        <p className="whitespace-pre-wrap text-card-foreground">{post.content}</p>
+        {editing ? (
+          <div className="space-y-2">
+            <Textarea value={draft} onChange={(e) => setDraft(e.target.value)} rows={3} />
+            <div className="flex justify-end gap-2">
+              <Button variant="ghost" size="sm" onClick={() => setEditing(false)}>Cancelar</Button>
+              <Button size="sm" onClick={saveEdit}>Salvar</Button>
+            </div>
+          </div>
+        ) : (
+          <p className="whitespace-pre-wrap text-card-foreground">{post.content}</p>
+        )}
       </div>
       {post.image_url && (
         <div className="border-y bg-muted">
