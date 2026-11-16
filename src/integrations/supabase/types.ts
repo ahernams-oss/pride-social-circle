@@ -917,18 +917,21 @@ export type Database = {
       poll_options: {
         Row: {
           id: string
+          image_url: string | null
           order_index: number
           question_id: string
           text: string
         }
         Insert: {
           id?: string
+          image_url?: string | null
           order_index?: number
           question_id: string
           text: string
         }
         Update: {
           id?: string
+          image_url?: string | null
           order_index?: number
           question_id?: string
           text?: string
@@ -947,6 +950,7 @@ export type Database = {
         Row: {
           allow_multiple: boolean
           id: string
+          image_url: string | null
           order_index: number
           poll_id: string
           text: string
@@ -954,6 +958,7 @@ export type Database = {
         Insert: {
           allow_multiple?: boolean
           id?: string
+          image_url?: string | null
           order_index?: number
           poll_id: string
           text: string
@@ -961,6 +966,7 @@ export type Database = {
         Update: {
           allow_multiple?: boolean
           id?: string
+          image_url?: string | null
           order_index?: number
           poll_id?: string
           text?: string
@@ -1021,6 +1027,7 @@ export type Database = {
           description: string
           ends_at: string
           id: string
+          image_url: string | null
           starts_at: string
           title: string
         }
@@ -1030,6 +1037,7 @@ export type Database = {
           description?: string
           ends_at: string
           id?: string
+          image_url?: string | null
           starts_at: string
           title: string
         }
@@ -1039,6 +1047,7 @@ export type Database = {
           description?: string
           ends_at?: string
           id?: string
+          image_url?: string | null
           starts_at?: string
           title?: string
         }
