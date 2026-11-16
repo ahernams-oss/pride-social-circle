@@ -8,7 +8,7 @@ const DRIVE_FOLDER_ID = "1ODlSD2IXpyVeeXmhrcoQ3DVmtkoJPzYf";
 const GATEWAY = "https://connector-gateway.lovable.dev/google_drive";
 
 const schema = z.object({
-  imageUrl: z.string().url().max(2000),
+  path: z.string().min(1).max(500),
   fileName: z.string().min(1).max(200),
   mimeType: z.string().max(100).default("image/jpeg"),
 });
@@ -16,14 +16,18 @@ const schema = z.object({
 export const backupFeedImageToDrive = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: unknown) => schema.parse(d))
-  .handler(async ({ data }) => {
+  .handler(async ({ data, context }) => {
+    // Só permite copiar imagens da própria pasta do usuário no bucket.
+    if (!data.path.startsWith(`${context.userId}/`)) throw new Error("Caminho de imagem inválido");
+
     const lovKey = process.env["LOVABLE_API_KEY"];
     const connKey = process.env["GOOGLE_DRIVE_API_KEY"];
     if (!lovKey || !connKey) throw new Error("Integração com o Google Drive não configurada");
 
-    const imgRes = await fetch(data.imageUrl);
-    if (!imgRes.ok) throw new Error(`Não foi possível ler a imagem (${imgRes.status})`);
-    const bytes = new Uint8Array(await imgRes.arrayBuffer());
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data: blob, error } = await supabaseAdmin.storage.from("feed-images").download(data.path);
+    if (error || !blob) throw new Error("Não foi possível ler a imagem enviada");
+    const bytes = new Uint8Array(await blob.arrayBuffer());
 
     const boundary = "lc11drive" + Math.random().toString(36).slice(2);
     const meta = JSON.stringify({ name: data.fileName, parents: [DRIVE_FOLDER_ID], mimeType: data.mimeType });
