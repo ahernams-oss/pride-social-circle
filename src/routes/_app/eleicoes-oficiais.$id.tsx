@@ -406,7 +406,9 @@ function DelegadosList({ items, isAdmin, onChanged, eleicao, presidente }: { ite
             </div>
           </div>
           <div className="flex flex-wrap items-center gap-2">
-            {d.ja_votou && <Badge variant="secondary">Já votou</Badge>}
+            {d.ja_votou
+              ? <Badge variant="secondary" className="gap-1"><CheckCircle2 className="h-3 w-3" /> Já votou</Badge>
+              : <Badge variant="outline" className="gap-1 border-destructive/40 text-destructive">Não votou</Badge>}
             {isAdmin && (
               <>
                 <Button size="sm" variant={d.credenciado ? "default" : "outline"} onClick={() => toggle(d.id, "credenciado", !d.credenciado)}>Credenciado</Button>
@@ -426,6 +428,21 @@ function DelegadosList({ items, isAdmin, onChanged, eleicao, presidente }: { ite
       ))}
       <SendCredencialDialog delegado={sendFor} eleicao={eleicao} onClose={() => setSendFor(null)} />
     </div>
+  );
+}
+
+function FiltroVotoChip({ label, count, active, onClick }: { label: string; count: number; active: boolean; onClick: () => void }) {
+  return (
+    <Button
+      size="sm"
+      variant={active ? "default" : "outline"}
+      onClick={onClick}
+      className="h-7 gap-1.5 px-2.5 text-xs"
+      aria-pressed={active}
+    >
+      {label}
+      <span className={cn("rounded-full px-1.5 py-0.5 text-[10px] font-semibold", active ? "bg-background/25" : "bg-muted")}>{count}</span>
+    </Button>
   );
 }
 
