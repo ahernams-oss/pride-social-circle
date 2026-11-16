@@ -14,6 +14,8 @@ export const adminResetPassword = createServerFn({ method: "POST" })
     if (!isAdmin) throw new Error("Apenas administradores podem zerar senhas");
     if (data.userId === context.userId) throw new Error("Você não pode zerar a sua própria senha");
 
+    const { data: isSuper } = await context.supabase.rpc("is_super_admin", { _user_id: data.userId });
+    if (isSuper) throw new Error("A senha de um Super Administrador não pode ser zerada");
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { data: u, error: ue } = await supabaseAdmin.auth.admin.getUserById(data.userId);
     if (ue || !u.user?.email) throw new Error("Usuário não encontrado");
