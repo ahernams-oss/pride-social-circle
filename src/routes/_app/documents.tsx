@@ -64,7 +64,23 @@ function DocumentsPage() {
   const handleDownload = async (doc: Doc) => {
     const { data, error } = await supabase.storage.from("documents").createSignedUrl(doc.file_path, 60);
     if (error || !data) return toast.error("Não foi possível gerar o link");
-    window.open(data.signedUrl, "_blank");
+    // Safari blocks window.open() once the click handler has awaited, so fetch the
+    // file and hand it to a download link instead; fall back to same-tab navigation.
+    try {
+      const res = await fetch(data.signedUrl);
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = doc.file_name || doc.title || "documento";
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 5000);
+    } catch {
+      window.location.assign(data.signedUrl);
+    }
   };
 
   const handleDelete = async (doc: Doc) => {
