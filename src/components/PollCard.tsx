@@ -6,9 +6,15 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "sonner";
 import { BarChart3, Trash2 } from "lucide-react";
 import { pollStatus } from "@/lib/polls";
+import { usePollImage } from "@/lib/poll-images";
 
-export type Poll = { id: string; title: string; description: string; starts_at: string; ends_at: string };
-type Question = { id: string; text: string; allow_multiple: boolean; order_index: number; options: { id: string; text: string; order_index: number }[] };
+function PollImg({ path, className }: { path: string | null | undefined; className: string }) {
+  const url = usePollImage(path);
+  return url ? <img src={url} alt="" loading="lazy" className={className} /> : null;
+}
+
+export type Poll = { id: string; title: string; description: string; starts_at: string; ends_at: string; image_url?: string | null };
+type Question = { id: string; text: string; allow_multiple: boolean; order_index: number; image_url: string | null; options: { id: string; text: string; order_index: number; image_url: string | null }[] };
 
 const fmt = (d: string) => new Date(d).toLocaleString("pt-BR", { dateStyle: "short", timeStyle: "short" });
 
@@ -22,7 +28,7 @@ export function PollCard({ poll, canDelete, onDeleted }: { poll: Poll; canDelete
 
   const load = useCallback(async () => {
     const { data: qs } = await supabase.from("poll_questions")
-      .select("id, text, allow_multiple, order_index, poll_options(id, text, order_index)")
+      .select("id, text, allow_multiple, order_index, image_url, poll_options(id, text, order_index, image_url)")
       .eq("poll_id", poll.id).order("order_index");
     const list = (qs ?? []).map((q) => ({ ...q, options: [...(q.poll_options ?? [])].sort((a, b) => a.order_index - b.order_index) })) as Question[];
     setQuestions(list);
@@ -85,6 +91,7 @@ export function PollCard({ poll, canDelete, onDeleted }: { poll: Poll; canDelete
         {canDelete && <Button size="icon" variant="ghost" onClick={remove} aria-label="Excluir enquete"><Trash2 className="h-4 w-4" /></Button>}
       </div>
 
+      <PollImg path={poll.image_url} className="mt-3 max-h-80 w-full rounded-lg object-cover" />
       <div className="mt-4 space-y-4">
         {questions.map((q, i) => {
           const done = answered(q) || status !== "aberta";
@@ -92,6 +99,7 @@ export function PollCard({ poll, canDelete, onDeleted }: { poll: Poll; canDelete
           return (
             <div key={q.id}>
               <p className="text-sm font-medium">{i + 1}. {q.text} {q.allow_multiple && <span className="text-xs text-muted-foreground">(várias respostas)</span>}</p>
+              <PollImg path={q.image_url} className="mt-2 max-h-60 w-full rounded-md object-cover" />
               <div className="mt-2 space-y-1.5">
                 {q.options.map((o) => {
                   if (done && showResults) {
@@ -101,19 +109,20 @@ export function PollCard({ poll, canDelete, onDeleted }: { poll: Poll; canDelete
                       <div key={o.id} className="relative overflow-hidden rounded-md border px-3 py-1.5 text-sm">
                         <div className="absolute inset-y-0 left-0 bg-primary/15" style={{ width: `${pct}%` }} />
                         <div className="relative flex justify-between gap-2">
-                          <span className={mine.has(o.id) ? "font-semibold" : ""}>{o.text}{mine.has(o.id) && " ✓"}</span>
+                          <span className={`flex items-center gap-2 ${mine.has(o.id) ? "font-semibold" : ""}`}><PollImg path={o.image_url} className="h-10 w-10 rounded object-cover" />{o.text}{mine.has(o.id) && " ✓"}</span>
                           <span className="text-muted-foreground">{pct}% · {c}</span>
                         </div>
                       </div>
                     );
                   }
-                  if (done) return <div key={o.id} className="rounded-md border px-3 py-1.5 text-sm">{o.text}{mine.has(o.id) && " ✓"}</div>;
+                  if (done) return <div key={o.id} className="flex items-center gap-2 rounded-md border px-3 py-1.5 text-sm"><PollImg path={o.image_url} className="h-10 w-10 rounded object-cover" />{o.text}{mine.has(o.id) && " ✓"}</div>;
                   const checked = (sel[q.id] ?? []).includes(o.id);
                   return (
                     <label key={o.id} className="flex cursor-pointer items-center gap-2 rounded-md border px-3 py-1.5 text-sm hover:bg-muted">
                       {q.allow_multiple
                         ? <Checkbox checked={checked} onCheckedChange={() => toggle(q, o.id)} />
                         : <input type="radio" name={q.id} checked={checked} onChange={() => toggle(q, o.id)} className="accent-primary" />}
+                      <PollImg path={o.image_url} className="h-10 w-10 rounded object-cover" />
                       {o.text}
                     </label>
                   );
@@ -135,7 +144,7 @@ export function FeedPolls() {
   const [polls, setPolls] = useState<Poll[]>([]);
   useEffect(() => {
     const now = new Date().toISOString();
-    supabase.from("polls").select("id, title, description, starts_at, ends_at")
+    supabase.from("polls").select("id, title, description, starts_at, ends_at, image_url")
       .lte("starts_at", now).gte("ends_at", now).order("ends_at")
       .then(({ data }) => setPolls(data ?? []));
   }, []);
