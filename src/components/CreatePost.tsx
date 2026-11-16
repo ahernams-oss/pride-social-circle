@@ -26,9 +26,7 @@ export function CreatePost({ onCreated }: { onCreated: () => void }) {
   const pickFile = (f: File | null) => {
     if (!f) return;
     if (!f.type.startsWith("image/")) return toast.error("Selecione um arquivo de imagem.");
-    if (f.size > MAX_IMAGE_BYTES) {
-      return toast.error(`A imagem deve ter no máximo ${MAX_IMAGE_LABEL}. A sua tem ${formatSize(f.size)}.`);
-    }
+    if (!isWithinImageLimit(f.size)) return toast.error(imageLimitMessage(f.size));
     setFile(f);
     setPreview(URL.createObjectURL(f));
   };
