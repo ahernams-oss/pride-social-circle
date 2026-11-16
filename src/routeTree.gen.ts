@@ -34,6 +34,7 @@ import { Route as AppMissionsRouteImport } from './routes/_app/missions'
 import { Route as AppNotificationsRouteImport } from './routes/_app/notifications'
 import { Route as AppRankingRouteImport } from './routes/_app/ranking'
 import { Route as AppVotarEleicaoRouteImport } from './routes/_app/votar-eleicao'
+import { Route as ApiFeedImageRouteImport } from './routes/api/feed-image'
 import { Route as AppAdminLaurearRouteImport } from './routes/_app/admin_.laurear'
 import { Route as AppElectionsIdRouteImport } from './routes/_app/elections.$id'
 import { Route as AppEleicoesOficiaisIndexRouteImport } from './routes/_app/eleicoes-oficiais.index'
@@ -168,6 +169,11 @@ const AppVotarEleicaoRoute = AppVotarEleicaoRouteImport.update({
   path: '/votar-eleicao',
   getParentRoute: () => AppRoute,
 } as any)
+const ApiFeedImageRoute = ApiFeedImageRouteImport.update({
+  id: '/api/feed-image',
+  path: '/api/feed-image',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AppAdminLaurearRoute = AppAdminLaurearRouteImport.update({
   id: '/admin_/laurear',
   path: '/admin/laurear',
@@ -241,6 +247,7 @@ export interface FileRoutesByFullPath {
   '/notifications': typeof AppNotificationsRoute
   '/ranking': typeof AppRankingRoute
   '/votar-eleicao': typeof AppVotarEleicaoRoute
+  '/api/feed-image': typeof ApiFeedImageRoute
   '/admin/laurear': typeof AppAdminLaurearRoute
   '/elections/$id': typeof AppElectionsIdRoute
   '/eleicoes-oficiais/$id': typeof AppEleicoesOficiaisIdRoute
@@ -274,6 +281,7 @@ export interface FileRoutesByTo {
   '/notifications': typeof AppNotificationsRoute
   '/ranking': typeof AppRankingRoute
   '/votar-eleicao': typeof AppVotarEleicaoRoute
+  '/api/feed-image': typeof ApiFeedImageRoute
   '/admin/laurear': typeof AppAdminLaurearRoute
   '/elections/$id': typeof AppElectionsIdRoute
   '/eleicoes-oficiais/$id': typeof AppEleicoesOficiaisIdRoute
@@ -311,6 +319,7 @@ export interface FileRoutesById {
   '/_app/notifications': typeof AppNotificationsRoute
   '/_app/ranking': typeof AppRankingRoute
   '/_app/votar-eleicao': typeof AppVotarEleicaoRoute
+  '/api/feed-image': typeof ApiFeedImageRoute
   '/_app/admin_/laurear': typeof AppAdminLaurearRoute
   '/_app/elections/$id': typeof AppElectionsIdRoute
   '/_app/eleicoes-oficiais/$id': typeof AppEleicoesOficiaisIdRoute
@@ -348,6 +357,7 @@ export interface FileRouteTypes {
     | '/notifications'
     | '/ranking'
     | '/votar-eleicao'
+    | '/api/feed-image'
     | '/admin/laurear'
     | '/elections/$id'
     | '/eleicoes-oficiais/$id'
@@ -381,6 +391,7 @@ export interface FileRouteTypes {
     | '/notifications'
     | '/ranking'
     | '/votar-eleicao'
+    | '/api/feed-image'
     | '/admin/laurear'
     | '/elections/$id'
     | '/eleicoes-oficiais/$id'
@@ -417,6 +428,7 @@ export interface FileRouteTypes {
     | '/_app/notifications'
     | '/_app/ranking'
     | '/_app/votar-eleicao'
+    | '/api/feed-image'
     | '/_app/admin_/laurear'
     | '/_app/elections/$id'
     | '/_app/eleicoes-oficiais/$id'
@@ -435,6 +447,7 @@ export interface RootRouteChildren {
   OnboardingRoute: typeof OnboardingRoute
   PendingRoute: typeof PendingRoute
   SignupRoute: typeof SignupRoute
+  ApiFeedImageRoute: typeof ApiFeedImageRoute
   ApiPublicElectionsRoute: typeof ApiPublicElectionsRoute
 }
 
@@ -615,6 +628,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppVotarEleicaoRouteImport
       parentRoute: typeof AppRoute
     }
+    '/api/feed-image': {
+      id: '/api/feed-image'
+      path: '/api/feed-image'
+      fullPath: '/api/feed-image'
+      preLoaderRoute: typeof ApiFeedImageRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/_app/admin_/laurear': {
       id: '/_app/admin_/laurear'
       path: '/admin/laurear'
@@ -779,6 +799,7 @@ const rootRouteChildren: RootRouteChildren = {
   OnboardingRoute: OnboardingRoute,
   PendingRoute: PendingRoute,
   SignupRoute: SignupRoute,
+  ApiFeedImageRoute: ApiFeedImageRoute,
   ApiPublicElectionsRoute: ApiPublicElectionsRoute,
 }
 export const routeTree = rootRouteImport

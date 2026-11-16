@@ -166,7 +166,11 @@ export function PostCard({ post, onChange }: { post: FeedPost; onChange: () => v
       </div>
       {post.image_url && (
         <div className="border-y bg-muted">
-          <img src={post.image_url} alt="" className="max-h-[520px] w-full object-cover" />
+          <img
+            src={post.image_url.startsWith("http") ? post.image_url : `/api/feed-image?path=${encodeURIComponent(post.image_url)}`}
+            alt=""
+            className="max-h-[520px] w-full object-cover"
+          />
         </div>
       )}
 
