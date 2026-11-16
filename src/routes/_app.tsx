@@ -5,7 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Menu as MenuIcon, Home, MessageCircle, Bell, Shield, LogOut, User as UserIcon, Users, Users2, Building2, Trophy, BookOpen, Calendar, Target, Landmark, Award, BadgeCheck, Globe, FileText, Vote, Monitor, Gavel } from "lucide-react";
+import { Menu as MenuIcon, Home, MessageCircle, Bell, Shield, LogOut, User as UserIcon, Users, Users2, Building2, Trophy, BookOpen, Calendar, Target, Landmark, Award, BadgeCheck, Globe, FileText, Vote, Monitor, Gavel, BarChart3 } from "lucide-react";
 import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
@@ -20,7 +20,7 @@ import { ProfileCompleteness } from "@/components/ProfileCompleteness";
 export const Route = createFileRoute("/_app")({ component: AppLayout });
 
 const MENU_ICONS: Record<string, typeof Home> = {
-  Home, MessageCircle, Bell, Shield, UserIcon, Users, Users2, Building2, Trophy, BookOpen,
+  Home, MessageCircle, Bell, Shield, UserIcon, Users, Users2, Building2, Trophy, BookOpen, BarChart3,
   Calendar, Target, Landmark, Award, BadgeCheck, Globe, FileText, Vote, Monitor, Gavel,
 };
 
