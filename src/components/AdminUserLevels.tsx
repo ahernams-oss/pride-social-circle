@@ -69,6 +69,10 @@ export function AdminUserLevels() {
   const [reason, setReason] = useState("");
   const [saving, setSaving] = useState(false);
   const { user, isAdmin } = useAuth();
+  const [superIds, setSuperIds] = useState<Set<string>>(new Set());
+  useEffect(() => {
+    supabase.from("super_admins").select("user_id").then(({ data }) => setSuperIds(new Set((data ?? []).map((r) => r.user_id))));
+  }, []);
   const [toggling, setToggling] = useState<UserRow | null>(null);
   const [toggleReason, setToggleReason] = useState("");
 
@@ -231,6 +235,9 @@ export function AdminUserLevels() {
                 <Badge variant={u.is_active ? "outline" : "destructive"}>
                   {u.is_active ? "Ativo" : "Desativado"}
                 </Badge>
+                {superIds.has(u.id) ? (
+                  <Badge className="bg-accent text-accent-foreground">Super Administrador</Badge>
+                ) : (<>
                 <Button size="sm" variant="outline" onClick={() => openDialog(u)}>
                   Alterar nível
                 </Button>
@@ -247,6 +254,7 @@ export function AdminUserLevels() {
                   {u.is_active ? <PowerOff className="mr-1 h-4 w-4" /> : <Power className="mr-1 h-4 w-4" />}
                   {u.is_active ? "Desativar" : "Ativar"}
                 </Button>
+                </>)}
               </li>
             ))}
           </ul>
