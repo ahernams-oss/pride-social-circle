@@ -1028,6 +1028,7 @@ export type Database = {
           ends_at: string
           id: string
           image_url: string | null
+          published_at: string | null
           starts_at: string
           title: string
         }
@@ -1038,6 +1039,7 @@ export type Database = {
           ends_at: string
           id?: string
           image_url?: string | null
+          published_at?: string | null
           starts_at: string
           title: string
         }
@@ -1048,6 +1050,7 @@ export type Database = {
           ends_at?: string
           id?: string
           image_url?: string | null
+          published_at?: string | null
           starts_at?: string
           title?: string
         }
@@ -1711,6 +1714,7 @@ export type Database = {
       }
       is_moderator: { Args: { _user_id: string }; Returns: boolean }
       is_super_admin: { Args: { _user_id: string }; Returns: boolean }
+      poll_is_draft: { Args: { _poll_id: string }; Returns: boolean }
       poll_results: {
         Args: { _poll_id: string }
         Returns: {
