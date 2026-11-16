@@ -1,11 +1,12 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
+import { useServerFn } from "@tanstack/react-start";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { Input } from "@/components/ui/input";
 import { Image as ImageIcon, X } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth-context";
+import { backupFeedImageToDrive } from "@/lib/drive-backup.functions";
 import { toast } from "sonner";
 
 function initials(n?: string | null) {
@@ -15,22 +16,71 @@ function initials(n?: string | null) {
 export function CreatePost({ onCreated }: { onCreated: () => void }) {
   const { user, profile } = useAuth();
   const [content, setContent] = useState("");
-  const [imageUrl, setImageUrl] = useState("");
-  const [showImage, setShowImage] = useState(false);
+  const [file, setFile] = useState<File | null>(null);
+  const [preview, setPreview] = useState("");
   const [posting, setPosting] = useState(false);
+  const fileRef = useRef<HTMLInputElement>(null);
+  const backupToDrive = useServerFn(backupFeedImageToDrive);
+
+  const pickFile = (f: File | null) => {
+    if (!f) return;
+    if (!f.type.startsWith("image/")) return toast.error("Selecione um arquivo de imagem.");
+    if (f.size > 10 * 1024 * 1024) return toast.error("A imagem deve ter no máximo 10 MB.");
+    setFile(f);
+    setPreview(URL.createObjectURL(f));
+  };
+
+  const clearFile = () => {
+    setFile(null);
+    setPreview("");
+    if (fileRef.current) fileRef.current.value = "";
+  };
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!user || !content.trim()) return;
     setPosting(true);
+
+    let imageUrl: string | null = null;
+    if (file) {
+      const ext = file.name.split(".").pop() ?? "jpg";
+      const path = `${user.id}/${Date.now()}.${ext}`;
+      const { error: upErr } = await supabase.storage.from("feed-images").upload(path, file);
+      if (upErr) {
+        setPosting(false);
+        return toast.error(upErr.message);
+      }
+      imageUrl = supabase.storage.from("feed-images").getPublicUrl(path).data.publicUrl;
+    }
+
     const { error } = await supabase.from("posts").insert({
       author_id: user.id,
       content: content.trim(),
-      image_url: imageUrl.trim() || null,
+      image_url: imageUrl,
     });
+    if (error) {
+      setPosting(false);
+      return toast.error(error.message);
+    }
+
+    // Cópia silenciosa para o Google Drive do Distrito (endereço nunca exposto ao usuário).
+    if (imageUrl && file) {
+      try {
+        await backupToDrive({
+          data: {
+            imageUrl,
+            fileName: `feed-${Date.now()}-${file.name}`,
+            mimeType: file.type || "image/jpeg",
+          },
+        });
+      } catch (err) {
+        console.error("Falha ao copiar imagem para o Drive:", err);
+      }
+    }
+
     setPosting(false);
-    if (error) return toast.error(error.message);
-    setContent(""); setImageUrl(""); setShowImage(false);
+    setContent("");
+    clearFile();
     toast.success("Publicado!");
     onCreated();
   };
@@ -50,23 +100,35 @@ export function CreatePost({ onCreated }: { onCreated: () => void }) {
           className="resize-none border-0 bg-muted/50 focus-visible:ring-1"
         />
       </div>
-      {showImage && (
-        <div className="mt-3 flex gap-2">
-          <Input
-            value={imageUrl}
-            onChange={(e) => setImageUrl(e.target.value)}
-            placeholder="URL da imagem (https://...)"
-          />
-          <Button type="button" variant="ghost" size="icon" onClick={() => { setShowImage(false); setImageUrl(""); }}>
+      {preview && (
+        <div className="relative mt-3">
+          <img src={preview} alt="" className="max-h-64 w-full rounded-lg object-cover" />
+          <Button
+            type="button"
+            variant="secondary"
+            size="icon"
+            className="absolute right-2 top-2 h-7 w-7"
+            onClick={clearFile}
+          >
             <X className="h-4 w-4" />
           </Button>
         </div>
       )}
-      {imageUrl && (
-        <img src={imageUrl} alt="" className="mt-3 max-h-64 w-full rounded-lg object-cover" />
-      )}
+      <input
+        ref={fileRef}
+        type="file"
+        accept="image/*"
+        className="hidden"
+        onChange={(e) => pickFile(e.target.files?.[0] ?? null)}
+      />
       <div className="mt-3 flex items-center justify-between border-t pt-3">
-        <Button type="button" variant="ghost" size="sm" onClick={() => setShowImage((v) => !v)} className="text-muted-foreground">
+        <Button
+          type="button"
+          variant="ghost"
+          size="sm"
+          onClick={() => fileRef.current?.click()}
+          className="text-muted-foreground"
+        >
           <ImageIcon className="mr-2 h-4 w-4" /> Imagem
         </Button>
         <Button type="submit" disabled={!content.trim() || posting}>
