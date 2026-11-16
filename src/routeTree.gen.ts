@@ -32,6 +32,7 @@ import { Route as AppLionsHistoryRouteImport } from './routes/_app/lions-history
 import { Route as AppMessagesRouteImport } from './routes/_app/messages'
 import { Route as AppMissionsRouteImport } from './routes/_app/missions'
 import { Route as AppNotificationsRouteImport } from './routes/_app/notifications'
+import { Route as AppPollsRouteImport } from './routes/_app/polls'
 import { Route as AppRankingRouteImport } from './routes/_app/ranking'
 import { Route as AppVotarEleicaoRouteImport } from './routes/_app/votar-eleicao'
 import { Route as ApiFeedImageRouteImport } from './routes/api/feed-image'
@@ -159,6 +160,11 @@ const AppNotificationsRoute = AppNotificationsRouteImport.update({
   path: '/notifications',
   getParentRoute: () => AppRoute,
 } as any)
+const AppPollsRoute = AppPollsRouteImport.update({
+  id: '/polls',
+  path: '/polls',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppRankingRoute = AppRankingRouteImport.update({
   id: '/ranking',
   path: '/ranking',
@@ -245,6 +251,7 @@ export interface FileRoutesByFullPath {
   '/messages': typeof AppMessagesRoute
   '/missions': typeof AppMissionsRoute
   '/notifications': typeof AppNotificationsRoute
+  '/polls': typeof AppPollsRoute
   '/ranking': typeof AppRankingRoute
   '/votar-eleicao': typeof AppVotarEleicaoRoute
   '/api/feed-image': typeof ApiFeedImageRoute
@@ -279,6 +286,7 @@ export interface FileRoutesByTo {
   '/messages': typeof AppMessagesRoute
   '/missions': typeof AppMissionsRoute
   '/notifications': typeof AppNotificationsRoute
+  '/polls': typeof AppPollsRoute
   '/ranking': typeof AppRankingRoute
   '/votar-eleicao': typeof AppVotarEleicaoRoute
   '/api/feed-image': typeof ApiFeedImageRoute
@@ -317,6 +325,7 @@ export interface FileRoutesById {
   '/_app/messages': typeof AppMessagesRoute
   '/_app/missions': typeof AppMissionsRoute
   '/_app/notifications': typeof AppNotificationsRoute
+  '/_app/polls': typeof AppPollsRoute
   '/_app/ranking': typeof AppRankingRoute
   '/_app/votar-eleicao': typeof AppVotarEleicaoRoute
   '/api/feed-image': typeof ApiFeedImageRoute
@@ -355,6 +364,7 @@ export interface FileRouteTypes {
     | '/messages'
     | '/missions'
     | '/notifications'
+    | '/polls'
     | '/ranking'
     | '/votar-eleicao'
     | '/api/feed-image'
@@ -389,6 +399,7 @@ export interface FileRouteTypes {
     | '/messages'
     | '/missions'
     | '/notifications'
+    | '/polls'
     | '/ranking'
     | '/votar-eleicao'
     | '/api/feed-image'
@@ -426,6 +437,7 @@ export interface FileRouteTypes {
     | '/_app/messages'
     | '/_app/missions'
     | '/_app/notifications'
+    | '/_app/polls'
     | '/_app/ranking'
     | '/_app/votar-eleicao'
     | '/api/feed-image'
@@ -614,6 +626,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppNotificationsRouteImport
       parentRoute: typeof AppRoute
     }
+    '/_app/polls': {
+      id: '/_app/polls'
+      path: '/polls'
+      fullPath: '/polls'
+      preLoaderRoute: typeof AppPollsRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/_app/ranking': {
       id: '/_app/ranking'
       path: '/ranking'
@@ -760,6 +779,7 @@ interface AppRouteChildren {
   AppMessagesRoute: typeof AppMessagesRoute
   AppMissionsRoute: typeof AppMissionsRoute
   AppNotificationsRoute: typeof AppNotificationsRoute
+  AppPollsRoute: typeof AppPollsRoute
   AppRankingRoute: typeof AppRankingRoute
   AppVotarEleicaoRoute: typeof AppVotarEleicaoRoute
   AppAdminLaurearRoute: typeof AppAdminLaurearRoute
@@ -784,6 +804,7 @@ const AppRouteChildren: AppRouteChildren = {
   AppMessagesRoute: AppMessagesRoute,
   AppMissionsRoute: AppMissionsRoute,
   AppNotificationsRoute: AppNotificationsRoute,
+  AppPollsRoute: AppPollsRoute,
   AppRankingRoute: AppRankingRoute,
   AppVotarEleicaoRoute: AppVotarEleicaoRoute,
   AppAdminLaurearRoute: AppAdminLaurearRoute,
