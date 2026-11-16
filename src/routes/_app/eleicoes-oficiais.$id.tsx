@@ -36,7 +36,7 @@ type Delegado = {
   birth_date?: string | null;
   avatar_url?: string | null;
 };
-type Comissao = { id: string; nome: string; funcao: "presidente" | "vice_presidente" | "membro" | "vogal" };
+type Comissao = { id: string; nome: string; associado_id?: string | null; funcao: "presidente" | "vice_presidente" | "membro" | "vogal" };
 type Apuracao = { cargo: string; candidatura_id: string | null; candidato: string; tipo: string; votos: number };
 
 
@@ -277,7 +277,7 @@ function CandidaturasList({ items, isAdmin, onChanged }: { items: Candidatura[];
 function useAssociados() {
   const [list, setList] = useState<Associado[]>([]);
   useEffect(() => {
-    supabase.from("profiles").select("id, full_name, club_name, avatar_url").eq("status", "approved").order("full_name")
+    supabase.from("profiles").select("id, full_name, club_name, avatar_url").eq("status", "approved").eq("is_active", true).order("full_name")
       .then(({ data }) => setList((data ?? []) as Associado[]));
   }, []);
   return list;
@@ -603,20 +603,25 @@ function NewComissao({ eleicaoId, onCreated, membro, open: openProp, onOpenChang
   const [openState, setOpenState] = useState(false);
   const open = openProp ?? openState;
   const setOpen = onOpenChange ?? setOpenState;
-  const [f, setF] = useState({ nome: membro?.nome ?? "", funcao: (membro?.funcao ?? "membro") as Comissao["funcao"] });
+  const associados = useAssociados();
+  const [f, setF] = useState({ associado_id: membro?.associado_id ?? "", nome: membro?.nome ?? "", funcao: (membro?.funcao ?? "membro") as Comissao["funcao"] });
   useEffect(() => {
-    if (open && membro) setF({ nome: membro.nome, funcao: membro.funcao });
+    if (open && membro) setF({ associado_id: membro.associado_id ?? "", nome: membro.nome, funcao: membro.funcao });
   }, [open, membro]);
+  const pick = (aid: string) => {
+    const a = associados.find((x) => x.id === aid);
+    setF({ ...f, associado_id: aid, nome: a?.full_name ?? "" });
+  };
   const save = async () => {
-    if (!f.nome) return toast.error("Nome é obrigatório");
+    if (!f.associado_id) return toast.error("Selecione um associado ativo");
     const { error } = membro
-      ? await supabase.from("vf_comissao").update({ nome: f.nome, funcao: f.funcao } as any).eq("id", membro.id)
+      ? await supabase.from("vf_comissao").update({ associado_id: f.associado_id, nome: f.nome, funcao: f.funcao } as any).eq("id", membro.id)
       : await supabase.from("vf_comissao").insert({
-          eleicao_id: eleicaoId, nome: f.nome, funcao: f.funcao,
+          eleicao_id: eleicaoId, associado_id: f.associado_id, nome: f.nome, funcao: f.funcao,
         } as any);
     if (error) return toast.error(error.message);
     toast.success(membro ? "Membro atualizado" : "Membro adicionado");
-    if (!membro) setF({ nome: "", funcao: "membro" });
+    if (!membro) setF({ associado_id: "", nome: "", funcao: "membro" });
     setOpen(false); onCreated();
   };
   return (
@@ -625,7 +630,9 @@ function NewComissao({ eleicaoId, onCreated, membro, open: openProp, onOpenChang
       <DialogContent>
         <DialogHeader><DialogTitle>{membro ? "Editar membro da comissão" : "Membro da comissão"}</DialogTitle></DialogHeader>
         <div className="space-y-3">
-          <div><Label>Nome</Label><Input value={f.nome} onChange={(e) => setF({ ...f, nome: e.target.value })} /></div>
+          <div><Label>Associado</Label>
+            <AssociadoCombobox items={associados} value={f.associado_id} onChange={pick} />
+          </div>
           <div><Label>Função</Label>
             <Select value={f.funcao} onValueChange={(v: any) => setF({ ...f, funcao: v })}>
               <SelectTrigger><SelectValue /></SelectTrigger>
