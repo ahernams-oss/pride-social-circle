@@ -4,8 +4,8 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "sonner";
-import { BarChart3, Trash2 } from "lucide-react";
-import { pollStatus } from "@/lib/polls";
+import { BarChart3, Trash2, Pencil, Send, Square } from "lucide-react";
+import { pollStatus, canEditPoll, canFinishPoll } from "@/lib/polls";
 import { usePollImage } from "@/lib/poll-images";
 
 function PollImg({ path, className }: { path: string | null | undefined; className: string }) {
@@ -13,18 +13,18 @@ function PollImg({ path, className }: { path: string | null | undefined; classNa
   return url ? <img src={url} alt="" loading="lazy" className={className} /> : null;
 }
 
-export type Poll = { id: string; title: string; description: string; starts_at: string; ends_at: string; image_url?: string | null };
+export type Poll = { id: string; title: string; description: string; starts_at: string; ends_at: string; image_url?: string | null; published_at?: string | null };
 type Question = { id: string; text: string; allow_multiple: boolean; order_index: number; image_url: string | null; options: { id: string; text: string; order_index: number; image_url: string | null }[] };
 
 const fmt = (d: string) => new Date(d).toLocaleString("pt-BR", { dateStyle: "short", timeStyle: "short" });
 
-export function PollCard({ poll, canDelete, onDeleted }: { poll: Poll; canDelete?: boolean; onDeleted?: () => void }) {
+export function PollCard({ poll, canDelete, canManage, onDeleted, onEdit }: { poll: Poll; canDelete?: boolean; canManage?: boolean; onDeleted?: () => void; onEdit?: (p: Poll) => void }) {
   const [questions, setQuestions] = useState<Question[]>([]);
   const [mine, setMine] = useState<Set<string>>(new Set());
   const [counts, setCounts] = useState<Map<string, { votes: number; voters: number }>>(new Map());
   const [sel, setSel] = useState<Record<string, string[]>>({});
   const [saving, setSaving] = useState(false);
-  const status = pollStatus(poll.starts_at, poll.ends_at);
+  const status = pollStatus(poll.starts_at, poll.ends_at, new Date(), poll.published_at ?? null);
 
   const load = useCallback(async () => {
     const { data: qs } = await supabase.from("poll_questions")
@@ -74,6 +74,22 @@ export function PollCard({ poll, canDelete, onDeleted }: { poll: Poll; canDelete
     onDeleted?.();
   };
 
+  const publish = async () => {
+    if (!confirm("Publicar esta enquete? Depois de publicada ela não poderá mais ser editada.")) return;
+    const { error } = await supabase.from("polls").update({ published_at: new Date().toISOString() }).eq("id", poll.id);
+    if (error) return toast.error(error.message);
+    toast.success("Enquete publicada");
+    onDeleted?.();
+  };
+
+  const finish = async () => {
+    if (!confirm("Finalizar esta enquete agora? Ninguém mais poderá votar.")) return;
+    const { error } = await supabase.from("polls").update({ ends_at: new Date().toISOString() }).eq("id", poll.id);
+    if (error) return toast.error(error.message);
+    toast.success("Enquete finalizada");
+    onDeleted?.();
+  };
+
   return (
     <div className="rounded-xl border-2 border-primary/30 bg-card p-4 shadow-sm">
       <div className="flex flex-wrap items-start gap-2">
@@ -81,13 +97,18 @@ export function PollCard({ poll, canDelete, onDeleted }: { poll: Poll; canDelete
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-2">
             <h3 className="font-semibold">{poll.title}</h3>
-            <Badge variant={status === "aberta" ? "default" : "outline"}>
-              {status === "aberta" ? "Aberta" : status === "agendada" ? "Agendada" : "Encerrada"}
+            <Badge variant={status === "aberta" ? "default" : status === "rascunho" ? "secondary" : "outline"}>
+              {status === "aberta" ? "Aberta" : status === "agendada" ? "Agendada" : status === "rascunho" ? "Rascunho" : "Encerrada"}
             </Badge>
           </div>
           {poll.description && <p className="mt-1 text-sm text-muted-foreground">{poll.description}</p>}
           <p className="mt-1 text-xs text-muted-foreground">De {fmt(poll.starts_at)} até {fmt(poll.ends_at)}</p>
         </div>
+        {canManage && canEditPoll(status) && <>
+          <Button size="sm" variant="outline" onClick={() => onEdit?.(poll)}><Pencil className="mr-1 h-4 w-4" /> Editar</Button>
+          <Button size="sm" onClick={publish}><Send className="mr-1 h-4 w-4" /> Publicar</Button>
+        </>}
+        {canManage && canFinishPoll(status) && <Button size="sm" variant="outline" onClick={finish}><Square className="mr-1 h-4 w-4" /> Finalizar agora</Button>}
         {canDelete && <Button size="icon" variant="ghost" onClick={remove} aria-label="Excluir enquete"><Trash2 className="h-4 w-4" /></Button>}
       </div>
 
@@ -145,7 +166,7 @@ export function FeedPolls() {
   useEffect(() => {
     const now = new Date().toISOString();
     supabase.from("polls").select("id, title, description, starts_at, ends_at, image_url")
-      .lte("starts_at", now).gte("ends_at", now).order("ends_at")
+      .not("published_at", "is", null).lte("starts_at", now).gte("ends_at", now).order("ends_at")
       .then(({ data }) => setPolls(data ?? []));
   }, []);
   if (!polls.length) return null;

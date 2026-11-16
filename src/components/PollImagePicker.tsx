@@ -2,12 +2,14 @@ import { useEffect, useRef, useState } from "react";
 import { ImagePlus, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
-import { isPollImageWithinLimit, pollImageLimitMessage } from "@/lib/poll-images";
+import { isPollImageWithinLimit, pollImageLimitMessage, usePollImage } from "@/lib/poll-images";
 
 /** Seleção opcional de imagem (até 500 KB) com prévia. */
-export function PollImagePicker({ file, onChange, label = "Imagem" }: { file: File | null; onChange: (f: File | null) => void; label?: string }) {
+export function PollImagePicker({ file, onChange, label = "Imagem", path, onClearPath }: { file: File | null; onChange: (f: File | null) => void; label?: string; path?: string | null; onClearPath?: () => void }) {
   const ref = useRef<HTMLInputElement>(null);
-  const [preview, setPreview] = useState<string | null>(null);
+  const [filePreview, setPreview] = useState<string | null>(null);
+  const saved = usePollImage(path);
+  const preview = filePreview ?? saved;
   useEffect(() => {
     if (!file) return setPreview(null);
     const u = URL.createObjectURL(file); setPreview(u);
@@ -24,7 +26,7 @@ export function PollImagePicker({ file, onChange, label = "Imagem" }: { file: Fi
       {preview ? (
         <div className="relative">
           <img src={preview} alt="" className="h-14 w-14 rounded-md border object-cover" />
-          <button type="button" onClick={() => onChange(null)} aria-label="Remover imagem"
+          <button type="button" onClick={() => { if (file) onChange(null); else onClearPath?.(); }} aria-label="Remover imagem"
             className="absolute -right-2 -top-2 rounded-full bg-destructive p-0.5 text-destructive-foreground"><X className="h-3 w-3" /></button>
         </div>
       ) : (
