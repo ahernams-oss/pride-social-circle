@@ -8,6 +8,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth-context";
 import { backupFeedImageToDrive } from "@/lib/drive-backup.functions";
 import { toast } from "sonner";
+import { MAX_IMAGE_LABEL, imageLimitMessage, isWithinImageLimit } from "@/lib/feed-image-limit";
 
 function initials(n?: string | null) {
   return (n ?? "L").split(" ").filter(Boolean).slice(0, 2).map((p) => p[0]?.toUpperCase()).join("");
@@ -25,9 +26,7 @@ export function CreatePost({ onCreated }: { onCreated: () => void }) {
   const pickFile = (f: File | null) => {
     if (!f) return;
     if (!f.type.startsWith("image/")) return toast.error("Selecione um arquivo de imagem.");
-    if (f.size > MAX_IMAGE_BYTES) {
-      return toast.error(`A imagem deve ter no máximo ${MAX_IMAGE_LABEL}. A sua tem ${formatSize(f.size)}.`);
-    }
+    if (!isWithinImageLimit(f.size)) return toast.error(imageLimitMessage(f.size));
     setFile(f);
     setPreview(URL.createObjectURL(f));
   };
@@ -124,15 +123,18 @@ export function CreatePost({ onCreated }: { onCreated: () => void }) {
         onChange={(e) => pickFile(e.target.files?.[0] ?? null)}
       />
       <div className="mt-3 flex items-center justify-between border-t pt-3">
-        <Button
-          type="button"
-          variant="ghost"
-          size="sm"
-          onClick={() => fileRef.current?.click()}
-          className="text-muted-foreground"
-        >
-          <ImageIcon className="mr-2 h-4 w-4" /> Imagem
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            onClick={() => fileRef.current?.click()}
+            className="text-muted-foreground"
+          >
+            <ImageIcon className="mr-2 h-4 w-4" /> Imagem
+          </Button>
+          <span className="text-xs text-muted-foreground">até {MAX_IMAGE_LABEL}</span>
+        </div>
         <Button type="submit" disabled={!content.trim() || posting}>
           {posting ? "Publicando..." : "Publicar"}
         </Button>
