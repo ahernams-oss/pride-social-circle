@@ -21,6 +21,7 @@ import { AssociadoCombobox, type Associado } from "@/components/AssociadoCombobo
 import { CandidatoFotoUpload } from "@/components/CandidatoFotoUpload";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { assinaturaEletronica, codigoUrna, codigoUrnaCredencial } from "@/lib/vf-credencial";
+import { cn } from "@/lib/utils";
 import lciEmblem from "@/assets/lci-emblem.png.asset.json";
 import distritoLogo from "@/assets/distrito-lc11-logo.png.asset.json";
 
@@ -37,6 +38,7 @@ type Delegado = {
   avatar_url?: string | null;
 };
 type Comissao = { id: string; nome: string; associado_id?: string | null; funcao: "presidente" | "vice_presidente" | "membro" | "vogal" };
+type FiltroVoto = "todos" | "votou" | "nao_votou";
 type Apuracao = { cargo: string; candidatura_id: string | null; candidato: string; tipo: string; votos: number };
 
 
@@ -354,6 +356,7 @@ function NewDelegado({ eleicaoId, onCreated }: { eleicaoId: string; onCreated: (
 
 function DelegadosList({ items, isAdmin, onChanged, eleicao, presidente }: { items: Delegado[]; isAdmin: boolean; onChanged: () => void; eleicao: Eleicao; presidente: string | null }) {
   const [sendFor, setSendFor] = useState<Delegado | null>(null);
+  const [filtro, setFiltro] = useState<FiltroVoto>("todos");
   const toggle = async (id: string, field: "credenciado" | "presente" | "habilitado_votar", val: boolean) => {
     const { error } = await supabase.from("vf_delegados").update({ [field]: val } as any).eq("id", id);
     if (error) return toast.error(error.message);
@@ -366,9 +369,28 @@ function DelegadosList({ items, isAdmin, onChanged, eleicao, presidente }: { ite
     onChanged();
   };
   if (items.length === 0) return <p className="text-sm text-muted-foreground">Nenhum delegado.</p>;
+
+  const jaVotaram = items.filter((d) => d.ja_votou).length;
+  const naoVotaram = items.length - jaVotaram;
+  const visiveis = filtro === "votou" ? items.filter((d) => d.ja_votou)
+    : filtro === "nao_votou" ? items.filter((d) => !d.ja_votou)
+    : items;
+
   return (
-    <div className="space-y-2">
-      {items.map((d) => (
+    <div className="space-y-3">
+      <div className="flex flex-wrap items-center gap-2">
+        <span className="text-xs font-medium text-muted-foreground">Situação de votação:</span>
+        <FiltroVotoChip label="Todos" count={items.length} active={filtro === "todos"} onClick={() => setFiltro("todos")} />
+        <FiltroVotoChip label="Já votou" count={jaVotaram} active={filtro === "votou"} onClick={() => setFiltro("votou")} />
+        <FiltroVotoChip label="Não votou" count={naoVotaram} active={filtro === "nao_votou"} onClick={() => setFiltro("nao_votou")} />
+        <span className="text-xs text-muted-foreground">
+          {jaVotaram} de {items.length} votaram ({items.length ? Math.round((jaVotaram / items.length) * 100) : 0}%)
+        </span>
+      </div>
+      {visiveis.length === 0 && (
+        <p className="text-sm text-muted-foreground">Nenhum delegado nesta situação.</p>
+      )}
+      {visiveis.map((d) => (
         <Card key={d.id}><CardContent className="flex flex-wrap items-center justify-between gap-3 py-3">
           <div className="min-w-0 flex-1">
             <div className="font-medium">{d.nome} <Badge variant="outline" className="ml-2 text-[10px]">{d.tipo}</Badge></div>
@@ -385,7 +407,9 @@ function DelegadosList({ items, isAdmin, onChanged, eleicao, presidente }: { ite
             </div>
           </div>
           <div className="flex flex-wrap items-center gap-2">
-            {d.ja_votou && <Badge variant="secondary">Já votou</Badge>}
+            {d.ja_votou
+              ? <Badge variant="secondary" className="gap-1"><CheckCircle2 className="h-3 w-3" /> Já votou</Badge>
+              : <Badge variant="outline" className="gap-1 border-destructive/40 text-destructive">Não votou</Badge>}
             {isAdmin && (
               <>
                 <Button size="sm" variant={d.credenciado ? "default" : "outline"} onClick={() => toggle(d.id, "credenciado", !d.credenciado)}>Credenciado</Button>
@@ -405,6 +429,21 @@ function DelegadosList({ items, isAdmin, onChanged, eleicao, presidente }: { ite
       ))}
       <SendCredencialDialog delegado={sendFor} eleicao={eleicao} onClose={() => setSendFor(null)} />
     </div>
+  );
+}
+
+function FiltroVotoChip({ label, count, active, onClick }: { label: string; count: number; active: boolean; onClick: () => void }) {
+  return (
+    <Button
+      size="sm"
+      variant={active ? "default" : "outline"}
+      onClick={onClick}
+      className="h-7 gap-1.5 px-2.5 text-xs"
+      aria-pressed={active}
+    >
+      {label}
+      <span className={cn("rounded-full px-1.5 py-0.5 text-[10px] font-semibold", active ? "bg-background/25" : "bg-muted")}>{count}</span>
+    </Button>
   );
 }
 
