@@ -1,4 +1,6 @@
-import { describe, expect, test } from "bun:test";
+import { describe, test } from "node:test";
+import { strictEqual } from "node:assert";
+const expect = (v: unknown) => ({ toBe: (e: unknown) => strictEqual(v, e) });
 import { resetAnswersMatch, MAX_RESET_ATTEMPTS } from "./password-reset";
 
 const p = { birth_date: "1975-03-22", club_name: "Lions Niterói Fonseca" };
