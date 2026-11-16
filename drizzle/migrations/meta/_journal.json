@@ -85,6 +85,13 @@
       "when": 1794870938496,
       "tag": "0011_password_resets",
       "breakpoints": true
+    },
+    {
+      "idx": 12,
+      "version": "7",
+      "when": 1794871277716,
+      "tag": "0012_polls",
+      "breakpoints": true
     }
   ]
 }

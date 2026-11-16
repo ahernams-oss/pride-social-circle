@@ -914,6 +914,136 @@ export type Database = {
         }
         Relationships: []
       }
+      poll_options: {
+        Row: {
+          id: string
+          order_index: number
+          question_id: string
+          text: string
+        }
+        Insert: {
+          id?: string
+          order_index?: number
+          question_id: string
+          text: string
+        }
+        Update: {
+          id?: string
+          order_index?: number
+          question_id?: string
+          text?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "poll_options_question_id_fkey"
+            columns: ["question_id"]
+            isOneToOne: false
+            referencedRelation: "poll_questions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      poll_questions: {
+        Row: {
+          allow_multiple: boolean
+          id: string
+          order_index: number
+          poll_id: string
+          text: string
+        }
+        Insert: {
+          allow_multiple?: boolean
+          id?: string
+          order_index?: number
+          poll_id: string
+          text: string
+        }
+        Update: {
+          allow_multiple?: boolean
+          id?: string
+          order_index?: number
+          poll_id?: string
+          text?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "poll_questions_poll_id_fkey"
+            columns: ["poll_id"]
+            isOneToOne: false
+            referencedRelation: "polls"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      poll_votes: {
+        Row: {
+          created_at: string
+          id: string
+          option_id: string
+          question_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          option_id: string
+          question_id: string
+          user_id?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          option_id?: string
+          question_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "poll_votes_option_id_fkey"
+            columns: ["option_id"]
+            isOneToOne: false
+            referencedRelation: "poll_options"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "poll_votes_question_id_fkey"
+            columns: ["question_id"]
+            isOneToOne: false
+            referencedRelation: "poll_questions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      polls: {
+        Row: {
+          created_at: string
+          created_by: string
+          description: string
+          ends_at: string
+          id: string
+          starts_at: string
+          title: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string
+          description?: string
+          ends_at: string
+          id?: string
+          starts_at: string
+          title: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          description?: string
+          ends_at?: string
+          id?: string
+          starts_at?: string
+          title?: string
+        }
+        Relationships: []
+      }
       post_comments: {
         Row: {
           author_id: string
@@ -1556,6 +1686,14 @@ export type Database = {
         Returns: boolean
       }
       is_moderator: { Args: { _user_id: string }; Returns: boolean }
+      poll_results: {
+        Args: { _poll_id: string }
+        Returns: {
+          option_id: string
+          voters: number
+          votes: number
+        }[]
+      }
       registry_verification: {
         Args: { _user_id: string }
         Returns: {
