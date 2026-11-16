@@ -368,9 +368,28 @@ function DelegadosList({ items, isAdmin, onChanged, eleicao, presidente }: { ite
     onChanged();
   };
   if (items.length === 0) return <p className="text-sm text-muted-foreground">Nenhum delegado.</p>;
+
+  const jaVotaram = items.filter((d) => d.ja_votou).length;
+  const naoVotaram = items.length - jaVotaram;
+  const visiveis = filtro === "votou" ? items.filter((d) => d.ja_votou)
+    : filtro === "nao_votou" ? items.filter((d) => !d.ja_votou)
+    : items;
+
   return (
-    <div className="space-y-2">
-      {items.map((d) => (
+    <div className="space-y-3">
+      <div className="flex flex-wrap items-center gap-2">
+        <span className="text-xs font-medium text-muted-foreground">Situação de votação:</span>
+        <FiltroVotoChip label="Todos" count={items.length} active={filtro === "todos"} onClick={() => setFiltro("todos")} />
+        <FiltroVotoChip label="Já votou" count={jaVotaram} active={filtro === "votou"} onClick={() => setFiltro("votou")} />
+        <FiltroVotoChip label="Não votou" count={naoVotaram} active={filtro === "nao_votou"} onClick={() => setFiltro("nao_votou")} />
+        <span className="text-xs text-muted-foreground">
+          {jaVotaram} de {items.length} votaram ({items.length ? Math.round((jaVotaram / items.length) * 100) : 0}%)
+        </span>
+      </div>
+      {visiveis.length === 0 && (
+        <p className="text-sm text-muted-foreground">Nenhum delegado nesta situação.</p>
+      )}
+      {visiveis.map((d) => (
         <Card key={d.id}><CardContent className="flex flex-wrap items-center justify-between gap-3 py-3">
           <div className="min-w-0 flex-1">
             <div className="font-medium">{d.nome} <Badge variant="outline" className="ml-2 text-[10px]">{d.tipo}</Badge></div>
