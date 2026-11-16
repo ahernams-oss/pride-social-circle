@@ -133,15 +133,18 @@ export function CreatePost({ onCreated }: { onCreated: () => void }) {
         onChange={(e) => pickFile(e.target.files?.[0] ?? null)}
       />
       <div className="mt-3 flex items-center justify-between border-t pt-3">
-        <Button
-          type="button"
-          variant="ghost"
-          size="sm"
-          onClick={() => fileRef.current?.click()}
-          className="text-muted-foreground"
-        >
-          <ImageIcon className="mr-2 h-4 w-4" /> Imagem
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            onClick={() => fileRef.current?.click()}
+            className="text-muted-foreground"
+          >
+            <ImageIcon className="mr-2 h-4 w-4" /> Imagem
+          </Button>
+          <span className="text-xs text-muted-foreground">até {MAX_IMAGE_LABEL}</span>
+        </div>
         <Button type="submit" disabled={!content.trim() || posting}>
           {posting ? "Publicando..." : "Publicar"}
         </Button>
