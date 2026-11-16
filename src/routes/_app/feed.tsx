@@ -3,6 +3,7 @@ import { useCallback, useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth-context";
 import { CreatePost } from "@/components/CreatePost";
+import { FeedPolls } from "@/components/PollCard";
 import { PostCard, type FeedPost } from "@/components/PostCard";
 
 export const Route = createFileRoute("/_app/feed")({ component: FeedPage });
@@ -68,6 +69,7 @@ function FeedPage() {
 
   return (
     <div className="space-y-4">
+      <FeedPolls />
       <CreatePost onCreated={load} />
       {loading ? (
         <p className="py-12 text-center text-muted-foreground">Carregando feed...</p>
