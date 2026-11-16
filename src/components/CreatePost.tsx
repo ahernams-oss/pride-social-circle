@@ -8,7 +8,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth-context";
 import { backupFeedImageToDrive } from "@/lib/drive-backup.functions";
 import { toast } from "sonner";
-import { MAX_IMAGE_BYTES, MAX_IMAGE_LABEL, imageLimitMessage, isWithinImageLimit } from "@/lib/feed-image-limit";
+import { MAX_IMAGE_LABEL, imageLimitMessage, isWithinImageLimit } from "@/lib/feed-image-limit";
 
 function initials(n?: string | null) {
   return (n ?? "L").split(" ").filter(Boolean).slice(0, 2).map((p) => p[0]?.toUpperCase()).join("");
