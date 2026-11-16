@@ -5,10 +5,11 @@ import { supabase } from "@/integrations/supabase/client";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Home, MessageCircle, Bell, Shield, LogOut, User as UserIcon, Users, Users2, Building2, Trophy, BookOpen, Calendar, Target, Landmark, Award, BadgeCheck, Globe, FileText, Vote, Monitor, Gavel } from "lucide-react";
+import { Menu as MenuIcon, Home, MessageCircle, Bell, Shield, LogOut, User as UserIcon, Users, Users2, Building2, Trophy, BookOpen, Calendar, Target, Landmark, Award, BadgeCheck, Globe, FileText, Vote, Monitor, Gavel } from "lucide-react";
 import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import distritoLogo from "@/assets/distrito-lc11-logo.png.asset.json";
 import { GovernadoresSidebar } from "@/components/GovernadoresSidebar";
 import { RequireMenu } from "@/components/RequireMenu";
@@ -34,6 +35,8 @@ function AppLayout() {
   const nav = useNavigate();
   const loc = useLocation();
   const [unread, setUnread] = useState(0);
+  const [menuOpen, setMenuOpen] = useState(false);
+  useEffect(() => { setMenuOpen(false); }, [loc.pathname]);
 
   useEffect(() => {
     if (!hydrated || loading) return;
@@ -95,20 +98,48 @@ function AppLayout() {
   return (
     <div className="min-h-screen bg-background">
       <header className="sticky top-0 z-40 border-b bg-card/95 backdrop-blur">
-        <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4">
-          <Link to="/feed" className="flex items-center gap-2">
-            <img src={distritoLogo.url} alt="Lions Clubs International - Distrito LC-11" className="h-9 w-auto object-contain" />
-            <span className="text-lg font-bold tracking-tight">Lions Connecta</span>
+        <div className="mx-auto flex h-16 max-w-7xl items-center justify-between gap-2 px-3 sm:px-4">
+          <div className="flex min-w-0 items-center gap-1">
+          <Sheet open={menuOpen} onOpenChange={setMenuOpen}>
+            <SheetTrigger asChild>
+              <Button variant="ghost" size="icon" className="shrink-0 md:hidden" aria-label="Abrir menu"><MenuIcon className="h-5 w-5" /></Button>
+            </SheetTrigger>
+            <SheetContent side="left" className="w-[85vw] max-w-xs overflow-y-auto p-3">
+              <SheetHeader><SheetTitle>Menu</SheetTitle></SheetHeader>
+              <div className="mt-2 space-y-1">
+                {sidebarMenus.map((m) => {
+                  const Icon = MENU_ICONS[m.icon] ?? Home;
+                  const active = loc.pathname.startsWith(m.path);
+                  return (
+                    <Link key={m.key} to={m.path as never} onClick={() => setMenuOpen(false)}
+                      className={`flex items-center gap-3 rounded-lg px-2 py-2 text-sm font-medium ${active ? "bg-primary/10 text-primary" : "text-foreground hover:bg-muted"}`}>
+                      <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-muted"><Icon className="h-5 w-5" /></span>
+                      {m.label}
+                    </Link>
+                  );
+                })}
+                {(isAdmin || isModerator || can("admin", "view")) && (
+                  <Link to="/admin" onClick={() => setMenuOpen(false)} className="flex items-center gap-3 rounded-lg px-2 py-2 text-sm font-medium hover:bg-muted">
+                    <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-muted"><Shield className="h-5 w-5" /></span>Admin
+                  </Link>
+                )}
+              </div>
+            </SheetContent>
+          </Sheet>
+          <Link to="/feed" className="flex min-w-0 items-center gap-2">
+            <img src={distritoLogo.url} alt="Lions Clubs International - Distrito LC-11" className="h-8 w-auto shrink-0 object-contain sm:h-9" />
+            <span className="truncate text-base font-bold tracking-tight sm:text-lg">Lions Connecta</span>
           </Link>
+          </div>
 
-          <nav className="hidden items-center gap-1 md:flex">
+          <nav className="hidden items-center gap-1 lg:flex">
             {navItems.map(({ to, label, icon: Icon, badge }) => {
               const active = loc.pathname.startsWith(to);
               return (
                 <Link
                   key={to}
                   to={to}
-                  className={`relative flex items-center gap-2 rounded-md px-4 py-2 text-sm font-medium transition-colors ${
+                  className={`relative flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium transition-colors ${
                     active ? "bg-primary/10 text-primary" : "text-muted-foreground hover:bg-muted hover:text-foreground"
                   }`}
                 >
@@ -127,7 +158,7 @@ function AppLayout() {
                 <Shield className="h-4 w-4" /> Admin
               </Link>
             )}
-            {can("laurear", "view") && <Button asChild variant="ghost" size="sm"><Link to="/admin/laurear"><Award className="mr-2 h-4 w-4" />Laurear companheiros</Link></Button>}
+            {can("laurear", "view") && <Button asChild variant="ghost" size="sm" className="hidden xl:inline-flex"><Link to="/admin/laurear"><Award className="mr-2 h-4 w-4" />Laurear companheiros</Link></Button>}
           </nav>
 
           <DropdownMenu>
@@ -139,7 +170,7 @@ function AppLayout() {
                     {initials(profile?.full_name ?? "L")}
                   </AvatarFallback>
                 </Avatar>
-                <span className="hidden text-sm font-medium md:inline">{profile?.full_name}</span>
+                <span className="hidden max-w-[10rem] truncate text-sm font-medium xl:inline">{profile?.full_name}</span>
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-56">
@@ -166,7 +197,7 @@ function AppLayout() {
         </div>
 
         {/* Mobile nav */}
-        <nav className="flex items-center justify-around border-t md:hidden">
+        <nav className="flex items-center justify-around border-t lg:hidden">
           {navItems.map(({ to, icon: Icon, badge }) => {
             const active = loc.pathname.startsWith(to);
             return (
@@ -179,7 +210,7 @@ function AppLayout() {
         </nav>
       </header>
 
-      <div className={`mx-auto grid max-w-7xl gap-6 px-4 py-6 md:grid-cols-[260px_minmax(0,1fr)] ${loc.pathname.startsWith("/feed") ? "lg:grid-cols-[260px_minmax(0,1fr)_280px]" : ""}`}>
+      <div className={`mx-auto grid max-w-7xl gap-4 px-3 py-4 sm:gap-6 sm:px-4 sm:py-6 md:grid-cols-[220px_minmax(0,1fr)] lg:grid-cols-[260px_minmax(0,1fr)] ${loc.pathname.startsWith("/feed") ? "xl:grid-cols-[260px_minmax(0,1fr)_280px]" : ""}`}>
         <aside className="hidden md:block">
           <div className="sticky top-24 space-y-1 rounded-xl border bg-card p-3 shadow-sm">
             <Link
@@ -233,7 +264,7 @@ function AppLayout() {
             <Outlet />
           </RequireMenu>
         </main>
-        {loc.pathname.startsWith("/feed") && <GovernadoresSidebar />}
+        {loc.pathname.startsWith("/feed") && <div className="md:col-span-2 xl:col-span-1"><GovernadoresSidebar /></div>}
       </div>
     </div>
   );
