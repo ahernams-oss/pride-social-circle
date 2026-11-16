@@ -101,3 +101,12 @@
   .text-gold { color: var(--gold); }
   .ring-gold { --tw-ring-color: var(--gold); }
 }
+
+/* Responsividade global */
+html, body { overflow-x: hidden; }
+img, video, canvas, svg { max-width: 100%; }
+main table { display: block; max-width: 100%; overflow-x: auto; }
+@media (max-width: 640px) {
+  [role="dialog"] { max-height: 92dvh; overflow-y: auto; }
+  [role="tablist"] { max-width: 100%; overflow-x: auto; justify-content: flex-start; }
+}
