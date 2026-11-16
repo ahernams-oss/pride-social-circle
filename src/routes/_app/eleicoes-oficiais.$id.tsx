@@ -28,7 +28,7 @@ export const Route = createFileRoute("/_app/eleicoes-oficiais/$id")({ component:
 
 type Status = "configurando" | "credenciamento" | "votacao_aberta" | "votacao_encerrada" | "apurada";
 type Eleicao = { id: string; titulo: string; descricao: string | null; distrito: string | null; data_eleicao: string; status: Status };
-type Candidatura = { id: string; nome: string; cargo: string; numero: string | null; proposta: string | null; status: string; foto_url: string | null };
+type Candidatura = { id: string; associado_id?: string | null; nome: string; cargo: string; numero: string | null; proposta: string | null; status: string; foto_url: string | null };
 type Delegado = {
   id: string; nome: string; clube: string | null; tipo: "titular" | "suplente" | "nato";
   codigo_acesso: string; credenciado: boolean; presente: boolean; habilitado_votar: boolean; ja_votou: boolean;
@@ -178,34 +178,44 @@ function Page() {
   );
 }
 
-function NewCandidatura({ eleicaoId, onCreated }: { eleicaoId: string; onCreated: () => void }) {
-  const [open, setOpen] = useState(false);
+function NewCandidatura({ eleicaoId, onCreated, candidatura, open: openProp, onOpenChange }: {
+  eleicaoId: string; onCreated: () => void; candidatura?: Candidatura; open?: boolean; onOpenChange?: (o: boolean) => void;
+}) {
+  const [openState, setOpenState] = useState(false);
+  const open = openProp ?? openState;
+  const setOpen = onOpenChange ?? setOpenState;
   const associados = useAssociados();
-  const [f, setF] = useState<{ associado_id: string; nome: string; cargo: string; numero: string; proposta: string; foto_url: string | null }>(
-    { associado_id: "", nome: "", cargo: "", numero: "", proposta: "", foto_url: null },
-  );
+  const fromCand = (c?: Candidatura) => ({
+    associado_id: c?.associado_id ?? "", nome: c?.nome ?? "", cargo: c?.cargo ?? "",
+    numero: c?.numero ?? "", proposta: c?.proposta ?? "", foto_url: c?.foto_url ?? null,
+  });
+  const [f, setF] = useState<{ associado_id: string; nome: string; cargo: string; numero: string; proposta: string; foto_url: string | null }>(fromCand(candidatura));
+  useEffect(() => { if (open && candidatura) setF(fromCand(candidatura)); }, [open, candidatura]);
   const pick = (aid: string) => {
     const a = associados.find((x) => x.id === aid);
     setF({ ...f, associado_id: aid, nome: a?.full_name ?? f.nome, foto_url: a?.avatar_url ?? f.foto_url });
   };
   const save = async () => {
     if (!f.nome || !f.cargo) return toast.error("Nome e cargo são obrigatórios");
-    const { error } = await supabase.from("vf_candidaturas").insert({
-      eleicao_id: eleicaoId, associado_id: f.associado_id || null,
+    const payload = {
+      associado_id: f.associado_id || null,
       nome: f.nome, cargo: f.cargo, numero: f.numero || null, proposta: f.proposta || null,
       foto_url: f.foto_url,
-    } as any);
+    };
+    const { error } = candidatura
+      ? await supabase.from("vf_candidaturas").update(payload as any).eq("id", candidatura.id)
+      : await supabase.from("vf_candidaturas").insert({ eleicao_id: eleicaoId, ...payload } as any);
     if (error) return toast.error(error.message);
-    toast.success("Candidatura cadastrada");
-    setF({ associado_id: "", nome: "", cargo: "", numero: "", proposta: "", foto_url: null });
+    toast.success(candidatura ? "Candidatura atualizada" : "Candidatura cadastrada");
+    if (!candidatura) setF({ associado_id: "", nome: "", cargo: "", numero: "", proposta: "", foto_url: null });
     setOpen(false);
     onCreated();
   };
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild><Button size="sm"><Plus className="mr-2 h-4 w-4" /> Nova candidatura</Button></DialogTrigger>
+      {!candidatura && <DialogTrigger asChild><Button size="sm"><Plus className="mr-2 h-4 w-4" /> Nova candidatura</Button></DialogTrigger>}
       <DialogContent>
-        <DialogHeader><DialogTitle>Nova candidatura</DialogTitle></DialogHeader>
+        <DialogHeader><DialogTitle>{candidatura ? "Editar candidatura" : "Nova candidatura"}</DialogTitle></DialogHeader>
         <div className="space-y-3">
           <div><Label>Associado (opcional)</Label>
             <AssociadoCombobox items={associados} value={f.associado_id} onChange={pick} />
@@ -234,6 +244,7 @@ function NewCandidatura({ eleicaoId, onCreated }: { eleicaoId: string; onCreated
 }
 
 function CandidaturasList({ items, isAdmin, onChanged }: { items: Candidatura[]; isAdmin: boolean; onChanged: () => void }) {
+  const [editing, setEditing] = useState<Candidatura | null>(null);
   const remove = async (id: string) => {
     if (!confirm("Excluir candidatura?")) return;
     const { error } = await supabase.from("vf_candidaturas").delete().eq("id", id);
@@ -264,12 +275,22 @@ function CandidaturasList({ items, isAdmin, onChanged }: { items: Candidatura[];
                   {c.proposta && <p className="mt-1 line-clamp-2 text-xs text-muted-foreground">{c.proposta}</p>}
                   </div>
                 </div>
-                {isAdmin && <Button size="icon" variant="ghost" onClick={() => remove(c.id)}><Trash2 className="h-4 w-4" /></Button>}
+                {isAdmin && (
+                  <div className="flex items-center gap-1">
+                    <Button size="icon" variant="ghost" title="Editar candidatura" onClick={() => setEditing(c)}><Pencil className="h-4 w-4" /></Button>
+                    <Button size="icon" variant="ghost" title="Excluir candidatura" onClick={() => remove(c.id)}><Trash2 className="h-4 w-4" /></Button>
+                  </div>
+                )}
               </CardContent></Card>
             ))}
           </div>
         </div>
       ))}
+      {editing && (
+        <NewCandidatura eleicaoId="" candidatura={editing} open={!!editing}
+          onOpenChange={(o) => { if (!o) setEditing(null); }}
+          onCreated={() => { setEditing(null); onChanged(); }} />
+      )}
     </div>
   );
 }
