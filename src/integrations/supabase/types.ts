@@ -890,6 +890,30 @@ export type Database = {
           },
         ]
       }
+      password_resets: {
+        Row: {
+          attempts: number
+          created_at: string
+          email: string
+          reset_by: string | null
+          user_id: string
+        }
+        Insert: {
+          attempts?: number
+          created_at?: string
+          email: string
+          reset_by?: string | null
+          user_id: string
+        }
+        Update: {
+          attempts?: number
+          created_at?: string
+          email?: string
+          reset_by?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       post_comments: {
         Row: {
           author_id: string
