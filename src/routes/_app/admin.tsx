@@ -9,6 +9,7 @@ import { AdminUserLevels } from "@/components/AdminUserLevels";
 import { AdminMemberRegistry } from "@/components/AdminMemberRegistry";
 import { AdminAccessLevels } from "@/components/AdminAccessLevels";
 import { AdminDashboard } from "@/components/AdminDashboard";
+import { AdminReportButtons } from "@/components/AdminReportButtons";
 import { useAccess } from "@/lib/access-control";
 import { formatCpf, matchProfile, type RegistryEntry } from "@/lib/registry";
 
@@ -168,6 +169,8 @@ function AdminPanel() {
           </button>
         ))}
       </div>
+
+      <AdminReportButtons section={section} />
 
       {section === "dashboard" ? (
         <AdminDashboard />
