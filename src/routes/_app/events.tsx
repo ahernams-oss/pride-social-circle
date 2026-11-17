@@ -31,6 +31,7 @@ type Event = {
   location: string;
   starts_at: string;
   ends_at: string | null;
+  registration_deadline: string | null;
   created_by: string;
 };
 
@@ -40,8 +41,8 @@ function EventsPage() {
   const [open, setOpen] = useState(false);
   const [report, setReport] = useState<Event | null>(null);
   const [editing, setEditing] = useState<Event | null>(null);
-  const [editForm, setEditForm] = useState({ title: "", description: "", location: "", starts_at: "", ends_at: "" });
-  const [form, setForm] = useState({ title: "", description: "", location: "", starts_at: "", ends_at: "" });
+  const [editForm, setEditForm] = useState({ title: "", description: "", location: "", starts_at: "", ends_at: "", registration_deadline: "" });
+  const [form, setForm] = useState({ title: "", description: "", location: "", starts_at: "", ends_at: "", registration_deadline: "" });
 
   const load = useCallback(async () => {
     const { data } = await supabase.from("events").select("*").order("starts_at", { ascending: true });

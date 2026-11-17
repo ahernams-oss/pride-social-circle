@@ -669,6 +669,7 @@ export type Database = {
           ends_at: string | null
           id: string
           location: string
+          registration_deadline: string | null
           starts_at: string
           title: string
         }
@@ -679,6 +680,7 @@ export type Database = {
           ends_at?: string | null
           id?: string
           location?: string
+          registration_deadline?: string | null
           starts_at: string
           title: string
         }
@@ -689,6 +691,7 @@ export type Database = {
           ends_at?: string | null
           id?: string
           location?: string
+          registration_deadline?: string | null
           starts_at?: string
           title?: string
         }
