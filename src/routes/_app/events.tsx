@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Calendar, MapPin, Plus, Trash2 } from "lucide-react";
+import { Calendar, MapPin, Pencil, Plus, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { EventFormsButton } from "@/components/EventForms";
 import { AttendButton, EventReport, BarChart3 } from "@/components/EventAttendance";
@@ -39,6 +39,8 @@ function EventsPage() {
   const [events, setEvents] = useState<Event[]>([]);
   const [open, setOpen] = useState(false);
   const [report, setReport] = useState<Event | null>(null);
+  const [editing, setEditing] = useState<Event | null>(null);
+  const [editForm, setEditForm] = useState({ title: "", description: "", location: "", starts_at: "", ends_at: "" });
   const [form, setForm] = useState({ title: "", description: "", location: "", starts_at: "", ends_at: "" });
 
   const load = useCallback(async () => {
