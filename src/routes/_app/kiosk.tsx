@@ -178,7 +178,7 @@ function KioskPage() {
               </CardContent>
             </Card>
           ))}
-          <Button onClick={submit} disabled={busy} className="w-full" size="lg"><Vote className="mr-2 h-4 w-4" /> Confirmar voto</Button>
+          <Button onClick={submit} disabled={busy} size="lg" className="h-20 w-full rounded-lg text-xl font-bold tracking-wide"><Vote className="mr-3 h-6 w-6" /> Confirmar voto</Button>
         </div>
       )}
 

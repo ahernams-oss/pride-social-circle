@@ -262,7 +262,7 @@ export function ElectionDetail({
                 ))}
               </div>
             )}
-            <Button onClick={submitVote} disabled={submitting} className="w-full">
+            <Button onClick={submitVote} disabled={submitting} size="lg" className="h-16 w-full rounded-lg text-lg font-bold tracking-wide">
               {submitting ? "Enviando..." : "Confirmar voto"}
             </Button>
           </CardContent>

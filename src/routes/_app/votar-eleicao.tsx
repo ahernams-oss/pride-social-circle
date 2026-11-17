@@ -132,7 +132,7 @@ function Page() {
           </div>
         </CardContent></Card>
       ))}
-      <Button onClick={submit} disabled={busy} className="w-full" size="lg">Confirmar voto</Button>
+      <Button onClick={submit} disabled={busy} size="lg" className="h-16 w-full rounded-lg text-lg font-bold tracking-wide">Confirmar voto</Button>
       <Badge variant="outline" className="block w-full py-2 text-center text-xs">Cada delegado pode votar apenas uma vez.</Badge>
     </div>
   );
