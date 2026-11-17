@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Target, Plus, Trash2, Check, Clock, X, ShieldCheck } from "lucide-react";
+import { Target, Plus, Trash2, Check, Clock, X, ShieldCheck, Pencil } from "lucide-react";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/_app/missions")({ component: MissionsPage });
@@ -45,6 +45,10 @@ function MissionsPage() {
   const [description, setDescription] = useState("");
   const [points, setPoints] = useState(1);
   const [showForm, setShowForm] = useState(false);
+  const [editing, setEditing] = useState<Mission | null>(null);
+  const [editTitle, setEditTitle] = useState("");
+  const [editDescription, setEditDescription] = useState("");
+  const [editPoints, setEditPoints] = useState(1);
 
   const load = async () => {
     const { data: m } = await supabase.from("missions").select("*").order("created_at", { ascending: false });
@@ -105,6 +109,26 @@ function MissionsPage() {
     if (error) return toast.error(error.message);
     setTitle(""); setDescription(""); setPoints(1); setShowForm(false);
     toast.success("Missão criada");
+    load();
+  };
+
+  const openEdit = (m: Mission) => {
+    setEditing(m);
+    setEditTitle(m.title);
+    setEditDescription(m.description ?? "");
+    setEditPoints(m.points);
+  };
+
+  const update = async () => {
+    if (!editing || !editTitle.trim()) return;
+    const { error } = await supabase.from("missions").update({
+      title: editTitle.trim(),
+      description: editDescription.trim() || null,
+      points: editPoints,
+    }).eq("id", editing.id);
+    if (error) return toast.error(error.message);
+    toast.success("Missão atualizada");
+    setEditing(null);
     load();
   };
 
@@ -247,6 +271,11 @@ function MissionsPage() {
                 </div>
                 {m.description && <p className="mt-1 text-sm text-muted-foreground">{m.description}</p>}
               </div>
+              {(isAdmin || can("missions", "edit")) && (
+                <Button variant="ghost" size="icon" title="Editar missão" onClick={() => openEdit(m)}>
+                  <Pencil className="h-4 w-4" />
+                </Button>
+              )}
               {(isAdmin || can("missions", "delete")) && (
                 <Button variant="ghost" size="icon" onClick={() => remove(m.id)}>
                   <Trash2 className="h-4 w-4" />
@@ -259,6 +288,26 @@ function MissionsPage() {
           <p className="rounded-xl border bg-card p-8 text-center text-muted-foreground">Nenhuma missão ainda.</p>
         )}
       </div>
+
+      {editing && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4" onClick={() => setEditing(null)}>
+          <Card className="w-full max-w-md" onClick={(e) => e.stopPropagation()}>
+            <CardHeader><CardTitle className="text-base">Editar missão</CardTitle></CardHeader>
+            <CardContent className="space-y-3">
+              <Input placeholder="Título" value={editTitle} onChange={(e) => setEditTitle(e.target.value)} />
+              <Textarea placeholder="Descrição (opcional)" value={editDescription} onChange={(e) => setEditDescription(e.target.value)} />
+              <div className="flex items-center gap-2">
+                <label className="text-sm text-muted-foreground">Pontos:</label>
+                <Input type="number" min={1} value={editPoints} onChange={(e) => setEditPoints(Math.max(1, Number(e.target.value) || 1))} className="w-24" />
+              </div>
+              <div className="flex justify-end gap-2">
+                <Button variant="ghost" onClick={() => setEditing(null)}>Cancelar</Button>
+                <Button onClick={update}>Salvar alterações</Button>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      )}
     </div>
   );
 }
