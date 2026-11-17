@@ -208,6 +208,23 @@ function ProfilePage() {
 
   if (!profile) return <p className="py-12 text-center text-muted-foreground">Carregando perfil...</p>;
 
+  const completenessFields: Array<{ label: string; filled: boolean }> = [
+    { label: "Foto de perfil", filled: !!profile.avatar_url },
+    { label: "Bio", filled: !!profile.bio?.trim() },
+    { label: "Telefone celular", filled: !!profile.phone?.trim() },
+    { label: "E-mail", filled: !!profile.email?.trim() },
+    { label: "Data de nascimento", filled: !!profile.birth_date },
+    { label: "CEP", filled: !!profile.cep?.trim() },
+    { label: "Logradouro", filled: !!profile.logradouro?.trim() },
+    { label: "Número", filled: !!profile.numero?.trim() },
+    { label: "Bairro", filled: !!profile.bairro?.trim() },
+    { label: "Cidade", filled: !!profile.city?.trim() },
+    { label: "Estado (UF)", filled: !!profile.estado?.trim() },
+    { label: "Cargo no clube", filled: !!profile.role_in_club?.trim() },
+  ];
+  const missing = completenessFields.filter((f) => !f.filled);
+  const percent = Math.round(((completenessFields.length - missing.length) / completenessFields.length) * 100);
+
   return (
     <div className="space-y-4">
       <div className="overflow-hidden rounded-xl border bg-card shadow-sm">
