@@ -155,9 +155,14 @@ function EventsPage() {
                 </div>
               </div>
               {(isAdmin || ev.created_by === user?.id) && (
-                <Button size="icon" variant="ghost" onClick={() => remove(ev.id)}>
-                  <Trash2 className="h-4 w-4" />
-                </Button>
+                <div className="flex shrink-0 gap-1">
+                  <Button size="icon" variant="ghost" title="Editar evento" onClick={() => openEdit(ev)}>
+                    <Pencil className="h-4 w-4" />
+                  </Button>
+                  <Button size="icon" variant="ghost" title="Excluir evento" onClick={() => remove(ev.id)}>
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                </div>
               )}
             </div>
           </div>
