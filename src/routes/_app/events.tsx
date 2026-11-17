@@ -65,6 +65,38 @@ function EventsPage() {
     await load();
   };
 
+  const toLocalInput = (iso: string | null) => {
+    if (!iso) return "";
+    const d = new Date(iso);
+    const pad = (n: number) => String(n).padStart(2, "0");
+    return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+  };
+
+  const openEdit = (ev: Event) => {
+    setEditing(ev);
+    setEditForm({
+      title: ev.title,
+      description: ev.description,
+      location: ev.location,
+      starts_at: toLocalInput(ev.starts_at),
+      ends_at: toLocalInput(ev.ends_at),
+    });
+  };
+
+  const update = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editing) return;
+    const { error } = await supabase.from("events").update({
+      title: editForm.title, description: editForm.description, location: editForm.location,
+      starts_at: new Date(editForm.starts_at).toISOString(),
+      ends_at: new Date(editForm.ends_at).toISOString(),
+    }).eq("id", editing.id);
+    if (error) return toast.error(error.message);
+    toast.success("Evento atualizado");
+    setEditing(null);
+    await load();
+  };
+
   const remove = async (id: string) => {
     const { error } = await supabase.from("events").delete().eq("id", id);
     if (error) return toast.error(error.message);
