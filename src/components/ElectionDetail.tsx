@@ -199,11 +199,17 @@ export function ElectionDetail({
         {election.description && <p className="mt-1 text-sm text-muted-foreground">{election.description}</p>}
       </div>
 
-      {isAdmin && election.status === "draft" && (
+      {isAdmin && (election.status === "draft" || (election.status === "open" && totalBallots === 0)) && (
         <AdminEditor election={election} positions={positions} candidates={candidates} onChanged={load} />
       )}
 
-      {canVote ? (
+      {election.status !== "draft" && candidates.length === 0 && election.type !== "yes_no" && (
+        <Card><CardContent className="py-6 text-center text-sm text-muted-foreground">
+          Esta votação ainda não tem {election.type === "multi_position" ? "cargos e candidatos" : "candidatos"} cadastrados.{isAdmin ? " Cadastre-os no quadro acima." : ""}
+        </CardContent></Card>
+      )}
+
+      {canVote && (election.type === "yes_no" || candidates.length > 0) ? (
         <Card>
           <CardContent className="space-y-4 py-5">
             <h3 className="font-semibold">Sua cédula</h3>
@@ -393,7 +399,7 @@ function AdminEditor({ election, positions, candidates, onChanged }: {
   return (
     <Card>
       <CardContent className="space-y-5 py-5">
-        <h3 className="font-semibold">Configuração (rascunho)</h3>
+        <h3 className="font-semibold">Configuração</h3>
 
         {election.type === "multi_position" && (
           <div className="space-y-2">

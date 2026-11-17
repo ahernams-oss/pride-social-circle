@@ -74,6 +74,13 @@ function ElectionsPage() {
   useEffect(() => { load(); }, [load]);
 
   const updateStatus = async (id: string, status: ElectionStatus) => {
+    if (status === "open") {
+      const { data: el } = await supabase.from("elections").select("type").eq("id", id).maybeSingle();
+      if (el && el.type !== "yes_no") {
+        const { count } = await supabase.from("election_candidates").select("id", { count: "exact", head: true }).eq("election_id", id);
+        if (!count) return toast.error("Cadastre ao menos um candidato antes de abrir a votação.");
+      }
+    }
     const { error } = await supabase.from("elections").update({ status }).eq("id", id);
     if (error) return toast.error(error.message);
     toast.success(status === "open" ? "Eleição aberta" : status === "closed" ? "Eleição encerrada" : "Atualizado");
