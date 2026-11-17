@@ -157,7 +157,8 @@ function KioskPage() {
                 <h3 className="font-semibold">{cargo}</h3>
                 <RadioGroup value={votos[cargo] ?? ""} onValueChange={(v) => setVotos((p) => ({ ...p, [cargo]: v }))}>
                   {cands.filter((c) => c.cargo === cargo).map((c) => (
-                    <label key={c.id} className="flex cursor-pointer items-center gap-3 rounded border p-3 hover:bg-accent">
+                    <label key={c.id} className={`relative flex cursor-pointer items-center gap-3 overflow-hidden rounded border p-3 pl-5 transition ${votos[cargo] === c.id ? "border-gold bg-gold/15 ring-2 ring-gold" : "hover:bg-accent"}`}>
+                      {votos[cargo] === c.id && <span aria-hidden className="absolute inset-y-0 left-0 w-2.5 bg-gold" />}
                       <RadioGroupItem value={c.id} />
                       <Avatar className="h-16 w-16 rounded-md">
                         {c.foto_url ? <AvatarImage src={c.foto_url} alt={c.nome} className="object-cover" /> : null}
@@ -167,11 +168,11 @@ function KioskPage() {
                       {c.numero && <Badge variant="outline">{c.numero}</Badge>}
                     </label>
                   ))}
-                  <label className="flex cursor-pointer items-center gap-3 rounded border p-3 hover:bg-accent">
+                  <label className={`flex cursor-pointer items-center gap-3 rounded border p-3 transition ${votos[cargo] === "branco" ? "border-gold bg-gold/15 ring-2 ring-gold" : "hover:bg-accent"}`}>
                     <RadioGroupItem value="branco" /> <span>Voto em branco</span>
                   </label>
-                  <label className="flex cursor-pointer items-center gap-3 rounded border p-3 hover:bg-accent">
-                    <RadioGroupItem value="nulo" /> <span>Não</span>
+                  <label className={`mt-10 flex cursor-pointer items-center gap-3 rounded border p-3 transition ${votos[cargo] === "nulo" ? "border-destructive bg-destructive/15 ring-2 ring-destructive" : "border-destructive/50 text-destructive hover:bg-destructive/10"}`}>
+                    <RadioGroupItem value="nulo" className="border-destructive text-destructive" /> <span className="font-medium">Não</span>
                   </label>
                 </RadioGroup>
               </CardContent>

@@ -100,26 +100,34 @@ function Page() {
       {cargos.map((cargo) => (
         <Card key={cargo}><CardContent className="space-y-2 py-4">
           <h3 className="font-semibold">{cargo}</h3>
-          <div className="space-y-2">
-            {cands.filter((c) => c.cargo === cargo).map((c) => (
-              <button key={c.id} type="button"
-                onClick={() => setVotos({ ...votos, [cargo]: c.id })}
-                className={`w-full rounded-lg border p-3 text-left transition ${votos[cargo] === c.id ? "border-primary bg-primary/5" : "hover:bg-muted"}`}>
-                <div className="flex items-center gap-3">
-                  <Avatar className="h-14 w-14 rounded-md">
-                    {c.foto_url ? <AvatarImage src={c.foto_url} alt={c.nome} className="object-cover" /> : null}
-                    <AvatarFallback className="rounded-md text-xs">{c.nome.slice(0, 2).toUpperCase()}</AvatarFallback>
-                  </Avatar>
-                  <div className="min-w-0">
-                    <div className="font-medium">{c.numero ? `${c.numero} — ` : ""}{c.nome}</div>
-                    {c.proposta && <p className="line-clamp-2 text-xs text-muted-foreground">{c.proposta}</p>}
+          <div className="space-y-3">
+            {cands.filter((c) => c.cargo === cargo).map((c) => {
+              const sel = votos[cargo] === c.id;
+              return (
+                <button key={c.id} type="button"
+                  onClick={() => setVotos({ ...votos, [cargo]: c.id })}
+                  className={`relative w-full overflow-hidden rounded-lg border p-3 pl-5 text-left transition ${sel ? "border-gold bg-gold/15 ring-2 ring-gold" : "hover:bg-muted"}`}>
+                  {sel && <span aria-hidden className="absolute inset-y-0 left-0 w-2.5 bg-gold" />}
+                  <div className="flex items-center gap-3">
+                    <Avatar className="h-14 w-14 rounded-md">
+                      {c.foto_url ? <AvatarImage src={c.foto_url} alt={c.nome} className="object-cover" /> : null}
+                      <AvatarFallback className="rounded-md text-xs">{c.nome.slice(0, 2).toUpperCase()}</AvatarFallback>
+                    </Avatar>
+                    <div className="min-w-0">
+                      <div className="font-medium">{c.numero ? `${c.numero} — ` : ""}{c.nome}</div>
+                      {c.proposta && <p className="line-clamp-2 text-xs text-muted-foreground">{c.proposta}</p>}
+                    </div>
+                    {sel && <Badge className="ml-auto shrink-0 border-0 bg-gold text-gold-foreground">Selecionado</Badge>}
                   </div>
-                </div>
-              </button>
-            ))}
-            <div className="flex gap-2">
+                </button>
+              );
+            })}
+            <div className="flex items-center gap-12 pt-2">
               <Button size="sm" variant={votos[cargo] === "branco" ? "default" : "outline"} onClick={() => setVotos({ ...votos, [cargo]: "branco" })}>Branco</Button>
-              <Button size="sm" variant={votos[cargo] === "nulo" ? "default" : "outline"} onClick={() => setVotos({ ...votos, [cargo]: "nulo" })}>Não</Button>
+              <Button size="sm"
+                variant={votos[cargo] === "nulo" ? "destructive" : "outline"}
+                className={votos[cargo] === "nulo" ? "" : "border-destructive text-destructive hover:bg-destructive hover:text-destructive-foreground"}
+                onClick={() => setVotos({ ...votos, [cargo]: "nulo" })}>Não</Button>
             </div>
           </div>
         </CardContent></Card>
