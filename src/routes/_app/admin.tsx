@@ -9,6 +9,7 @@ import { AdminUserLevels } from "@/components/AdminUserLevels";
 import { AdminMemberRegistry } from "@/components/AdminMemberRegistry";
 import { AdminAccessLevels } from "@/components/AdminAccessLevels";
 import { AdminDashboard } from "@/components/AdminDashboard";
+import { AdminInsights } from "@/components/AdminInsights";
 import { AdminReportButtons } from "@/components/AdminReportButtons";
 import { useAccess } from "@/lib/access-control";
 import { formatCpf, matchProfile, type RegistryEntry } from "@/lib/registry";
@@ -43,11 +44,16 @@ function AdminPanel() {
   const { can } = useAccess();
   const [rows, setRows] = useState<Row[]>([]);
   const [registry, setRegistry] = useState<RegistryEntry[]>([]);
-  const [section, setSection] = useState<"dashboard" | "cadastros" | "niveis" | "permissoes" | "base">("dashboard");
+  const [section, setSection] = useState<"dashboard" | "cadastros" | "niveis" | "permissoes" | "base" | "gerencial">("dashboard");
   const [tab, setTab] = useState<"pending" | "approved" | "rejected">("pending");
   const [bulk, setBulk] = useState(false);
   const [selected, setSelected] = useState<Set<string>>(new Set());
-  const { isAdmin, level } = useAuth();
+  const { isAdmin, level, user } = useAuth();
+  const [isSuper, setIsSuper] = useState(false);
+  useEffect(() => {
+    if (!user) return;
+    supabase.rpc("is_super_admin", { _user_id: user.id }).then(({ data }) => setIsSuper(!!data));
+  }, [user]);
 
   const sections = useMemo(
     () =>
@@ -57,8 +63,9 @@ function AdminPanel() {
         ...(isAdmin
           ? ([["niveis", "Usuários e níveis"], ["permissoes", "Níveis e permissões"], ["base", "Base de associados"]] as const)
           : ([] as const)),
-      ] as ["dashboard" | "cadastros" | "niveis" | "permissoes" | "base", string][]),
-    [isAdmin],
+        ...(isSuper ? ([["gerencial", "Informações gerenciais"]] as const) : ([] as const)),
+      ] as ["dashboard" | "cadastros" | "niveis" | "permissoes" | "base" | "gerencial", string][]),
+    [isAdmin, isSuper],
   );
 
 
@@ -170,9 +177,11 @@ function AdminPanel() {
         ))}
       </div>
 
-      <AdminReportButtons section={section} />
+      {section !== "gerencial" && <AdminReportButtons section={section} />}
 
-      {section === "dashboard" ? (
+      {section === "gerencial" ? (
+        isSuper ? <AdminInsights /> : null
+      ) : section === "dashboard" ? (
         <AdminDashboard />
       ) : section === "niveis" && isAdmin ? (
         <AdminUserLevels />
