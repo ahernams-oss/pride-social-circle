@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Target, Plus, Trash2, Check, Clock, X, ShieldCheck } from "lucide-react";
+import { Target, Plus, Trash2, Check, Clock, X, ShieldCheck, Pencil } from "lucide-react";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/_app/missions")({ component: MissionsPage });
@@ -45,6 +45,10 @@ function MissionsPage() {
   const [description, setDescription] = useState("");
   const [points, setPoints] = useState(1);
   const [showForm, setShowForm] = useState(false);
+  const [editing, setEditing] = useState<Mission | null>(null);
+  const [editTitle, setEditTitle] = useState("");
+  const [editDescription, setEditDescription] = useState("");
+  const [editPoints, setEditPoints] = useState(1);
 
   const load = async () => {
     const { data: m } = await supabase.from("missions").select("*").order("created_at", { ascending: false });
@@ -105,6 +109,26 @@ function MissionsPage() {
     if (error) return toast.error(error.message);
     setTitle(""); setDescription(""); setPoints(1); setShowForm(false);
     toast.success("Missão criada");
+    load();
+  };
+
+  const openEdit = (m: Mission) => {
+    setEditing(m);
+    setEditTitle(m.title);
+    setEditDescription(m.description ?? "");
+    setEditPoints(m.points);
+  };
+
+  const update = async () => {
+    if (!editing || !editTitle.trim()) return;
+    const { error } = await supabase.from("missions").update({
+      title: editTitle.trim(),
+      description: editDescription.trim() || null,
+      points: editPoints,
+    }).eq("id", editing.id);
+    if (error) return toast.error(error.message);
+    toast.success("Missão atualizada");
+    setEditing(null);
     load();
   };
 
