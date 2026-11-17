@@ -127,6 +127,13 @@
       "when": 1794874494543,
       "tag": "0017_management_insights",
       "breakpoints": true
+    },
+    {
+      "idx": 18,
+      "version": "7",
+      "when": 1794874847089,
+      "tag": "0018_restrict_super_admins_read",
+      "breakpoints": true
     }
   ]
 }
