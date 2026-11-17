@@ -1,5 +1,9 @@
 import { Link } from "@tanstack/react-router";
-import { completeness, type CompletenessProfile } from "@/lib/profile-completeness";
+import {
+  PROFILE_COMPLETENESS_THRESHOLD,
+  completeness,
+  type CompletenessProfile,
+} from "@/lib/profile-completeness";
 
 export function ProfileCompleteness({
   profile,
@@ -11,7 +15,8 @@ export function ProfileCompleteness({
   compact?: boolean;
 }) {
   const { percent, done, total, missing } = completeness(profile);
-  if (percent >= 100) return null;
+  // Perfil já considerado completo: não insiste em atualizar.
+  if (percent >= PROFILE_COMPLETENESS_THRESHOLD) return null;
 
   return (
     <div className="rounded-lg border bg-card p-3">

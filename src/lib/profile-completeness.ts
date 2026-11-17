@@ -60,11 +60,15 @@ export function completeness(p: CompletenessProfile | null | undefined) {
   };
 }
 
-/** O onboarding é obrigatório enquanto faltar algum campo essencial. */
+/** A partir deste percentual o app deixa de pedir atualização de perfil no login. */
+export const PROFILE_COMPLETENESS_THRESHOLD = 75;
+
+/** O onboarding é obrigatório enquanto o perfil estiver abaixo do percentual mínimo. */
 export function needsOnboarding(
   p: (CompletenessProfile & { onboarding_done?: boolean | null }) | null | undefined,
 ) {
   if (!p) return true;
   if (p.onboarding_done) return false;
+  if (completeness(p).percent >= PROFILE_COMPLETENESS_THRESHOLD) return false;
   return missingFields(p, true).length > 0;
 }
