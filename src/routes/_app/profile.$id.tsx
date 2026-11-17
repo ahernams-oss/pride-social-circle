@@ -208,6 +208,23 @@ function ProfilePage() {
 
   if (!profile) return <p className="py-12 text-center text-muted-foreground">Carregando perfil...</p>;
 
+  const completenessFields: Array<{ label: string; filled: boolean }> = [
+    { label: "Foto de perfil", filled: !!profile.avatar_url },
+    { label: "Bio", filled: !!profile.bio?.trim() },
+    { label: "Telefone celular", filled: !!profile.phone?.trim() },
+    { label: "E-mail", filled: !!profile.email?.trim() },
+    { label: "Data de nascimento", filled: !!profile.birth_date },
+    { label: "CEP", filled: !!profile.cep?.trim() },
+    { label: "Logradouro", filled: !!profile.logradouro?.trim() },
+    { label: "Número", filled: !!profile.numero?.trim() },
+    { label: "Bairro", filled: !!profile.bairro?.trim() },
+    { label: "Cidade", filled: !!profile.city?.trim() },
+    { label: "Estado (UF)", filled: !!profile.estado?.trim() },
+    { label: "Cargo no clube", filled: !!profile.role_in_club?.trim() },
+  ];
+  const missing = completenessFields.filter((f) => !f.filled);
+  const percent = Math.round(((completenessFields.length - missing.length) / completenessFields.length) * 100);
+
   return (
     <div className="space-y-4">
       <div className="overflow-hidden rounded-xl border bg-card shadow-sm">
@@ -334,6 +351,31 @@ function ProfilePage() {
           )}
         </div>
       </div>
+
+      {isMe && (
+        <div className="rounded-xl border border-yellow-300 bg-yellow-50 p-4 shadow-sm dark:border-yellow-700 dark:bg-yellow-950/30">
+          <div className="flex items-center justify-between gap-2">
+            <h2 className="text-sm font-semibold text-yellow-900 dark:text-yellow-200">
+              Perfil {percent}% completo
+            </h2>
+            {missing.length > 0 && (
+              <Button size="sm" variant="outline" className="border-yellow-400 text-yellow-900 dark:text-yellow-200" onClick={() => setEditing(true)}>
+                <Pencil className="mr-1 h-3.5 w-3.5" /> Completar agora
+              </Button>
+            )}
+          </div>
+          <div className="mt-2 h-2.5 w-full overflow-hidden rounded-full bg-yellow-200 dark:bg-yellow-900">
+            <div className="h-full rounded-full bg-yellow-500 transition-all" style={{ width: `${percent}%` }} />
+          </div>
+          {missing.length > 0 ? (
+            <p className="mt-2 text-sm text-yellow-800 dark:text-yellow-300">
+              Para chegar a 100%, preencha: <strong>{missing.map((f) => f.label).join(", ")}</strong>.
+            </p>
+          ) : (
+            <p className="mt-2 text-sm text-yellow-800 dark:text-yellow-300">Parabéns! Seu perfil está 100% completo.</p>
+          )}
+        </div>
+      )}
 
       <div className="rounded-xl border bg-card p-4 shadow-sm">
         <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-muted-foreground">Histórico de cargos</h2>
