@@ -172,6 +172,22 @@ function EventsPage() {
         )}
       </div>
       {report && <EventReport eventId={report.id} title={report.title} open={!!report} onOpenChange={(v) => !v && setReport(null)} />}
+
+      <Dialog open={!!editing} onOpenChange={(v) => !v && setEditing(null)}>
+        <DialogContent>
+          <DialogHeader><DialogTitle>Editar evento</DialogTitle></DialogHeader>
+          <form onSubmit={update} className="space-y-3">
+            <div><Label>Título</Label><Input required value={editForm.title} onChange={(e) => setEditForm({ ...editForm, title: e.target.value })} /></div>
+            <div className="grid gap-3 sm:grid-cols-2">
+              <div className="min-w-0"><Label htmlFor="edit-event-start">Data e hora de início</Label><Input id="edit-event-start" required type="datetime-local" value={editForm.starts_at} onChange={(e) => setEditForm({ ...editForm, starts_at: e.target.value })} /></div>
+              <div className="min-w-0"><Label htmlFor="edit-event-end">Data e hora de fim</Label><Input id="edit-event-end" required type="datetime-local" value={editForm.ends_at} onChange={(e) => setEditForm({ ...editForm, ends_at: e.target.value })} /></div>
+            </div>
+            <div><Label>Local</Label><Input value={editForm.location} onChange={(e) => setEditForm({ ...editForm, location: e.target.value })} /></div>
+            <div><Label>Descrição</Label><Textarea value={editForm.description} onChange={(e) => setEditForm({ ...editForm, description: e.target.value })} rows={3} /></div>
+            <Button type="submit" className="w-full">Salvar alterações</Button>
+          </form>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
