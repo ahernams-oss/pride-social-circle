@@ -57,12 +57,14 @@ function EventsPage() {
     const { error } = await supabase.from("events").insert({
       title: form.title, description: form.description, location: form.location,
       starts_at: new Date(form.starts_at).toISOString(),
-      ends_at: new Date(form.ends_at).toISOString(), created_by: user.id,
+      ends_at: new Date(form.ends_at).toISOString(),
+      registration_deadline: form.registration_deadline ? new Date(form.registration_deadline).toISOString() : null,
+      created_by: user.id,
     });
     if (error) return toast.error(error.message);
     toast.success("Evento criado");
     setOpen(false);
-    setForm({ title: "", description: "", location: "", starts_at: "", ends_at: "" });
+    setForm({ title: "", description: "", location: "", starts_at: "", ends_at: "", registration_deadline: "" });
     await load();
   };
 
@@ -81,6 +83,7 @@ function EventsPage() {
       location: ev.location,
       starts_at: toLocalInput(ev.starts_at),
       ends_at: toLocalInput(ev.ends_at),
+      registration_deadline: toLocalInput(ev.registration_deadline),
     });
   };
 
@@ -91,6 +94,7 @@ function EventsPage() {
       title: editForm.title, description: editForm.description, location: editForm.location,
       starts_at: new Date(editForm.starts_at).toISOString(),
       ends_at: new Date(editForm.ends_at).toISOString(),
+      registration_deadline: editForm.registration_deadline ? new Date(editForm.registration_deadline).toISOString() : null,
     }).eq("id", editing.id);
     if (error) return toast.error(error.message);
     toast.success("Evento atualizado");
