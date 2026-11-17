@@ -271,6 +271,11 @@ function MissionsPage() {
                 </div>
                 {m.description && <p className="mt-1 text-sm text-muted-foreground">{m.description}</p>}
               </div>
+              {(isAdmin || can("missions", "edit")) && (
+                <Button variant="ghost" size="icon" title="Editar missão" onClick={() => openEdit(m)}>
+                  <Pencil className="h-4 w-4" />
+                </Button>
+              )}
               {(isAdmin || can("missions", "delete")) && (
                 <Button variant="ghost" size="icon" onClick={() => remove(m.id)}>
                   <Trash2 className="h-4 w-4" />
