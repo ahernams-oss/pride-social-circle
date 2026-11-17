@@ -15,7 +15,7 @@ import { Sparkles } from "lucide-react";
 
 type Companion = { name: string; age: string; is_lion: boolean };
 
-export function AttendButton({ eventId, userId, onChange }: { eventId: string; userId: string; onChange?: () => void }) {
+export function AttendButton({ eventId, userId, registrationDeadline, onChange }: { eventId: string; userId: string; registrationDeadline?: string | null; onChange?: () => void }) {
   const [att, setAtt] = useState<{ id: string; count: number } | null>(null);
   const [open, setOpen] = useState(false);
   const [comps, setComps] = useState<Companion[]>([]);
@@ -63,6 +63,8 @@ export function AttendButton({ eventId, userId, onChange }: { eventId: string; u
           </span>
           <Button size="sm" variant="ghost" onClick={cancel}>Cancelar presença</Button>
         </div>
+      ) : registrationDeadline && new Date(registrationDeadline).getTime() < Date.now() ? (
+        <span className="text-sm text-muted-foreground">Inscrições encerradas</span>
       ) : (
         <Button size="sm" onClick={() => setOpen(true)}>Vou participar</Button>
       )}
