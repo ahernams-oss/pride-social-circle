@@ -171,7 +171,7 @@ function KioskPage() {
                     <RadioGroupItem value="branco" /> <span>Voto em branco</span>
                   </label>
                   <label className="flex cursor-pointer items-center gap-3 rounded border p-3 hover:bg-accent">
-                    <RadioGroupItem value="nulo" /> <span>Voto nulo</span>
+                    <RadioGroupItem value="nulo" /> <span>Não</span>
                   </label>
                 </RadioGroup>
               </CardContent>

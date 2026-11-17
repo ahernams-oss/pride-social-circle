@@ -760,9 +760,10 @@ function buildApuracaoReport(
     const total = list.reduce((s, x) => s + Number(x.votos), 0);
     const p = (n: number) => (total ? (n / total) * 100 : 0);
     const sum = (tipo: string) => list.filter((x) => x.tipo === tipo).reduce((s, x) => s + Number(x.votos), 0);
-    const nulos = sum("nulo");
-    const contrarios = sum("nao");
-    const favoraveis = sum("sim");
+    // Sim = votos no candidato; Não = opção "Não" (gravada como nulo); Branco = gravado como "nao"
+    const favoraveis = sum("candidato") + sum("sim");
+    const contrarios = sum("nulo");
+    const nulos = sum("nao");
     return {
       cargo,
       totalVotos: total,
@@ -928,7 +929,7 @@ function ApuracaoView({ items, status, eleicao, cands, presidente }: {
               <div className="font-semibold">{c.contrarios} · {c.contrariosPct.toFixed(1)}%</div>
             </div>
             <div className="rounded-md border p-2">
-              <div className="text-xs text-muted-foreground">Nulos</div>
+              <div className="text-xs text-muted-foreground">Brancos</div>
               <div className="font-semibold">{c.nulos} · {c.nulosPct.toFixed(1)}%</div>
             </div>
           </div>

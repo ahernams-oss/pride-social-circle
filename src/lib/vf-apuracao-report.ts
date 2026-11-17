@@ -63,7 +63,7 @@ export function cargoSlices(c: ApuracaoCargoReport): PieSlice[] {
   }));
   if (c.favoraveis > 0) slices.push({ label: "Favoráveis (Sim)", value: c.favoraveis, color: "#4caf50" });
   if (c.contrarios > 0) slices.push({ label: "Contrários (Não)", value: c.contrarios, color: "#e53935" });
-  if (c.nulos > 0) slices.push({ label: "Nulos", value: c.nulos, color: "#9e9e9e" });
+  if (c.nulos > 0) slices.push({ label: "Brancos", value: c.nulos, color: "#9e9e9e" });
   return slices.filter((s) => s.value > 0);
 }
 
@@ -212,7 +212,7 @@ export async function exportApuracaoPdf(d: ApuracaoReport) {
       body: [
         ["Votos favoráveis (Sim)", String(c.favoraveis), pct(c.favoraveisPct)],
         ["Votos contrários (Não)", String(c.contrarios), pct(c.contrariosPct)],
-        ["Votos nulos", String(c.nulos), pct(c.nulosPct)],
+        ["Votos em branco", String(c.nulos), pct(c.nulosPct)],
         ["Total de votos", String(c.totalVotos), "100,0%"],
       ],
       styles: { fontSize: 9 },
@@ -279,7 +279,7 @@ export async function exportApuracaoWord(d: ApuracaoReport) {
       <tr><th align="left">Resumo</th><th align="right">Votos</th><th align="right">%</th></tr>
       <tr><td>Votos favoráveis (Sim)</td><td align="right">${c.favoraveis}</td><td align="right">${pct(c.favoraveisPct)}</td></tr>
       <tr><td>Votos contrários (Não)</td><td align="right">${c.contrarios}</td><td align="right">${pct(c.contrariosPct)}</td></tr>
-      <tr><td>Votos nulos</td><td align="right">${c.nulos}</td><td align="right">${pct(c.nulosPct)}</td></tr>
+      <tr><td>Votos em branco</td><td align="right">${c.nulos}</td><td align="right">${pct(c.nulosPct)}</td></tr>
       <tr><td><strong>Total de votos</strong></td><td align="right"><strong>${c.totalVotos}</strong></td><td align="right">100,0%</td></tr>
     </table>${(() => {
       const pie = renderPieDataUrl(c);
@@ -326,7 +326,7 @@ export function exportApuracaoExcel(d: ApuracaoReport) {
     }
     rows.push(["Votos favoráveis (Sim)", "", c.favoraveis, Number(c.favoraveisPct.toFixed(1)), ""]);
     rows.push(["Votos contrários (Não)", "", c.contrarios, Number(c.contrariosPct.toFixed(1)), ""]);
-    rows.push(["Votos nulos", "", c.nulos, Number(c.nulosPct.toFixed(1)), ""]);
+    rows.push(["Votos em branco", "", c.nulos, Number(c.nulosPct.toFixed(1)), ""]);
     rows.push(["Total de votos", "", c.totalVotos, 100, ""]);
     rows.push([]);
   }

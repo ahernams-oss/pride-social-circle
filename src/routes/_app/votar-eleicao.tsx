@@ -119,7 +119,7 @@ function Page() {
             ))}
             <div className="flex gap-2">
               <Button size="sm" variant={votos[cargo] === "branco" ? "default" : "outline"} onClick={() => setVotos({ ...votos, [cargo]: "branco" })}>Branco</Button>
-              <Button size="sm" variant={votos[cargo] === "nulo" ? "default" : "outline"} onClick={() => setVotos({ ...votos, [cargo]: "nulo" })}>Nulo</Button>
+              <Button size="sm" variant={votos[cargo] === "nulo" ? "default" : "outline"} onClick={() => setVotos({ ...votos, [cargo]: "nulo" })}>Não</Button>
             </div>
           </div>
         </CardContent></Card>
