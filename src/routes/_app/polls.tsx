@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAccess } from "@/lib/access-control";
 import { useAuth } from "@/lib/auth-context";
@@ -54,6 +54,27 @@ function PollsPage() {
     setLoading(false);
   }, []);
   useEffect(() => { load(); }, [load]);
+
+  const FORM_KEY = "poll-form-draft";
+  const restored = useRef(false);
+  useEffect(() => {
+    if (restored.current) return; restored.current = true;
+    try {
+      const raw = localStorage.getItem(FORM_KEY); if (!raw) return;
+      const d = JSON.parse(raw);
+      setTitle(d.title ?? ""); setDescription(d.description ?? ""); setStartsAt(d.startsAt ?? ""); setEndsAt(d.endsAt ?? "");
+      setEditingId(d.editingId ?? null); setTitlePath(d.titlePath ?? null);
+      if (Array.isArray(d.qs) && d.qs.length) setQs(d.qs.map((q: QDraft) => ({ ...q, image: null, optionImages: q.options.map(() => null) })));
+      if (d.open) setOpen(true);
+    } catch { /* ignore */ }
+  }, []);
+  useEffect(() => {
+    if (!restored.current) return;
+    const dirty = open || title || description || qs.some((q) => q.text || q.options.some(Boolean));
+    if (!dirty) { localStorage.removeItem(FORM_KEY); return; }
+    localStorage.setItem(FORM_KEY, JSON.stringify({ open, title, description, startsAt, endsAt, editingId, titlePath,
+      qs: qs.map((q) => ({ ...q, image: null, optionImages: [] })) }));
+  }, [open, title, description, startsAt, endsAt, editingId, titlePath, qs]);
 
   const updQ = (i: number, patch: Partial<QDraft>) => setQs((a) => a.map((q, j) => (j === i ? { ...q, ...patch } : q)));
 
@@ -122,15 +143,15 @@ function PollsPage() {
         <BarChart3 className="h-5 w-5 text-primary" />
         <h1 className="text-xl font-bold">Enquetes</h1>
         {can("polls", "create") && (
-          <Button className="ml-auto" onClick={() => { reset(); setOpen(true); }}><Plus className="mr-1 h-4 w-4" /> Nova enquete</Button>
+          <Button className="ml-auto" onClick={() => { if (editingId) reset(); setOpen(true); }}><Plus className="mr-1 h-4 w-4" /> Nova enquete</Button>
         )}
       </div>
       {loading ? <p className="text-muted-foreground">Carregando...</p>
         : polls.length === 0 ? <div className="rounded-xl border bg-card p-10 text-center text-muted-foreground">Nenhuma enquete cadastrada.</div>
         : polls.map((p) => <PollCard key={p.id} poll={p} canDelete={can("polls", "delete")} canManage={can("polls", "create") || can("polls", "edit")} onDeleted={load} onEdit={startEdit} />)}
 
-      <Dialog open={open} onOpenChange={(o) => { setOpen(o); if (!o) reset(); }}>
-        <DialogContent className="max-h-[90dvh] overflow-y-auto sm:max-w-2xl">
+      <Dialog open={open} onOpenChange={setOpen}>
+        <DialogContent onInteractOutside={(e) => e.preventDefault()} onFocusOutside={(e) => e.preventDefault()} className="max-h-[90dvh] overflow-y-auto sm:max-w-2xl">
           <DialogHeader><DialogTitle>{editingId ? "Editar rascunho" : "Nova enquete"}</DialogTitle></DialogHeader>
           <div className="space-y-4">
             <div><Label>Título</Label><Input value={title} onChange={(e) => setTitle(e.target.value)} /><div className="mt-2"><PollImagePicker file={titleImage} onChange={setTitleImage} label="Imagem do título" path={titlePath} onClearPath={() => setTitlePath(null)} /></div></div>
@@ -163,7 +184,7 @@ function PollsPage() {
             <Button variant="outline" onClick={() => setQs((a) => [...a, emptyQ()])}><Plus className="mr-1 h-4 w-4" /> Adicionar pergunta</Button>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setOpen(false)}>Cancelar</Button>
+            <Button variant="outline" onClick={() => { if (confirm("Descartar o que foi preenchido?")) { setOpen(false); reset(); } }}>Cancelar</Button>
             <Button variant="secondary" onClick={() => save(false)} disabled={saving}>{saving ? "Salvando..." : "Salvar rascunho"}</Button>
             <Button onClick={() => save(true)} disabled={saving}>Publicar</Button>
           </DialogFooter>
