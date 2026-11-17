@@ -134,6 +134,13 @@
       "when": 1794874847089,
       "tag": "0018_restrict_super_admins_read",
       "breakpoints": true
+    },
+    {
+      "idx": 19,
+      "version": "7",
+      "when": 1794877220095,
+      "tag": "0019_event_forms",
+      "breakpoints": true
     }
   ]
 }

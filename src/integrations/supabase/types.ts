@@ -588,6 +588,79 @@ export type Database = {
           },
         ]
       }
+      event_form_responses: {
+        Row: {
+          answers: Json
+          created_at: string
+          form_id: string
+          id: string
+          user_id: string
+        }
+        Insert: {
+          answers?: Json
+          created_at?: string
+          form_id: string
+          id?: string
+          user_id: string
+        }
+        Update: {
+          answers?: Json
+          created_at?: string
+          form_id?: string
+          id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "event_form_responses_form_id_fkey"
+            columns: ["form_id"]
+            isOneToOne: false
+            referencedRelation: "event_forms"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      event_forms: {
+        Row: {
+          created_at: string
+          created_by: string
+          description: string
+          event_id: string
+          id: string
+          questions: Json
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by: string
+          description?: string
+          event_id: string
+          id?: string
+          questions?: Json
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          description?: string
+          event_id?: string
+          id?: string
+          questions?: Json
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "event_forms_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       events: {
         Row: {
           created_at: string
@@ -1699,6 +1772,14 @@ export type Database = {
       }
       admin_set_user_active: {
         Args: { _active: boolean; _reason?: string; _user_id: string }
+        Returns: boolean
+      }
+      can_manage_event: {
+        Args: { _event_id: string; _user: string }
+        Returns: boolean
+      }
+      can_manage_event_form: {
+        Args: { _form_id: string; _user: string }
         Returns: boolean
       }
       can_menu: {

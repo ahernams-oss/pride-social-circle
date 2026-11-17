@@ -9,6 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Calendar, MapPin, Plus, Trash2 } from "lucide-react";
 import { toast } from "sonner";
+import { EventFormsButton } from "@/components/EventForms";
 import { AttendButton, EventReport, BarChart3 } from "@/components/EventAttendance";
 
 export const Route = createFileRoute("/_app/events")({
@@ -115,6 +116,7 @@ function EventsPage() {
                 {ev.description && <p className="mt-2 whitespace-pre-wrap text-sm">{ev.description}</p>}
                 <div className="mt-3 flex flex-wrap items-center gap-2">
                   {user && <AttendButton eventId={ev.id} userId={user.id} />}
+                  {user && <EventFormsButton eventId={ev.id} eventTitle={ev.title} userId={user.id} canManage={isAdmin || ev.created_by === user.id} />}
                   {isAdmin && <Button size="sm" variant="outline" onClick={() => setReport(ev)}><BarChart3 className="mr-1 h-4 w-4" />Relatório</Button>}
                 </div>
               </div>
