@@ -37,7 +37,7 @@ import { Route as AppRankingRouteImport } from './routes/_app/ranking'
 import { Route as AppVotarEleicaoRouteImport } from './routes/_app/votar-eleicao'
 import { Route as ApiFeedImageRouteImport } from './routes/api/feed-image'
 import { Route as AppAdminLaurearRouteImport } from './routes/_app/admin_.laurear'
-import { Route as AppElectionsIdRouteImport } from './routes/_app/elections.$id'
+import { Route as AppElectionsIdRouteImport } from './routes/_app/elections_.$id'
 import { Route as AppEleicoesOficiaisIndexRouteImport } from './routes/_app/eleicoes-oficiais.index'
 import { Route as AppEleicoesOficiaisIdRouteImport } from './routes/_app/eleicoes-oficiais.$id'
 import { Route as AppLionsHistoryIndexRouteImport } from './routes/_app/lions-history.index'
@@ -186,9 +186,9 @@ const AppAdminLaurearRoute = AppAdminLaurearRouteImport.update({
   getParentRoute: () => AppRoute,
 } as any)
 const AppElectionsIdRoute = AppElectionsIdRouteImport.update({
-  id: '/$id',
-  path: '/$id',
-  getParentRoute: () => AppElectionsRoute,
+  id: '/elections_/$id',
+  path: '/elections/$id',
+  getParentRoute: () => AppRoute,
 } as any)
 const AppEleicoesOficiaisIndexRoute =
   AppEleicoesOficiaisIndexRouteImport.update({
@@ -240,7 +240,7 @@ export interface FileRoutesByFullPath {
   '/district-roles': typeof AppDistrictRolesRoute
   '/distrito': typeof AppDistritoRoute
   '/documents': typeof AppDocumentsRoute
-  '/elections': typeof AppElectionsRouteWithChildren
+  '/elections': typeof AppElectionsRoute
   '/eleicoes-oficiais': typeof AppEleicoesOficiaisRouteWithChildren
   '/events': typeof AppEventsRoute
   '/feed': typeof AppFeedRoute
@@ -277,7 +277,7 @@ export interface FileRoutesByTo {
   '/district-roles': typeof AppDistrictRolesRoute
   '/distrito': typeof AppDistritoRoute
   '/documents': typeof AppDocumentsRoute
-  '/elections': typeof AppElectionsRouteWithChildren
+  '/elections': typeof AppElectionsRoute
   '/events': typeof AppEventsRoute
   '/feed': typeof AppFeedRoute
   '/friends': typeof AppFriendsRoute
@@ -314,7 +314,7 @@ export interface FileRoutesById {
   '/_app/district-roles': typeof AppDistrictRolesRoute
   '/_app/distrito': typeof AppDistritoRoute
   '/_app/documents': typeof AppDocumentsRoute
-  '/_app/elections': typeof AppElectionsRouteWithChildren
+  '/_app/elections': typeof AppElectionsRoute
   '/_app/eleicoes-oficiais': typeof AppEleicoesOficiaisRouteWithChildren
   '/_app/events': typeof AppEventsRoute
   '/_app/feed': typeof AppFeedRoute
@@ -330,7 +330,7 @@ export interface FileRoutesById {
   '/_app/votar-eleicao': typeof AppVotarEleicaoRoute
   '/api/feed-image': typeof ApiFeedImageRoute
   '/_app/admin_/laurear': typeof AppAdminLaurearRoute
-  '/_app/elections/$id': typeof AppElectionsIdRoute
+  '/_app/elections_/$id': typeof AppElectionsIdRoute
   '/_app/eleicoes-oficiais/$id': typeof AppEleicoesOficiaisIdRoute
   '/_app/lions-history/certificados': typeof AppLionsHistoryCertificadosRoute
   '/_app/lions-history/titulos': typeof AppLionsHistoryTitulosRoute
@@ -442,7 +442,7 @@ export interface FileRouteTypes {
     | '/_app/votar-eleicao'
     | '/api/feed-image'
     | '/_app/admin_/laurear'
-    | '/_app/elections/$id'
+    | '/_app/elections_/$id'
     | '/_app/eleicoes-oficiais/$id'
     | '/_app/lions-history/certificados'
     | '/_app/lions-history/titulos'
@@ -661,12 +661,12 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppAdminLaurearRouteImport
       parentRoute: typeof AppRoute
     }
-    '/_app/elections/$id': {
-      id: '/_app/elections/$id'
-      path: '/$id'
+    '/_app/elections_/$id': {
+      id: '/_app/elections_/$id'
+      path: '/elections/$id'
       fullPath: '/elections/$id'
       preLoaderRoute: typeof AppElectionsIdRouteImport
-      parentRoute: typeof AppElectionsRoute
+      parentRoute: typeof AppRoute
     }
     '/_app/eleicoes-oficiais/': {
       id: '/_app/eleicoes-oficiais/'
@@ -720,18 +720,6 @@ declare module '@tanstack/react-router' {
   }
 }
 
-interface AppElectionsRouteChildren {
-  AppElectionsIdRoute: typeof AppElectionsIdRoute
-}
-
-const AppElectionsRouteChildren: AppElectionsRouteChildren = {
-  AppElectionsIdRoute: AppElectionsIdRoute,
-}
-
-const AppElectionsRouteWithChildren = AppElectionsRoute._addFileChildren(
-  AppElectionsRouteChildren,
-)
-
 interface AppEleicoesOficiaisRouteChildren {
   AppEleicoesOficiaisIdRoute: typeof AppEleicoesOficiaisIdRoute
   AppEleicoesOficiaisIndexRoute: typeof AppEleicoesOficiaisIndexRoute
@@ -768,7 +756,7 @@ interface AppRouteChildren {
   AppDistrictRolesRoute: typeof AppDistrictRolesRoute
   AppDistritoRoute: typeof AppDistritoRoute
   AppDocumentsRoute: typeof AppDocumentsRoute
-  AppElectionsRoute: typeof AppElectionsRouteWithChildren
+  AppElectionsRoute: typeof AppElectionsRoute
   AppEleicoesOficiaisRoute: typeof AppEleicoesOficiaisRouteWithChildren
   AppEventsRoute: typeof AppEventsRoute
   AppFeedRoute: typeof AppFeedRoute
@@ -783,6 +771,7 @@ interface AppRouteChildren {
   AppRankingRoute: typeof AppRankingRoute
   AppVotarEleicaoRoute: typeof AppVotarEleicaoRoute
   AppAdminLaurearRoute: typeof AppAdminLaurearRoute
+  AppElectionsIdRoute: typeof AppElectionsIdRoute
   AppProfileIdRoute: typeof AppProfileIdRoute
 }
 
@@ -793,7 +782,7 @@ const AppRouteChildren: AppRouteChildren = {
   AppDistrictRolesRoute: AppDistrictRolesRoute,
   AppDistritoRoute: AppDistritoRoute,
   AppDocumentsRoute: AppDocumentsRoute,
-  AppElectionsRoute: AppElectionsRouteWithChildren,
+  AppElectionsRoute: AppElectionsRoute,
   AppEleicoesOficiaisRoute: AppEleicoesOficiaisRouteWithChildren,
   AppEventsRoute: AppEventsRoute,
   AppFeedRoute: AppFeedRoute,
@@ -808,6 +797,7 @@ const AppRouteChildren: AppRouteChildren = {
   AppRankingRoute: AppRankingRoute,
   AppVotarEleicaoRoute: AppVotarEleicaoRoute,
   AppAdminLaurearRoute: AppAdminLaurearRoute,
+  AppElectionsIdRoute: AppElectionsIdRoute,
   AppProfileIdRoute: AppProfileIdRoute,
 }
 

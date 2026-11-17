@@ -4,10 +4,10 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth-context";
 import { ElectionDetail } from "@/components/ElectionDetail";
 
-export const Route = createFileRoute("/_app/elections/$id")({ component: ElectionDetailPage });
+export const Route = createFileRoute("/_app/elections_/$id")({ component: ElectionDetailPage });
 
 function ElectionDetailPage() {
-  const { id } = useParams({ from: "/_app/elections/$id" });
+  const { id } = useParams({ from: "/_app/elections_/$id" });
   const { user, isAdmin } = useAuth();
   return (
     <ElectionDetail
