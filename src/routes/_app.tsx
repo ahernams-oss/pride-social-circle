@@ -1,3 +1,4 @@
+import { useActivityHeartbeat } from "@/hooks/use-activity-heartbeat";
 import { createFileRoute, Link, Outlet, useNavigate, useLocation, useHydrated } from "@tanstack/react-router";
 import { useAuth } from "@/lib/auth-context";
 import { useEffect, useState } from "react";
@@ -31,6 +32,7 @@ function initials(name: string) {
 function AppLayout() {
   const hydrated = useHydrated();
   const { user, profile, isAdmin, isModerator, loading, signOut } = useAuth();
+  useActivityHeartbeat(user?.id);
   const { can, visibleMenus } = useAccess();
   const nav = useNavigate();
   const loc = useLocation();
