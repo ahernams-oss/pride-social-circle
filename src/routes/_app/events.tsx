@@ -127,6 +127,7 @@ function EventsPage() {
                 <div className="min-w-0"><Label htmlFor="event-start">Data e hora de início</Label><Input id="event-start" required type="datetime-local" value={form.starts_at} onChange={(e) => setForm({ ...form, starts_at: e.target.value })} /></div>
                 <div className="min-w-0"><Label htmlFor="event-end">Data e hora de fim</Label><Input id="event-end" required type="datetime-local" value={form.ends_at} onChange={(e) => setForm({ ...form, ends_at: e.target.value })} /></div>
               </div>
+              <div><Label htmlFor="event-deadline">Inscrições até (opcional)</Label><Input id="event-deadline" type="datetime-local" value={form.registration_deadline} onChange={(e) => setForm({ ...form, registration_deadline: e.target.value })} /></div>
               <div><Label>Local</Label><Input value={form.location} onChange={(e) => setForm({ ...form, location: e.target.value })} /></div>
               <div><Label>Descrição</Label><Textarea value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} rows={3} /></div>
               <Button type="submit" className="w-full">Criar</Button>
@@ -150,11 +151,17 @@ function EventsPage() {
                     <Calendar className="h-3.5 w-3.5" />
                     Fim: {ev.ends_at ? new Date(ev.ends_at).toLocaleString("pt-BR", { dateStyle: "short", timeStyle: "short" }) : "Não informado"}
                   </span>
+                  {ev.registration_deadline && (
+                    <span className="flex items-center gap-1">
+                      <Calendar className="h-3.5 w-3.5" />
+                      Inscrições até: {new Date(ev.registration_deadline).toLocaleString("pt-BR", { dateStyle: "short", timeStyle: "short" })}
+                    </span>
+                  )}
                   {ev.location && <span className="flex items-center gap-1"><MapPin className="h-3.5 w-3.5" />{ev.location}</span>}
                 </div>
                 {ev.description && <p className="mt-2 whitespace-pre-wrap text-sm">{ev.description}</p>}
                 <div className="mt-3 flex flex-wrap items-center gap-2">
-                  {user && <AttendButton eventId={ev.id} userId={user.id} />}
+                  {user && <AttendButton eventId={ev.id} userId={user.id} registrationDeadline={ev.registration_deadline} />}
                   {user && <EventFormsButton eventId={ev.id} eventTitle={ev.title} userId={user.id} canManage={isAdmin || ev.created_by === user.id} />}
                   {isAdmin && <Button size="sm" variant="outline" onClick={() => setReport(ev)}><BarChart3 className="mr-1 h-4 w-4" />Relatório</Button>}
                 </div>
@@ -187,6 +194,7 @@ function EventsPage() {
               <div className="min-w-0"><Label htmlFor="edit-event-start">Data e hora de início</Label><Input id="edit-event-start" required type="datetime-local" value={editForm.starts_at} onChange={(e) => setEditForm({ ...editForm, starts_at: e.target.value })} /></div>
               <div className="min-w-0"><Label htmlFor="edit-event-end">Data e hora de fim</Label><Input id="edit-event-end" required type="datetime-local" value={editForm.ends_at} onChange={(e) => setEditForm({ ...editForm, ends_at: e.target.value })} /></div>
             </div>
+            <div><Label htmlFor="edit-event-deadline">Inscrições até (opcional)</Label><Input id="edit-event-deadline" type="datetime-local" value={editForm.registration_deadline} onChange={(e) => setEditForm({ ...editForm, registration_deadline: e.target.value })} /></div>
             <div><Label>Local</Label><Input value={editForm.location} onChange={(e) => setEditForm({ ...editForm, location: e.target.value })} /></div>
             <div><Label>Descrição</Label><Textarea value={editForm.description} onChange={(e) => setEditForm({ ...editForm, description: e.target.value })} rows={3} /></div>
             <Button type="submit" className="w-full">Salvar alterações</Button>
