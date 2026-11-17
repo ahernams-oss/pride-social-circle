@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Calendar, MapPin, Plus, Trash2 } from "lucide-react";
+import { Calendar, MapPin, Pencil, Plus, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { EventFormsButton } from "@/components/EventForms";
 import { AttendButton, EventReport, BarChart3 } from "@/components/EventAttendance";
@@ -39,6 +39,8 @@ function EventsPage() {
   const [events, setEvents] = useState<Event[]>([]);
   const [open, setOpen] = useState(false);
   const [report, setReport] = useState<Event | null>(null);
+  const [editing, setEditing] = useState<Event | null>(null);
+  const [editForm, setEditForm] = useState({ title: "", description: "", location: "", starts_at: "", ends_at: "" });
   const [form, setForm] = useState({ title: "", description: "", location: "", starts_at: "", ends_at: "" });
 
   const load = useCallback(async () => {
@@ -60,6 +62,38 @@ function EventsPage() {
     toast.success("Evento criado");
     setOpen(false);
     setForm({ title: "", description: "", location: "", starts_at: "", ends_at: "" });
+    await load();
+  };
+
+  const toLocalInput = (iso: string | null) => {
+    if (!iso) return "";
+    const d = new Date(iso);
+    const pad = (n: number) => String(n).padStart(2, "0");
+    return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+  };
+
+  const openEdit = (ev: Event) => {
+    setEditing(ev);
+    setEditForm({
+      title: ev.title,
+      description: ev.description,
+      location: ev.location,
+      starts_at: toLocalInput(ev.starts_at),
+      ends_at: toLocalInput(ev.ends_at),
+    });
+  };
+
+  const update = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editing) return;
+    const { error } = await supabase.from("events").update({
+      title: editForm.title, description: editForm.description, location: editForm.location,
+      starts_at: new Date(editForm.starts_at).toISOString(),
+      ends_at: new Date(editForm.ends_at).toISOString(),
+    }).eq("id", editing.id);
+    if (error) return toast.error(error.message);
+    toast.success("Evento atualizado");
+    setEditing(null);
     await load();
   };
 
@@ -121,9 +155,14 @@ function EventsPage() {
                 </div>
               </div>
               {(isAdmin || ev.created_by === user?.id) && (
-                <Button size="icon" variant="ghost" onClick={() => remove(ev.id)}>
-                  <Trash2 className="h-4 w-4" />
-                </Button>
+                <div className="flex shrink-0 gap-1">
+                  <Button size="icon" variant="ghost" title="Editar evento" onClick={() => openEdit(ev)}>
+                    <Pencil className="h-4 w-4" />
+                  </Button>
+                  <Button size="icon" variant="ghost" title="Excluir evento" onClick={() => remove(ev.id)}>
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                </div>
               )}
             </div>
           </div>
@@ -133,6 +172,22 @@ function EventsPage() {
         )}
       </div>
       {report && <EventReport eventId={report.id} title={report.title} open={!!report} onOpenChange={(v) => !v && setReport(null)} />}
+
+      <Dialog open={!!editing} onOpenChange={(v) => !v && setEditing(null)}>
+        <DialogContent>
+          <DialogHeader><DialogTitle>Editar evento</DialogTitle></DialogHeader>
+          <form onSubmit={update} className="space-y-3">
+            <div><Label>Título</Label><Input required value={editForm.title} onChange={(e) => setEditForm({ ...editForm, title: e.target.value })} /></div>
+            <div className="grid gap-3 sm:grid-cols-2">
+              <div className="min-w-0"><Label htmlFor="edit-event-start">Data e hora de início</Label><Input id="edit-event-start" required type="datetime-local" value={editForm.starts_at} onChange={(e) => setEditForm({ ...editForm, starts_at: e.target.value })} /></div>
+              <div className="min-w-0"><Label htmlFor="edit-event-end">Data e hora de fim</Label><Input id="edit-event-end" required type="datetime-local" value={editForm.ends_at} onChange={(e) => setEditForm({ ...editForm, ends_at: e.target.value })} /></div>
+            </div>
+            <div><Label>Local</Label><Input value={editForm.location} onChange={(e) => setEditForm({ ...editForm, location: e.target.value })} /></div>
+            <div><Label>Descrição</Label><Textarea value={editForm.description} onChange={(e) => setEditForm({ ...editForm, description: e.target.value })} rows={3} /></div>
+            <Button type="submit" className="w-full">Salvar alterações</Button>
+          </form>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
