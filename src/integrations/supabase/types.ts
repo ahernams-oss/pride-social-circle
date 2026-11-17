@@ -1314,6 +1314,27 @@ export type Database = {
         }
         Relationships: []
       }
+      user_activity_daily: {
+        Row: {
+          day: string
+          last_seen_at: string
+          seconds: number
+          user_id: string
+        }
+        Insert: {
+          day?: string
+          last_seen_at?: string
+          seconds?: number
+          user_id: string
+        }
+        Update: {
+          day?: string
+          last_seen_at?: string
+          seconds?: number
+          user_id?: string
+        }
+        Relationships: []
+      }
       user_role_history: {
         Row: {
           created_at: string
@@ -1714,6 +1735,25 @@ export type Database = {
       }
       is_moderator: { Args: { _user_id: string }; Returns: boolean }
       is_super_admin: { Args: { _user_id: string }; Returns: boolean }
+      management_stats: {
+        Args: { _since?: string }
+        Returns: {
+          avatar_url: string
+          club_name: string
+          comments: number
+          events_joined: number
+          full_name: string
+          last_seen_at: string
+          likes_given: number
+          likes_received: number
+          messages: number
+          missions_done: number
+          poll_votes: number
+          posts: number
+          seconds_online: number
+          user_id: string
+        }[]
+      }
       poll_is_draft: { Args: { _poll_id: string }; Returns: boolean }
       poll_results: {
         Args: { _poll_id: string }
@@ -1741,6 +1781,7 @@ export type Database = {
           name: string
         }[]
       }
+      track_activity: { Args: { _seconds: number }; Returns: undefined }
       vf_apuracao: {
         Args: { _eleicao_id: string }
         Returns: {

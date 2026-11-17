@@ -120,6 +120,13 @@
       "when": 1794873520872,
       "tag": "0016_poll_drafts",
       "breakpoints": true
+    },
+    {
+      "idx": 17,
+      "version": "7",
+      "when": 1794874494543,
+      "tag": "0017_management_insights",
+      "breakpoints": true
     }
   ]
 }
