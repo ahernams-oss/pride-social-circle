@@ -6,3 +6,4 @@
 - Events, clubs and missions SELECT policies require an active approved member or a server-verified administrator; signed-out signup uses only the minimal club-directory function to avoid exposing full records.
 - Profile award sections reuse LionsAwards with the viewed recipient ID; database visibility rules remain authoritative so visiting a profile does not widen award access.- Poll votes are readable only by the voter; members see totals through a security-definer results function, and the vote insert policy enforces the poll's start/end window so results stay anonymous and timing can't be bypassed.
 - Super administrators live in a server-managed table; DB functions, a profile trigger and the password-reset server function refuse changes to them, so UI hiding is never the only protection.
+- Event forms store questions as JSON on the form row; responses are one per member and readable only by the respondent, admins or the event creator.
