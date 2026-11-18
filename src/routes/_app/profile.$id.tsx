@@ -42,7 +42,7 @@ function ProfilePage() {
   const [form, setForm] = useState({
     full_name: "", bio: "", club_name: "", city: "", role_in_club: "", role_in_district: "", avatar_url: "",
     birth_date: "", cep: "", logradouro: "", numero: "", complemento: "", bairro: "", estado: "",
-    phone: "", email: "",
+    phone: "", email: "", lions_title: "",
   });
   const [districtRoles, setDistrictRoles] = useState<{ id: string; name: string }[]>([]);
   const [clubRoles, setClubRoles] = useState<{ id: string; name: string }[]>([]);
@@ -68,6 +68,7 @@ function ProfilePage() {
       estado: (p as any).estado ?? "",
       phone: (p as any).phone ?? "",
       email: (p as any).email ?? "",
+      lions_title: (p as any).lions_title ?? "",
     });
 
     const [{ data: dr }, { data: cr }, { data: hist }, { data: edus }] = await Promise.all([
@@ -118,6 +119,7 @@ function ProfilePage() {
       cep: form.cep, logradouro: form.logradouro, numero: form.numero,
       complemento: form.complemento, bairro: form.bairro, estado: form.estado,
       phone: form.phone, email: form.email,
+      lions_title: form.lions_title.trim() || null,
     } as any).eq("id", id);
     if (error) return toast.error(error.message);
     toast.success("Perfil atualizado");
@@ -277,6 +279,20 @@ function ProfilePage() {
                 </div>
               </div>
               <div><Label>Nome</Label><Input value={form.full_name} onChange={(e) => setForm({ ...form, full_name: e.target.value })} /></div>
+              <div>
+                <Label>Título Leonístico</Label>
+                <Input
+                  list="lions-title-options"
+                  placeholder="Ex.: Companheiro, Melvin Jones Fellow, Past Governador"
+                  value={form.lions_title}
+                  onChange={(e) => setForm({ ...form, lions_title: e.target.value })}
+                />
+                <datalist id="lions-title-options">
+                  {["Companheiro", "Companheira", "Leão", "Lion", "Melvin Jones Fellow", "Past Governador", "Ex-Governador", "Sócio Fundador", "Sócio Emérito"].map((t) => (
+                    <option key={t} value={t} />
+                  ))}
+                </datalist>
+              </div>
               <div className="grid grid-cols-2 gap-3">
                 <div><Label>Clube</Label><Input value={form.club_name} onChange={(e) => setForm({ ...form, club_name: e.target.value })} /></div>
                 <div><Label>Cidade</Label><Input value={form.city} onChange={(e) => setForm({ ...form, city: e.target.value })} /></div>
@@ -340,6 +356,9 @@ function ProfilePage() {
           ) : (
             <>
               <h1 className="mt-3 text-2xl font-bold">{profile.full_name}</h1>
+              {profile.lions_title && (
+                <div className="mt-1 text-sm font-medium text-gold">{profile.lions_title}</div>
+              )}
               {profile.role_in_club && <div className="text-sm text-accent-foreground"><span className="rounded-md bg-accent px-2 py-0.5 text-xs font-medium">{profile.role_in_club}</span></div>}
               {profile.role_in_district && <div className="mt-1 text-sm"><span className="rounded-md bg-primary/10 px-2 py-0.5 text-xs font-medium text-primary">Distrito: {profile.role_in_district}</span></div>}
               <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-sm text-muted-foreground">

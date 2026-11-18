@@ -1273,6 +1273,7 @@ export type Database = {
           id: string
           is_active: boolean
           lion_number: string
+          lions_title: string | null
           logradouro: string
           numero: string
           onboarding_done: boolean
@@ -1301,6 +1302,7 @@ export type Database = {
           id: string
           is_active?: boolean
           lion_number?: string
+          lions_title?: string | null
           logradouro?: string
           numero?: string
           onboarding_done?: boolean
@@ -1329,6 +1331,7 @@ export type Database = {
           id?: string
           is_active?: boolean
           lion_number?: string
+          lions_title?: string | null
           logradouro?: string
           numero?: string
           onboarding_done?: boolean
