@@ -157,14 +157,14 @@ function KioskPage() {
                 <h3 className="font-semibold">{cargo}</h3>
                 <RadioGroup value={votos[cargo] ?? ""} onValueChange={(v) => setVotos((p) => ({ ...p, [cargo]: v }))}>
                   {cands.filter((c) => c.cargo === cargo).map((c) => (
-                    <label key={c.id} className={`relative flex cursor-pointer items-center gap-3 overflow-hidden rounded border p-3 pl-5 transition ${votos[cargo] === c.id ? "border-gold bg-gold/15 ring-2 ring-gold" : "hover:bg-accent"}`}>
+                     <label key={c.id} className={`relative flex cursor-pointer items-center gap-4 overflow-hidden rounded border p-4 pl-7 transition ${votos[cargo] === c.id ? "border-gold bg-gold/15 ring-2 ring-gold" : "hover:bg-accent"}`}>
                       {votos[cargo] === c.id && <span aria-hidden className="absolute inset-y-0 left-0 w-2.5 bg-gold" />}
                       <RadioGroupItem value={c.id} />
-                      <Avatar className="h-16 w-16 rounded-md">
+                      <Avatar className="h-32 w-32 shrink-0 rounded-lg sm:h-40 sm:w-40">
                         {c.foto_url ? <AvatarImage src={c.foto_url} alt={c.nome} className="object-cover" /> : null}
-                        <AvatarFallback className="rounded-md text-sm">{c.nome.slice(0, 2).toUpperCase()}</AvatarFallback>
+                        <AvatarFallback className="rounded-lg text-3xl">{c.nome.slice(0, 2).toUpperCase()}</AvatarFallback>
                       </Avatar>
-                      <div className="flex-1"><div className="font-medium">{c.nome}</div>{c.proposta && <div className="text-xs text-muted-foreground">{c.proposta}</div>}</div>
+                      <div className="flex-1"><div className="text-base font-semibold sm:text-lg">{c.nome}</div>{c.proposta && <div className="text-sm text-muted-foreground">{c.proposta}</div>}</div>
                       {c.numero && <Badge variant="outline">{c.numero}</Badge>}
                     </label>
                   ))}
