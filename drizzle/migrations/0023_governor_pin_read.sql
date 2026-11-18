@@ -1,0 +1,1 @@
+CREATE POLICY "governor_pins_admin_read" ON storage.objects FOR SELECT TO authenticated USING (bucket_id = 'governor-pins' AND public.has_role(auth.uid(),'admin'));

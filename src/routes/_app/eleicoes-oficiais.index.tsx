@@ -45,6 +45,7 @@ function Page() {
   const [loading, setLoading] = useState(true);
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState({ titulo: "", descricao: "", distrito: "", data_eleicao: "" });
+  const [pin, setPin] = useState<File | null>(null);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -61,7 +62,13 @@ function Page() {
   const create = async () => {
     if (!user) return;
     if (!form.titulo || !form.data_eleicao) return toast.error("Título e data são obrigatórios");
+    if (!pin) return toast.error("Envie o PIN do Governador");
+    const ext = (pin.name.split(".").pop() || "png").toLowerCase();
+    const pinPath = `${crypto.randomUUID()}.${ext}`;
+    const { error: upErr } = await supabase.storage.from("governor-pins").upload(pinPath, pin, { contentType: pin.type });
+    if (upErr) return toast.error("Erro ao enviar PIN: " + upErr.message);
     const { error } = await supabase.from("vf_eleicoes").insert({
+      pin_url: pinPath,
       titulo: form.titulo,
       descricao: form.descricao || null,
       distrito: form.distrito || null,
@@ -72,6 +79,7 @@ function Page() {
     toast.success("Eleição criada");
     setOpen(false);
     setForm({ titulo: "", descricao: "", distrito: "", data_eleicao: "" });
+    setPin(null);
     load();
   };
 
@@ -100,6 +108,13 @@ function Page() {
                   <Input placeholder="LC-11" value={form.distrito} onChange={(e) => setForm({ ...form, distrito: e.target.value })} /></div>
                 <div className="space-y-1.5"><Label>Data da eleição</Label>
                   <Input type="date" value={form.data_eleicao} onChange={(e) => setForm({ ...form, data_eleicao: e.target.value })} /></div>
+                <div className="space-y-1.5"><Label>PIN do Governador (imagem)</Label>
+                  <Input type="file" accept="image/png,image/jpeg,image/webp" onChange={(e) => {
+                    const f = e.target.files?.[0] ?? null;
+                    if (f && f.size > 2 * 1024 * 1024) { toast.error("Imagem acima de 2 MB"); e.target.value = ""; return; }
+                    setPin(f);
+                  }} />
+                  <p className="text-xs text-muted-foreground">Aparece ao fundo da credencial do delegado.</p></div>
                 <div className="space-y-1.5"><Label>Descrição</Label>
                   <Textarea value={form.descricao} onChange={(e) => setForm({ ...form, descricao: e.target.value })} /></div>
               </div>

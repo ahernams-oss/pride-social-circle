@@ -155,6 +155,20 @@
       "when": 1794965987260,
       "tag": "0021_profile_lions_title",
       "breakpoints": true
+    },
+    {
+      "idx": 22,
+      "version": "7",
+      "when": 1794966763796,
+      "tag": "0022_governor_pin",
+      "breakpoints": true
+    },
+    {
+      "idx": 23,
+      "version": "7",
+      "when": 1794966776056,
+      "tag": "0023_governor_pin_read",
+      "breakpoints": true
     }
   ]
 }

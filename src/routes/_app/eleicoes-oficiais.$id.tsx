@@ -28,7 +28,7 @@ import distritoLogo from "@/assets/distrito-lc11-logo.png.asset.json";
 export const Route = createFileRoute("/_app/eleicoes-oficiais/$id")({ component: Page });
 
 type Status = "configurando" | "credenciamento" | "votacao_aberta" | "votacao_encerrada" | "apurada";
-type Eleicao = { id: string; titulo: string; descricao: string | null; distrito: string | null; data_eleicao: string; status: Status };
+type Eleicao = { id: string; titulo: string; descricao: string | null; distrito: string | null; data_eleicao: string; status: Status; pin_url?: string | null };
 type Candidatura = { id: string; associado_id?: string | null; nome: string; cargo: string; numero: string | null; proposta: string | null; status: string; foto_url: string | null };
 type Delegado = {
   id: string; nome: string; clube: string | null; tipo: "titular" | "suplente" | "nato";
@@ -524,9 +524,13 @@ async function printCredenciais(list: Delegado[], e: Eleicao, presidente: string
   w.document.close();
 
   const dateStr = new Date(e.data_eleicao).toLocaleDateString("pt-BR");
-  const [emblem, district] = await Promise.all([
+  const pinSigned = e.pin_url
+    ? (await supabase.storage.from("governor-pins").createSignedUrl(e.pin_url, 600)).data?.signedUrl ?? null
+    : null;
+  const [emblem, district, pinImg] = await Promise.all([
     assetDataUrl(lciEmblem.url),
     assetDataUrl(distritoLogo.url),
+    pinSigned ? assetDataUrl(pinSigned) : Promise.resolve(null),
   ]);
   const dist = e.distrito || "Distrito LC-11";
   const cards = list.map((d) => {
@@ -541,7 +545,7 @@ async function printCredenciais(list: Delegado[], e: Eleicao, presidente: string
       : `<div class="photo-fallback">${escapeHtml(initials || "DL")}</div>`;
     return `
     <div class="cred"><div class="in">
-      <div class="wm"><img src="${emblem}" alt=""></div>
+      <div class="wm${pinImg ? " pin" : ""}"><img src="${pinImg ?? emblem}" alt=""></div>
       <div class="corner l"><div class="n"></div><div class="g"></div></div>
       <div class="corner r"><div class="n"></div><div class="g"></div></div>
       <div class="hd">
@@ -597,6 +601,7 @@ async function printCredenciais(list: Delegado[], e: Eleicao, presidente: string
       .in{position:relative;overflow:hidden;border:2px solid #14346e;border-radius:12px;background:#fff}
       .wm{position:absolute;right:-40px;bottom:60px;width:320px;opacity:.06;pointer-events:none}
       .wm img{width:100%}
+      .wm.pin{left:50%;right:auto;top:50%;bottom:auto;transform:translate(-50%,-50%);width:360px;opacity:.12}
       .hd{position:relative;display:flex;align-items:stretch;gap:10px;padding:14px 12px 10px}
       .emblem{width:86px;height:86px;object-fit:contain;flex:none}
       .vsep{width:3px;background:#d3a625;flex:none;border-radius:2px}

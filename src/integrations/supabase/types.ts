@@ -1683,6 +1683,7 @@ export type Database = {
           descricao: string | null
           distrito: string | null
           id: string
+          pin_url: string | null
           status: Database["public"]["Enums"]["vf_status_eleicao"]
           titulo: string
           updated_at: string
@@ -1694,6 +1695,7 @@ export type Database = {
           descricao?: string | null
           distrito?: string | null
           id?: string
+          pin_url?: string | null
           status?: Database["public"]["Enums"]["vf_status_eleicao"]
           titulo: string
           updated_at?: string
@@ -1705,6 +1707,7 @@ export type Database = {
           descricao?: string | null
           distrito?: string | null
           id?: string
+          pin_url?: string | null
           status?: Database["public"]["Enums"]["vf_status_eleicao"]
           titulo?: string
           updated_at?: string
