@@ -19,6 +19,17 @@ export function codigoUrnaCredencial(codigoAcesso: string, birthDate?: string | 
   return diaNascimento(birthDate) ? `${codigoAcesso}XX` : codigoUrna(codigoAcesso, birthDate);
 }
 
+/**
+ * Siglas do título Leonístico para preceder o nome (ex.: "MJF PDG Anselmo Hernams").
+ * Aceita tanto o valor da lista ("MJF — Companheiro Melvin Jones") quanto texto livre conjugado ("MJF PDG").
+ */
+export function tituloSiglas(title?: string | null): string {
+  if (!title) return "";
+  const t = title.trim();
+  if (!t) return "";
+  return t.split(/\s*—\s*/)[0]!.trim();
+}
+
 /** Assinatura eletrônica determinística exibida na credencial. */
 export function assinaturaEletronica(seed: string): string {
   let h = 0;

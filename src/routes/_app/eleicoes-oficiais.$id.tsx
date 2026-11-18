@@ -20,7 +20,7 @@ import { toast } from "sonner";
 import { AssociadoCombobox, type Associado } from "@/components/AssociadoCombobox";
 import { CandidatoFotoUpload } from "@/components/CandidatoFotoUpload";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { assinaturaEletronica, codigoUrna, codigoUrnaCredencial } from "@/lib/vf-credencial";
+import { assinaturaEletronica, codigoUrna, codigoUrnaCredencial, tituloSiglas } from "@/lib/vf-credencial";
 import { cn } from "@/lib/utils";
 import lciEmblem from "@/assets/lci-emblem.png.asset.json";
 import distritoLogo from "@/assets/distrito-lc11-logo.png.asset.json";
@@ -36,6 +36,7 @@ type Delegado = {
   associado_id: string | null;
   birth_date?: string | null;
   avatar_url?: string | null;
+  lions_title?: string | null;
 };
 type Comissao = { id: string; nome: string; associado_id?: string | null; funcao: "presidente" | "vice_presidente" | "membro" | "vogal" };
 type FiltroVoto = "todos" | "votou" | "nao_votou";
@@ -76,12 +77,13 @@ function Page() {
     const delegados = (d ?? []) as Delegado[];
     const assocIds = delegados.map((x) => x.associado_id).filter(Boolean) as string[];
     if (assocIds.length > 0) {
-      const { data: profs } = await supabase.from("profiles").select("id, birth_date, avatar_url").in("id", assocIds);
-      const map = new Map((profs ?? []).map((p: any) => [p.id, { birthDate: p.birth_date as string | null, avatarUrl: p.avatar_url as string | null }]));
+      const { data: profs } = await supabase.from("profiles").select("id, birth_date, avatar_url, lions_title").in("id", assocIds);
+      const map = new Map((profs ?? []).map((p: any) => [p.id, { birthDate: p.birth_date as string | null, avatarUrl: p.avatar_url as string | null, lionsTitle: p.lions_title as string | null }]));
       for (const del of delegados) {
         const profile = del.associado_id ? map.get(del.associado_id) : null;
         del.birth_date = profile?.birthDate ?? null;
         del.avatar_url = profile?.avatarUrl ?? null;
+        del.lions_title = profile?.lionsTitle ?? null;
       }
     }
     setDels(delegados);
@@ -528,6 +530,8 @@ async function printCredenciais(list: Delegado[], e: Eleicao, presidente: string
   ]);
   const dist = e.distrito || "Distrito LC-11";
   const cards = list.map((d) => {
+    const siglas = tituloSiglas(d.lions_title);
+    const nomeComTitulo = siglas ? `${siglas} ${d.nome}` : d.nome;
     const initials = d.nome.split(/\s+/).filter(Boolean).slice(0, 2).map((part) => part[0]?.toUpperCase() ?? "").join("");
     const photoUrl = d.avatar_url
       ? (d.avatar_url.startsWith("http") ? d.avatar_url : window.location.origin + d.avatar_url)
@@ -563,7 +567,7 @@ async function printCredenciais(list: Delegado[], e: Eleicao, presidente: string
         <div class="identity">
           <div class="photo-frame">${photo}</div>
           <div class="details">
-            <div class="row"><span class="lbl">Nome</span><span class="val">${escapeHtml(d.nome)}</span></div>
+            <div class="row"><span class="lbl">Nome</span><span class="val">${escapeHtml(nomeComTitulo)}</span></div>
             <div class="row"><span class="lbl">Clube</span><span class="val">${escapeHtml(d.clube ?? "—")}</span></div>
             <div class="row"><span class="lbl">Tipo</span><span class="val">${escapeHtml(d.tipo)}</span></div>
           </div>
