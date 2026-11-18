@@ -30,6 +30,32 @@ function initials(n?: string | null) {
   return (n ?? "L").split(" ").filter(Boolean).slice(0, 2).map((p) => p[0]?.toUpperCase()).join("");
 }
 
+// Títulos Leonísticos oficiais (sigla — nome). O campo aceita digitação livre
+// para títulos conjugados, ex.: "MJF PDG".
+const LIONS_TITLES = [
+  "CL — Companheiro Leão",
+  "CaL — Companheira Leão",
+  "DM — Domadora",
+  "LEO — Companheiro Leo",
+  "IP — Presidente Internacional",
+  "IPIP — Past-Presidente Internacional Imediato",
+  "PIP — Past-Presidente Internacional",
+  "1VPI — 1º Vice-Presidente Internacional",
+  "2VPI — 2º Vice-Presidente Internacional",
+  "ID — Diretor Internacional",
+  "PID — Past-Diretor Internacional",
+  "CC — Presidente Conselho Governadores",
+  "PPC — Past-Presidente Conselho de Governadores",
+  "DG — Governador Distrital",
+  "DGE — Governador de Distrito Eleito",
+  "1VDG — 1º Vice-Governador",
+  "2VDG — 2º Vice-Governador",
+  "IPDG — Past-Governador Imediato",
+  "PDG — Past-Governador Distrital",
+  "MJF — Companheiro Melvin Jones",
+  "PMJF — Companheiro de Melvin Jones Progressivo",
+];
+
 function ProfilePage() {
   const { id } = useParams({ from: "/_app/profile/$id" });
   const { user, refresh } = useAuth();
@@ -283,15 +309,16 @@ function ProfilePage() {
                 <Label>Título Leonístico</Label>
                 <Input
                   list="lions-title-options"
-                  placeholder="Ex.: Companheiro, Melvin Jones Fellow, Past Governador"
+                  placeholder="Ex.: MJF PDG (títulos podem ser conjugados)"
                   value={form.lions_title}
                   onChange={(e) => setForm({ ...form, lions_title: e.target.value })}
                 />
-                <datalist id="lions-title-options">
-                  {["Companheiro", "Companheira", "Leão", "Lion", "Melvin Jones Fellow", "Past Governador", "Ex-Governador", "Sócio Fundador", "Sócio Emérito"].map((t) => (
+                 <datalist id="lions-title-options">
+                  {LIONS_TITLES.map((t) => (
                     <option key={t} value={t} />
                   ))}
                 </datalist>
+                <p className="mt-1 text-xs text-muted-foreground">Escolha da lista ou digite títulos conjugados, ex.: MJF PDG.</p>
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div><Label>Clube</Label><Input value={form.club_name} onChange={(e) => setForm({ ...form, club_name: e.target.value })} /></div>
