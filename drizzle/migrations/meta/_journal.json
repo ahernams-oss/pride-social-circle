@@ -176,6 +176,13 @@
       "when": 1795290849173,
       "tag": "0024_district_settings",
       "breakpoints": true
+    },
+    {
+      "idx": 25,
+      "version": "7",
+      "when": 1795291268760,
+      "tag": "0025_restrict_district_settings_read",
+      "breakpoints": true
     }
   ]
 }
