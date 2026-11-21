@@ -1,8 +1,9 @@
-import { describe, it, expect } from "bun:test";
+import { describe, test } from "node:test";
+import { strictEqual } from "node:assert";
 import { shouldCongratulateProfile } from "./birthday-message";
 describe("parabéns do governador pelo perfil", () => {
-  it("só aparece acima de 80%", () => {
-    expect(shouldCongratulateProfile(80)).toBe(false);
-    expect(shouldCongratulateProfile(81)).toBe(true);
+  test("só aparece acima de 80%", () => {
+    strictEqual(shouldCongratulateProfile(80), false);
+    strictEqual(shouldCongratulateProfile(81), true);
   });
 });
