@@ -18,6 +18,27 @@ export function anoLeonistico(ref: Date = new Date()): string {
   return `${start}/${start + 1}`;
 }
 
+export const ANO_LEONISTICO_KEY = "ano_leonistico";
+
+/**
+ * Ano Leonístico configurado em Admin → Cargos do Distrito.
+ * Sem configuração, usa o ano calculado automaticamente (julho a junho).
+ */
+export async function fetchAnoLeonistico(): Promise<string> {
+  try {
+    const { data } = await supabase
+      .from("district_settings")
+      .select("value")
+      .eq("key", ANO_LEONISTICO_KEY)
+      .maybeSingle();
+    const v = data?.value?.trim();
+    if (v) return v;
+  } catch {
+    // usa o cálculo automático
+  }
+  return anoLeonistico();
+}
+
 export type GovernorSignature = {
   /** Siglas do título + nome, ex.: "CL MJF André Luís Périssé". */
   signedName: string;
@@ -64,6 +85,17 @@ export async function fetchCurrentGovernor(): Promise<GovernorSignature | null> 
     // sem governador disponível
   }
   return null;
+}
+
+/** Dados da assinatura do governador: nome assinado + ano leonístico configurado. */
+export type GovernorSignatureData = {
+  governor: GovernorSignature | null;
+  anoLeonistico: string;
+};
+
+export async function fetchGovernorSignatureData(): Promise<GovernorSignatureData> {
+  const [governor, ano] = await Promise.all([fetchCurrentGovernor(), fetchAnoLeonistico()]);
+  return { governor, anoLeonistico: ano };
 }
 
 /** Monta a mensagem de aniversário com o nome do aniversariante. */

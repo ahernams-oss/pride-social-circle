@@ -15,8 +15,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Award, Plus, Trash2, Pencil, X, UserPlus, UserX } from "lucide-react";
+import { Award, Plus, Trash2, Pencil, X, UserPlus, UserX, CalendarRange } from "lucide-react";
 import { toast } from "sonner";
+import { ANO_LEONISTICO_KEY, anoLeonistico } from "@/lib/birthday-message";
 
 export const Route = createFileRoute("/_app/district-roles")({ component: DistrictRolesPage });
 
@@ -44,16 +45,20 @@ function DistrictRolesPage() {
   const [form, setForm] = useState({ name: "", description: "" });
   const [assigningId, setAssigningId] = useState<string | null>(null);
   const [assignSelect, setAssignSelect] = useState<string>("");
+  const [anoLeonisticoValue, setAnoLeonisticoValue] = useState("");
+  const [savingAno, setSavingAno] = useState(false);
 
   const load = async () => {
     setLoading(true);
-    const [{ data: r, error: er }, { data: p }] = await Promise.all([
+    const [{ data: r, error: er }, { data: p }, { data: s }] = await Promise.all([
       supabase.from("district_roles").select("*").order("name"),
       supabase.from("profiles").select("id,full_name,avatar_url,club_name").order("full_name"),
+      supabase.from("district_settings").select("key,value").eq("key", ANO_LEONISTICO_KEY).maybeSingle(),
     ]);
     if (er) toast.error(er.message);
     setRoles((r as DistrictRole[]) ?? []);
     setProfiles((p as ProfileLite[]) ?? []);
+    setAnoLeonisticoValue(s?.value?.trim() || anoLeonistico());
     setLoading(false);
   };
 
@@ -125,6 +130,22 @@ function DistrictRolesPage() {
     load();
   };
 
+  const saveAnoLeonistico = async () => {
+    if (!user || !isAdmin) return;
+    const value = anoLeonisticoValue.trim();
+    if (!value) { toast.error("Informe o Ano Leonístico, ex.: 2026/2027"); return; }
+    setSavingAno(true);
+    const { error } = await supabase
+      .from("district_settings")
+      .upsert(
+        { key: ANO_LEONISTICO_KEY, value, updated_by: user.id, updated_at: new Date().toISOString() },
+        { onConflict: "key" },
+      );
+    setSavingAno(false);
+    if (error) { toast.error(error.message); return; }
+    toast.success("Ano Leonístico atualizado");
+  };
+
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
@@ -138,6 +159,40 @@ function DistrictRolesPage() {
           </Button>
         )}
       </div>
+
+      <Card>
+        <CardContent className="flex flex-col gap-3 p-4 sm:flex-row sm:items-end sm:justify-between">
+          <div className="flex items-start gap-3">
+            <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-accent/30 text-primary">
+              <CalendarRange className="h-5 w-5" />
+            </span>
+            <div className="space-y-1">
+              <div className="font-semibold">Ano Leonístico</div>
+              <p className="text-sm text-muted-foreground">
+                Usado nas mensagens e assinaturas do Governador. Vazio, é calculado automaticamente (julho a junho).
+              </p>
+            </div>
+          </div>
+          <div className="flex items-end gap-2">
+            <div className="space-y-1">
+              <Label htmlFor="ano-leonistico">Ano Leonístico</Label>
+              <Input
+                id="ano-leonistico"
+                className="w-36"
+                value={anoLeonisticoValue}
+                onChange={(e) => setAnoLeonisticoValue(e.target.value)}
+                placeholder="2026/2027"
+                disabled={!isAdmin}
+              />
+            </div>
+            {isAdmin && (
+              <Button onClick={saveAnoLeonistico} disabled={savingAno}>
+                {savingAno ? "Salvando..." : "Salvar"}
+              </Button>
+            )}
+          </div>
+        </CardContent>
+      </Card>
 
       {showForm && isAdmin && (
         <Card>

@@ -169,6 +169,13 @@
       "when": 1794966776056,
       "tag": "0023_governor_pin_read",
       "breakpoints": true
+    },
+    {
+      "idx": 24,
+      "version": "7",
+      "when": 1795290849173,
+      "tag": "0024_district_settings",
+      "breakpoints": true
     }
   ]
 }

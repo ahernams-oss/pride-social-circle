@@ -2,9 +2,8 @@ import { useQuery } from "@tanstack/react-query";
 import { Cake } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import {
-  anoLeonistico,
   birthdayMessage,
-  fetchCurrentGovernor,
+  fetchGovernorSignatureData,
 } from "@/lib/birthday-message";
 
 /**
@@ -13,11 +12,12 @@ import {
  * Distrito é atualizado em Admin → Cargos do Distrito.
  */
 export function BirthdayMessage({ nome }: { nome: string }) {
-  const { data: governor } = useQuery({
+  const { data: sig } = useQuery({
     queryKey: ["current-governor-signature"],
-    queryFn: fetchCurrentGovernor,
+    queryFn: fetchGovernorSignatureData,
     staleTime: 5 * 60 * 1000,
   });
+  const governor = sig?.governor ?? null;
 
   return (
     <Card className="overflow-hidden border-amber-300 bg-gradient-to-br from-amber-50 via-background to-amber-50 dark:from-amber-950/30 dark:to-amber-950/30">
@@ -34,7 +34,7 @@ export function BirthdayMessage({ nome }: { nome: string }) {
         <div className="border-t border-amber-200 pt-3 text-sm dark:border-amber-900">
           <p className="font-semibold">{governor?.signedName ?? "Governador do Distrito"}</p>
           <p className="text-muted-foreground">Governador do Distrito LC-11</p>
-          <p className="text-muted-foreground">Ano Leonístico {anoLeonistico()}</p>
+          <p className="text-muted-foreground">Ano Leonístico {sig?.anoLeonistico ?? ""}</p>
           <p className="text-muted-foreground">Lions Clubs International – Nós Servimos!</p>
         </div>
       </CardContent>
