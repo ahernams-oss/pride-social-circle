@@ -38,7 +38,7 @@ export const MENUS: MenuDef[] = [
   { key: "notifications", label: "Notificações", path: "/notifications", icon: "Bell", sidebar: false, minLevel: "approved" },
   { key: "profile", label: "Perfil", path: "/profile", icon: "UserIcon", sidebar: false, minLevel: "approved" },
   { key: "ranking", label: "Ranking", path: "/ranking", icon: "Trophy", sidebar: true, minLevel: "approved" },
-  { key: "missions", label: "Missões", path: "/missions", icon: "Target", sidebar: true, minLevel: "approved" },
+  { key: "missions", label: "LionsPass", path: "/missions", icon: "Target", sidebar: true, minLevel: "approved" },
   { key: "lions-history", label: "Lions history", path: "/lions-history", icon: "BookOpen", sidebar: true, minLevel: "approved" },
   { key: "polls", label: "Enquetes", path: "/polls", icon: "BarChart3", sidebar: true, minLevel: "approved" },
   { key: "friends", label: "Amigos", path: "/friends", icon: "Users", sidebar: true, minLevel: "approved" },
