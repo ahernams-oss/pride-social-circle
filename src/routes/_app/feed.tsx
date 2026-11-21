@@ -5,6 +5,8 @@ import { useAuth } from "@/lib/auth-context";
 import { CreatePost } from "@/components/CreatePost";
 import { FeedPolls } from "@/components/PollCard";
 import { PostCard, type FeedPost } from "@/components/PostCard";
+import { BirthdayMessage } from "@/components/BirthdayMessage";
+import { isBirthdayToday } from "@/lib/birthday-message";
 
 export const Route = createFileRoute("/_app/feed")({ component: FeedPage });
 
@@ -12,6 +14,21 @@ function FeedPage() {
   const { user } = useAuth();
   const [posts, setPosts] = useState<FeedPost[]>([]);
   const [loading, setLoading] = useState(true);
+  const [myBirthday, setMyBirthday] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!user) return;
+    supabase
+      .from("profiles")
+      .select("full_name, birth_date")
+      .eq("id", user.id)
+      .maybeSingle()
+      .then(({ data }) => {
+        if (data && isBirthdayToday(data.birth_date)) {
+          setMyBirthday(data.full_name ?? "Companheiro(a)");
+        }
+      });
+  }, [user]);
 
   const load = useCallback(async () => {
     if (!user) return;
@@ -69,6 +86,7 @@ function FeedPage() {
 
   return (
     <div className="space-y-4">
+      {myBirthday && <BirthdayMessage nome={myBirthday} />}
       <FeedPolls />
       <CreatePost onCreated={load} />
       {loading ? (

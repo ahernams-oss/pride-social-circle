@@ -12,6 +12,8 @@ import { MapPin, Building2, MessageCircle, Pencil } from "lucide-react";
 import { useNavigate } from "@tanstack/react-router";
 import { toast } from "sonner";
 import { LionsAwards } from "@/components/LionsAwards";
+import { BirthdayMessage } from "@/components/BirthdayMessage";
+import { isBirthdayToday } from "@/lib/birthday-message";
 
 
 export const Route = createFileRoute("/_app/profile/$id")({
@@ -255,6 +257,9 @@ function ProfilePage() {
 
   return (
     <div className="space-y-4">
+      {isBirthdayToday(profile.birth_date) && (
+        <BirthdayMessage nome={profile.full_name ?? "Companheiro(a)"} />
+      )}
       <div className="overflow-hidden rounded-xl border bg-card shadow-sm">
         <div className="h-32 bg-lions-gradient" />
         <div className="px-6 pb-6">
