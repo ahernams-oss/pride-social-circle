@@ -1,9 +1,11 @@
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
+import { CalendarRange } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { fetchDistrito, type Governador } from "@/lib/distrito-api";
+import { fetchAnoLeonistico } from "@/lib/birthday-message";
 
 const ROLES = [
   { key: "governador", label: "Governador", match: (r: string) => /governador/i.test(r) && !/vice/i.test(r) },
@@ -73,9 +75,24 @@ export function GovernadoresSidebar() {
     return null;
   };
 
+  const { data: ano } = useQuery({
+    queryKey: ["distrito", "ano-leonistico"],
+    queryFn: fetchAnoLeonistico,
+    staleTime: 5 * 60 * 1000,
+  });
+
   return (
     <aside className="hidden lg:block">
       <div className="sticky top-24 space-y-4 rounded-xl border bg-card p-4 shadow-sm">
+        <div className="flex items-center gap-3 rounded-lg border bg-accent/20 p-3">
+          <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-accent/40 text-primary">
+            <CalendarRange className="h-5 w-5" />
+          </span>
+          <div className="min-w-0">
+            <h3 className="text-sm font-semibold">Ano Leonístico</h3>
+            <p className="text-sm font-medium text-primary">{ano ?? "…"}</p>
+          </div>
+        </div>
         {ROLES.map(({ key, label, match }) => {
           const p = findProfile(key, match);
           return (
