@@ -84,3 +84,25 @@ Parabéns pelo seu dia! 🎉🦁
 
 Com estima e companheirismo,`;
 }
+
+/** Percentual a partir do qual o governador parabeniza pelo perfil completo. */
+export const PROFILE_CONGRATS_THRESHOLD = 80;
+
+export function shouldCongratulateProfile(percent: number): boolean {
+  return percent > PROFILE_CONGRATS_THRESHOLD;
+}
+
+/** Mensagem de parabéns pelo preenchimento do perfil. */
+export function profileCongratsMessage(nome: string): string {
+  return `👏🦁 PARABÉNS PELO SEU PERFIL!
+
+Prezado(a) Companheiro(a) Leão ${nome},
+
+É com grande satisfação que, em nome do Distrito LC-11, parabenizo você por ter completado mais de 80% do seu perfil no Lions Connecta!
+
+Sua dedicação em manter seus dados atualizados demonstra o comprometimento e o espírito leonístico que fortalecem a nossa família e tornam o nosso trabalho de servir ainda mais eficiente.
+
+Muito obrigado pelo seu empenho e por fazer parte desta grande corrente de servir!
+
+Com estima e companheirismo,`;
+}

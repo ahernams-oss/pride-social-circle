@@ -6,7 +6,9 @@ import { CreatePost } from "@/components/CreatePost";
 import { FeedPolls } from "@/components/PollCard";
 import { PostCard, type FeedPost } from "@/components/PostCard";
 import { BirthdayMessage } from "@/components/BirthdayMessage";
-import { isBirthdayToday } from "@/lib/birthday-message";
+import { isBirthdayToday, shouldCongratulateProfile } from "@/lib/birthday-message";
+import { ProfileCongratsMessage } from "@/components/ProfileCongratsMessage";
+import { completeness } from "@/lib/profile-completeness";
 
 export const Route = createFileRoute("/_app/feed")({ component: FeedPage });
 
@@ -15,17 +17,21 @@ function FeedPage() {
   const [posts, setPosts] = useState<FeedPost[]>([]);
   const [loading, setLoading] = useState(true);
   const [myBirthday, setMyBirthday] = useState<string | null>(null);
+  const [congratsName, setCongratsName] = useState<string | null>(null);
 
   useEffect(() => {
     if (!user) return;
     supabase
       .from("profiles")
-      .select("full_name, birth_date")
+      .select("*")
       .eq("id", user.id)
       .maybeSingle()
       .then(({ data }) => {
         if (data && isBirthdayToday(data.birth_date)) {
           setMyBirthday(data.full_name ?? "Companheiro(a)");
+        }
+        if (data && shouldCongratulateProfile(completeness(data as any).percent)) {
+          setCongratsName(data.full_name ?? "Companheiro(a)");
         }
       });
   }, [user]);
@@ -87,6 +93,7 @@ function FeedPage() {
   return (
     <div className="space-y-4">
       {myBirthday && <BirthdayMessage nome={myBirthday} />}
+      {congratsName && user && <ProfileCongratsMessage nome={congratsName} userId={user.id} />}
       <FeedPolls />
       <CreatePost onCreated={load} />
       {loading ? (
