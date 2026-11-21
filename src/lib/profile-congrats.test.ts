@@ -1,4 +1,4 @@
-import { describe, it, expect } from "vitest";
+import { describe, it, expect } from "bun:test";
 import { shouldCongratulateProfile } from "./birthday-message";
 describe("parabéns do governador pelo perfil", () => {
   it("só aparece acima de 80%", () => {
